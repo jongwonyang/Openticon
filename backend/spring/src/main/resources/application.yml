@@ -80,6 +80,13 @@ spring:
 jwt:
   secret: ${JWT_SECRET_KEY}
 
+
+iamport:
+  api:
+      key: ${IAMPORT_API_KEY}
+      secret: ${IAMPORT_API_SECRET}
+
+
 server:
   servlet:
     context-path: /api/v1
