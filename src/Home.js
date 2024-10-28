@@ -12,9 +12,11 @@ const Home = () => {
     useEffect(() => {
         initIMP();
     }, []);
+
     const [searchParams] = useSearchParams();
-  const accessToken = searchParams.get('access_token');
-  const refreshToken = searchParams.get('refresh_token');
+    const accessToken = searchParams.get("access_token");
+    const refreshToken = searchParams.get("refresh_token");
+
     const requestPay = () => {
         const { IMP } = window;
         IMP.request_pay(
@@ -42,12 +44,15 @@ const Home = () => {
     };
 
     const verifyPayment = (imp_uid, member_id, emoticon_pack_id, point) => {
+        console.log(accessToken);
         fetch("http://127.0.0.1:8080/api/v1/points/payment", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}` // Access Token 추가
+            },
             body: JSON.stringify({
                 imp_uid, // 결제 고유 ID
-                member_id, // 회원 ID
                 emoticon_pack_id, // 이모티콘 팩 ID
                 point, // 포인트
             }),
@@ -73,33 +78,28 @@ const Home = () => {
                 결제하기
             </button>
             <div>
-            <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=login">
-              <button>Google Login</button>
-            </a>
-            <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=unlink">
-              <button>Google Unlink</button>
-            </a>
-            <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=login">
-              <button>Naver Login</button>
-            </a>
-            <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=unlink">
-              <button>Naver Unlink</button>
-            </a>
-
-            <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=login">
-              <button>Kakao Login</button>
-            </a>
-
-            <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=unlink">
-              <button>Kakao Unlink</button>
-            </a>
-
-            <p>Access Token : {accessToken}</p>
-            <p>Refresh Token : {refreshToken}</p>
-
-          </div>
+                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=login">
+                    <button>Google Login</button>
+                </a>
+                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=unlink">
+                    <button>Google Unlink</button>
+                </a>
+                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=login">
+                    <button>Naver Login</button>
+                </a>
+                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=unlink">
+                    <button>Naver Unlink</button>
+                </a>
+                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=login">
+                    <button>Kakao Login</button>
+                </a>
+                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=unlink">
+                    <button>Kakao Unlink</button>
+                </a>
+                <p>Access Token : {accessToken}</p>
+                <p>Refresh Token : {refreshToken}</p>
+            </div>
         </div>
-        
     );
 };
 
