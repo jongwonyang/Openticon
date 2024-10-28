@@ -2,11 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="380.dp"
     android:layout_height="300.dp"
     android:layout_margin="10.dp"
-    android:orientation="vertical"
     android:background="#AAFFFFFF"
+    android:orientation="vertical"
     android:padding="16dp">
 
     <HorizontalScrollView
@@ -18,8 +18,7 @@
             android:id="@+id/linearLayoutInsideScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-        </LinearLayout>
+            android:orientation="horizontal"></LinearLayout>
     </HorizontalScrollView>
 
     <TextView
@@ -28,6 +27,7 @@
         android:layout_height="wrap_content"
         android:text="New Floating View!"
         android:textSize="18sp" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="300dp"
@@ -78,6 +78,7 @@
             </TableRow>
         </TableLayout>
     </ScrollView>
+
     <Button
         android:id="@+id/closeButton"
         android:layout_width="wrap_content"

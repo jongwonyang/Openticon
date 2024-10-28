@@ -21,6 +21,9 @@ class FloatingService : Service() {
 
     private lateinit var windowManager: WindowManager
     private lateinit var floatingView: View
+    private lateinit var secondFloatingView: View
+    private var isSecondViewVisible = false  // 두 번째 뷰의 표시 상태
+    private lateinit var secondLayoutParams: WindowManager.LayoutParams
 
     private var initialTouchX = 0
     private var initialTouchY = 0
@@ -32,6 +35,7 @@ class FloatingService : Service() {
         Log.d("FloatingService", "onCreate called")
         startForegroundServiceWithNotification()
         setupFloatingView()
+        setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
     }
 
     private fun startForegroundServiceWithNotification() {
@@ -70,14 +74,19 @@ class FloatingService : Service() {
         floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
             if (floatingView.windowToken != null) {
                 windowManager.removeView(floatingView)
+                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
                 stopSelf()  // 서비스 종료
             }
+        }
+
+        // 토글 버튼 설정
+        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
+            toggleSecondFloatingView()
         }
 
         floatingView.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // 터치 시작 좌표와 뷰의 초기 위치 기록
                     initialTouchX = event.rawX.toInt()
                     initialTouchY = event.rawY.toInt()
                     initialX = layoutParams.x
@@ -85,10 +94,8 @@ class FloatingService : Service() {
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    // 현재 위치에서 초기 위치 차이를 이용하여 좌표 계산
                     layoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
                     layoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
-
                     windowManager.updateViewLayout(floatingView, layoutParams)
                     true
                 }
@@ -99,22 +106,73 @@ class FloatingService : Service() {
         Log.d("FloatingService", "Floating view added successfully")
     }
 
+    private fun dpToPx(dp: Int): Int {
+        val density = resources.displayMetrics.density
+        return (dp * density).toInt()
+    }
+
+    private fun setupSecondFloatingView() {
+        // dp 값을 px로 변환하여 고정된 크기 설정
+        secondLayoutParams = WindowManager.LayoutParams(
+            dpToPx(380),  // 380dp를 px로 변환하여 넓이 설정
+            dpToPx(300),  // 300dp를 px로 변환하여 높이 설정
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        secondLayoutParams.gravity = Gravity.CENTER
+
+        // 두 번째 플로팅 뷰 설정
+        secondFloatingView = LayoutInflater.from(this).inflate(R.layout.new_compose_activity_layout, null)
+
+        // 터치 리스너 설정
+        secondFloatingView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialTouchX = event.rawX.toInt()
+                    initialTouchY = event.rawY.toInt()
+                    initialX = secondLayoutParams.x
+                    initialY = secondLayoutParams.y
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    secondLayoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
+                    secondLayoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(secondFloatingView, secondLayoutParams)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun toggleSecondFloatingView() {
+        if (isSecondViewVisible) {
+            windowManager.removeView(secondFloatingView)
+            Log.d("FloatingService", "Second Floating View Hidden")
+        } else {
+            windowManager.addView(secondFloatingView, secondLayoutParams)
+            Log.d("FloatingService", "Second Floating View Shown")
+        }
+        isSecondViewVisible = !isSecondViewVisible
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (::floatingView.isInitialized && floatingView.windowToken != null) {
             windowManager.removeView(floatingView)
         }
+        if (isSecondViewVisible && ::secondFloatingView.isInitialized && secondFloatingView.windowToken != null) {
+            windowManager.removeView(secondFloatingView)
+        }
 
-        // Broadcast 전송하여 isServiceRunning 상태 초기화
         val intent = Intent("io.ssafy.openticon.ACTION_STOP_FLOATING_SERVICE")
         sendBroadcast(intent)
         Log.d("FloatingService", "FloatingService stopped, broadcast sent")
 
-        // 서비스 종료 시 상태를 SharedPreferences에 반영
         getSharedPreferences("ServicePrefs", Context.MODE_PRIVATE)
             .edit().putBoolean("isServiceRunning", false).apply()
     }
-
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
