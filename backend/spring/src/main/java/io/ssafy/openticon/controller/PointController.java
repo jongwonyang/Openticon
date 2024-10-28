@@ -3,7 +3,7 @@ package io.ssafy.openticon.controller;
 
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.response.Payment;
-import io.ssafy.openticon.dto.PointRequestDto;
+import io.ssafy.openticon.controller.request.PointRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
