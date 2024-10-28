@@ -38,8 +38,15 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi memberApi() {
         return GroupedOpenApi.builder()
-                .group("유저 관련 기능")
+                .group("유저 관련")
                 .pathsToMatch("/member/**")
+                .build();
+    }
+    @Bean
+    public GroupedOpenApi healthcheckApi() {
+        return GroupedOpenApi.builder()
+                .group("헬스 체크")
+                .pathsToMatch("/health/**")
                 .build();
     }
 
