@@ -41,33 +41,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.example.floatingtest.CustomImageView
-                    android:id="@+id/customImageView6"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:customSrc="@android:drawable/alert_dark_frame" />
+
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.example.floatingtest.CustomImageView
-                    android:id="@+id/customImageView8"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:customSrc="@android:drawable/alert_dark_frame" />
+
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.example.floatingtest.CustomImageView
-                    android:id="@+id/customImageView7"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:customSrc="@android:drawable/alert_dark_frame" />
             </TableRow>
 
             <!-- 추가 행들 -->
@@ -75,33 +62,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.example.floatingtest.CustomImageView
-                    android:id="@+id/customImageView9"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:customSrc="@android:drawable/alert_dark_frame" />
+
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.example.floatingtest.CustomImageView
-                    android:id="@+id/customImageView10"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:customSrc="@android:drawable/alert_dark_frame" />
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.example.floatingtest.CustomImageView
-                    android:id="@+id/customImageView11"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    app:customSrc="@android:drawable/alert_dark_frame" />
             </TableRow>
         </TableLayout>
     </ScrollView>
