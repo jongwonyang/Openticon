@@ -12,30 +12,40 @@ import androidx.core.content.ContextCompat
 
 class KeyboardAccessibilityService : AccessibilityService() {
 
-    var isServiceRunning = false  // 플래그로 실행 상태 관리
+    private val sharedPreferences by lazy {
+        getSharedPreferences("ServicePrefs", Context.MODE_PRIVATE)
+    }
 
-    // FloatingService의 상태를 수신하는 BroadcastReceiver
+    // 서비스 종료 시 실행 상태 초기화를 위한 BroadcastReceiver
     private val serviceStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == "io.ssafy.openticon.ACTION_STOP_FLOATING_SERVICE") {
-                isServiceRunning = false
+                sharedPreferences.edit().putBoolean("isServiceRunning", false).apply()
+                Log.d("KeyboardAccessibilityService", "FloatingService stopped, isServiceRunning reset to false")
             }
         }
     }
 
     override fun onCreate() {
         super.onCreate()
-        // BroadcastReceiver 등록
         val filter = IntentFilter("io.ssafy.openticon.ACTION_STOP_FLOATING_SERVICE")
-
-        // RECEIVER_NOT_EXPORTED 플래그 사용
         ContextCompat.registerReceiver(this, serviceStateReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event?.let {
-            if (isKeyboardEvent(event)) {
+            // EditText에 포커스가 설정된 경우에만 플로팅 서비스 실행
+            if (event.eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED &&
+                event.className?.contains("EditText") == true) {
+                Log.d("KeyboardAccessibilityService", "EditText focused - possible keyboard activation")
                 startFloatingServiceIfNotRunning()
+            }
+
+            // 키보드 닫힘 추정 이벤트 감지하여 플로팅 윈도우 닫기
+            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED &&
+                event.className != "android.inputmethodservice.InputMethodService") {
+                Log.d("KeyboardAccessibilityService", "Non-keyboard window detected - possible keyboard close")
+                stopFloatingServiceIfRunning()
             }
         }
     }
@@ -47,7 +57,7 @@ class KeyboardAccessibilityService : AccessibilityService() {
     }
 
     private fun startFloatingServiceIfNotRunning() {
-        if (!isServiceRunning) {
+        if (!sharedPreferences.getBoolean("isServiceRunning", false)) {
             Log.d("KeyboardAccessibilityService", "Starting FloatingService")
             val intent = Intent(this, FloatingService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -55,9 +65,18 @@ class KeyboardAccessibilityService : AccessibilityService() {
             } else {
                 startService(intent)
             }
-            isServiceRunning = true
+            sharedPreferences.edit().putBoolean("isServiceRunning", true).apply()
         } else {
             Log.d("KeyboardAccessibilityService", "FloatingService already running")
+        }
+    }
+
+    private fun stopFloatingServiceIfRunning() {
+        if (sharedPreferences.getBoolean("isServiceRunning", false)) {
+            Log.d("KeyboardAccessibilityService", "Stopping FloatingService")
+            val intent = Intent(this, FloatingService::class.java)
+            stopService(intent)
+            sharedPreferences.edit().putBoolean("isServiceRunning", false).apply()
         }
     }
 
@@ -65,7 +84,6 @@ class KeyboardAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(serviceStateReceiver)  // 서비스 종료 시 BroadcastReceiver 해제
+        unregisterReceiver(serviceStateReceiver)
     }
-
 }
