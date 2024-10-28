@@ -22,6 +22,11 @@ class FloatingService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var floatingView: View
 
+    private var initialTouchX = 0
+    private var initialTouchY = 0
+    private var initialX = 0
+    private var initialY = 0
+
     override fun onCreate() {
         super.onCreate()
         Log.d("FloatingService", "onCreate called")
@@ -70,12 +75,25 @@ class FloatingService : Service() {
         }
 
         floatingView.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_MOVE) {
-                layoutParams.x = event.rawX.toInt()
-                layoutParams.y = event.rawY.toInt()
-                windowManager.updateViewLayout(floatingView, layoutParams)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // 터치 시작 좌표와 뷰의 초기 위치 기록
+                    initialTouchX = event.rawX.toInt()
+                    initialTouchY = event.rawY.toInt()
+                    initialX = layoutParams.x
+                    initialY = layoutParams.y
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    // 현재 위치에서 초기 위치 차이를 이용하여 좌표 계산
+                    layoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
+                    layoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
+
+                    windowManager.updateViewLayout(floatingView, layoutParams)
+                    true
+                }
+                else -> false
             }
-            true
         }
         windowManager.addView(floatingView, layoutParams)
         Log.d("FloatingService", "Floating view added successfully")
