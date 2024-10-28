@@ -83,8 +83,8 @@ jwt:
 
 iamport:
   api:
-    key: ${iamport_api_key}
-    secret: ${iamport_api_secret}
+      key: ${IAMPORT_API_KEY}
+      secret: ${IAMPORT_API_SECRET}
 
 
 server:
