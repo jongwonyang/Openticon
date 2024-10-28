@@ -1,4 +1,4 @@
-package io.ssafy.openticon.dto;
+package io.ssafy.openticon.controller.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
