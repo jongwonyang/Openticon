@@ -1,13 +1,21 @@
 package io.ssafy.openticon.controller.request;
 
 import io.ssafy.openticon.dto.Category;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public class EmoticonUploadRequest {
+@Getter
+@Setter
+public class EmoticonUploadRequestDto {
 
     private String packTitle;
+
+    private boolean isAiGenerated;
+
+    private boolean isPublic;
 
     private Category category;
 
@@ -17,9 +25,9 @@ public class EmoticonUploadRequest {
 
     private List<String> tags;
 
-    private MultipartFile thumbnail;
+    private MultipartFile thumbnailImg;
 
-    private MultipartFile thumbnail_list;
+    private MultipartFile listImg;
 
     private List<MultipartFile> emoticons;
 }
