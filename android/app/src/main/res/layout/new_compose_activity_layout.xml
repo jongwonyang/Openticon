@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="300.dp"
+    android:layout_margin="10.dp"
+    android:orientation="vertical"
+    android:background="#AAFFFFFF"
+    android:padding="16dp">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutInsideScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/floatingTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Floating View!"
+        android:textSize="18sp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.example.floatingtest.CustomImageView
+                    android:id="@+id/customImageView6"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:customSrc="@android:drawable/alert_dark_frame" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.example.floatingtest.CustomImageView
+                    android:id="@+id/customImageView8"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:customSrc="@android:drawable/alert_dark_frame" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.example.floatingtest.CustomImageView
+                    android:id="@+id/customImageView7"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:customSrc="@android:drawable/alert_dark_frame" />
+            </TableRow>
+
+            <!-- 추가 행들 -->
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.example.floatingtest.CustomImageView
+                    android:id="@+id/customImageView9"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:customSrc="@android:drawable/alert_dark_frame" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.example.floatingtest.CustomImageView
+                    android:id="@+id/customImageView10"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:customSrc="@android:drawable/alert_dark_frame" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.example.floatingtest.CustomImageView
+                    android:id="@+id/customImageView11"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:customSrc="@android:drawable/alert_dark_frame" />
+            </TableRow>
+        </TableLayout>
+    </ScrollView>
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Close" />
+</LinearLayout>
