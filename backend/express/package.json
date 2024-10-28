@@ -1,14 +1,21 @@
 {
   "name": "express",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js app.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "express-fileupload": "^1.5.1",
+    "uuid": "^11.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
