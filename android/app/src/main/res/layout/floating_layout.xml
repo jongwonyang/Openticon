@@ -7,19 +7,21 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/floatingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Floating Window!"
-        android:textColor="#000000"
-        android:textSize="16sp" />
+        android:text="Floating View 1"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/toggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toggle Second View" />
+
     <Button
         android:id="@+id/closeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Close" />
-    <Button
-        android:id="@+id/openNewActivityButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Open New Compose Activity" />
 </LinearLayout>
