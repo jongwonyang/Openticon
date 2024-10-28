@@ -14,14 +14,6 @@ java {
 	}
 }
 
-sourceSets {
-	main {
-		resources {
-			srcDir 'src/main/resources'
-		}
-	}
-}
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -31,6 +23,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -57,9 +50,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
 
+	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+
+}
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
