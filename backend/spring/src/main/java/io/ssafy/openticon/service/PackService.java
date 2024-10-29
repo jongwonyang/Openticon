@@ -36,7 +36,7 @@ public class PackService {
     }
 
     @Transactional
-    public void emoticonPackUpload(EmoticonPack emoticonPack){
+    public String emoticonPackUpload(EmoticonPack emoticonPack){
         MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
         MultipartFile listImg= emoticonPack.getListImg();
         String thumbnailImgUrl=saveImage(thumbnailImg);
@@ -51,6 +51,7 @@ public class PackService {
         packRepository.save(emoticonPackEntity);
         emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
 
+        return emoticonPackEntity.getShareLink();
     }
 
 

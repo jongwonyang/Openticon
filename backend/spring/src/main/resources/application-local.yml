@@ -9,7 +9,7 @@ spring:
     password: ${LOCAL_PASSWORD}
 
 
-
+  base-url: ${LOCAL_BASE_URL}
 server:
   port: 8080
   address: localhost
