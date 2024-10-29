@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -77,6 +78,7 @@ public class EmoticonPackEntity {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        this.shareLink= UUID.randomUUID().toString();
     }
 
     public EmoticonPackEntity(EmoticonPack emoticonPack, MemberEntity member, String thumbnailImg, String listImg){
