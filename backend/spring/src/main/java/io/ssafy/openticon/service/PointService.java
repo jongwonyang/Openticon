@@ -4,7 +4,7 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.response.Payment;
 import io.ssafy.openticon.controller.request.PointRequestDto;
 import io.ssafy.openticon.dto.PointType;
-import io.ssafy.openticon.entity.Member;
+import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.PointHistoryEntity;
 import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.repository.PointHistoryRepository;
@@ -46,7 +46,7 @@ public class PointService {
 
     // TODO: 1. 포인트 구매
     @Transactional
-    public boolean purchasePoints(PointRequestDto pointRequestDto, Member member) {
+    public boolean purchasePoints(PointRequestDto pointRequestDto, MemberEntity member) {
         // 1. paymentCheck 로 결제를 확인
         if("success".equals(paymentCheck(pointRequestDto.getImpUid()))){
             // 2. point_history에 기록
@@ -68,7 +68,7 @@ public class PointService {
     }
 
     // TODO: 2. 이모티콘 팩 구매
-    public void purchaseEmoticonPack(Member member) {
+    public void purchaseEmoticonPack(MemberEntity member) {
         // 1. 소지하고 있는 금액과 이모티콘 팩의 금액을 비교
         // 2. 소지하고 있는 금액이 많다면 purchase_history를 작성
         // 3. point_history를 작성

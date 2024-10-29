@@ -26,7 +26,7 @@ public class PointHistoryEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberEntity member;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")

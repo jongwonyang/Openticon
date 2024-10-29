@@ -3,7 +3,7 @@ package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.PointRequestDto;
 import io.ssafy.openticon.controller.response.PurchasePointReponseDto;
-import io.ssafy.openticon.entity.Member;
+import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.service.PointService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +30,7 @@ public class PointController {
     @Operation(summary = "사용자가 포인트를 구매합니다.")
     public ResponseEntity<PurchasePointReponseDto> purchasePoint(@RequestBody PointRequestDto request, @AuthenticationPrincipal UserDetails userDetails) {
         PurchasePointReponseDto purchasePointReponseDto = null;
-        Member member = memberRepository.findMemberByEmail(userDetails.getUsername())
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
         if(pointService.purchasePoints(request, member)){
             purchasePointReponseDto = new PurchasePointReponseDto("success", request.getPoint()+"원 구매 성공");
