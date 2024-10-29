@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayoutInsideScrollView"
     android:layout_width="380.dp"
     android:layout_height="300.dp"
     android:layout_margin="10.dp"
@@ -10,15 +11,17 @@
     android:padding="16dp">
 
     <HorizontalScrollView
+        android:id="@+id/progress_horizontal"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
 
-        <LinearLayout
-            android:id="@+id/linearLayoutInsideScrollView"
+        <io.ssafy.openticon.ui.component.EmoticonPackView
+            android:id="@+id/imoticonPackView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"></LinearLayout>
+            android:orientation="horizontal">
+        </io.ssafy.openticon.ui.component.EmoticonPackView>
     </HorizontalScrollView>
 
     <TextView
@@ -34,6 +37,7 @@
         android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
 
         <TableLayout
+            android:id="@+id/tableLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
