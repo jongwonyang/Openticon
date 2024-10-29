@@ -9,7 +9,7 @@ import io.ssafy.openticon.R
 class CustomImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
-) : ImageView(context, attrs) {
+) : androidx.appcompat.widget.AppCompatImageView(context, attrs) {
 
     init {
         // 커스텀 속성을 읽어와서 이미지 설정
