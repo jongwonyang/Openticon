@@ -11,13 +11,11 @@ fun ProfileScreen(
     navController: NavController
 ) {
     Column {
-        Text("Profile Screen")
-        Button(
-            onClick = {
-                navController.navigate("login")
-            }
-        ) {
-            Text("Go to login")
+        Text("profile")
+        Button(onClick = {
+            navController.navigate("login")
+        }) {
+            Text("login")
         }
     }
 }
