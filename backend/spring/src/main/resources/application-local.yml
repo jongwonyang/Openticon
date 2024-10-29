@@ -4,7 +4,7 @@ spring:
       on-profile: local
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/openticon?stringtype=unspecified&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:postgresql://localhost:5432/openticon?stringtype=unspecified&serverTimezone=Asia/Seoul&characterEncoding=UTF-8jdbc:postgresql://localhost:5432/openticon?stringtype=unspecified&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${LOCAL_NAME}
     password: ${LOCAL_PASSWORD}
 
