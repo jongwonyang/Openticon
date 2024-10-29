@@ -12,11 +12,8 @@ public class PointRequestDto {
     @JsonProperty("imp_uid")
     private String impUid;
 
-    @JsonProperty("member_id")
-    private Long memberId;
-
     @JsonProperty("emoticon_pack_id")
     private Long emoticonPackId;
 
-    private Integer point;
+    private Long point;
 }
