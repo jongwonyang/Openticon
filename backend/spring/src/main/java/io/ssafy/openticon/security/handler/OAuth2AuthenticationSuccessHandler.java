@@ -16,7 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import io.ssafy.openticon.entity.Member;
+import io.ssafy.openticon.entity.MemberEntity;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -81,14 +81,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             System.out.println(principal.getMemberInfo().getName()+" "+principal.getMemberInfo().getNickname());
             if(!userExists){
 
-                Member member = Member.builder()
+                MemberEntity member = MemberEntity.builder()
                         .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
                         .nickname(nickname)
                         .email(principal.getMemberInfo().getEmail())
                         .profile_image(Optional.ofNullable(principal.getMemberInfo().getProfileImageUrl()).orElse(""))  // null이면 빈 문자열
                         .build();
-                Member member1 = memberRepository.save(member);
+                MemberEntity member1 = memberRepository.save(member);
                 member1.setNickname("새로운 사용자" + member1.getId());
                 memberRepository.save(member1);
                 System.out.println(member1);
@@ -112,7 +112,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             String accessToken = principal.getMemberInfo().getAccessToken();
             OAuth2Provider provider = principal.getMemberInfo().getProvider();
-            Member member = (Member) memberRepository.findMemberByEmail(principal.getMemberInfo().getEmail())
+            MemberEntity member = (MemberEntity) memberRepository.findMemberByEmail(principal.getMemberInfo().getEmail())
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
             memberRepository.delete(member);
