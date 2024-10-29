@@ -20,6 +20,7 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import androidx.core.app.NotificationCompat
+import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
 import kotlinx.serialization.json.Json
@@ -98,10 +99,29 @@ class FloatingService : Service() {
         data.forEach { pack ->
             val emoticonPackView = EmoticonPackView(this)
             emoticonPackView.setupEmoticonPack(pack) { images ->
-                emoticonPackView.displayImagesInTable(tableLayout, images)
+                emoticonPackView.displayImagesInTable(tableLayout, images){ emoticon: Emoticon ->
+                    copyEmoticon(emoticon)
+                }
             }
             horizontalScrollView.addView(emoticonPackView)
         }
+    }
+
+    private fun copyEmoticon(clickedEmoticon: Emoticon) {
+        /**
+        val intent = Intent("io.ssafy.openticon.INSERT_EMOTICON").setClassName(/* TODO: provide the application ID. For example: */
+            packageName,
+        )
+        intent.putExtra("emoticonResource", clickedEmoticon.imageResource)
+        Log.d("serviceInsert", intent.action.toString())
+        sendBroadcast(intent)
+        **/
+        // 다른 서비스에서 실행
+        val intent = Intent(this, KeyboardAccessibilityService::class.java)
+        intent.putExtra("CALL_METHOD", "insertEmoticon")
+        intent.putExtra("resourceId", clickedEmoticon.imageResource)
+        startService(intent)
+
     }
 
 

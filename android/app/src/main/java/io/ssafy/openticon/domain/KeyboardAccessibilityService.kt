@@ -2,12 +2,24 @@ package io.ssafy.openticon
 
 import android.accessibilityservice.AccessibilityService
 import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.net.Uri
 import android.os.Build
+import android.os.Bundle
+import android.provider.MediaStore
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 
 class KeyboardAccessibilityService : AccessibilityService() {
@@ -16,22 +28,53 @@ class KeyboardAccessibilityService : AccessibilityService() {
         getSharedPreferences("ServicePrefs", Context.MODE_PRIVATE)
     }
 
-    // 서비스 종료 시 실행 상태 초기화를 위한 BroadcastReceiver
-    private val serviceStateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == "io.ssafy.openticon.ACTION_STOP_FLOATING_SERVICE") {
-                sharedPreferences.edit().putBoolean("isServiceRunning", false).apply()
-                Log.d("KeyboardAccessibilityService", "FloatingService stopped, isServiceRunning reset to false")
-            }
-        }
-    }
+
 
     override fun onCreate() {
         super.onCreate()
         // 서비스 실행 상태를 초기화하여 앱 시작 시 기본적으로 false가 되도록 설정
         sharedPreferences.edit().putBoolean("isServiceRunning", false).apply()
-        val filter = IntentFilter("io.ssafy.openticon.ACTION_STOP_FLOATING_SERVICE")
-        ContextCompat.registerReceiver(this, serviceStateReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+    }
+
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        when (intent.getStringExtra("CALL_METHOD")) {
+            "insertEmoticon" -> {
+                val resourceId = intent.getIntExtra("resourceId", -1)
+                if (resourceId != -1) {
+                    insertEmoticonIntoFocusedEditText(resourceId)
+                }
+            }
+            // 다른 호출도 필요하면 추가
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+
+    fun insertEmoticonIntoFocusedEditText(resourceId: Int) {
+        Log.d("AccessInsert", resourceId.toString())
+        val drawable = ContextCompat.getDrawable(applicationContext, resourceId) ?: return
+        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+
+        // 클립보드에 비트맵 복사
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newUri(contentResolver, "Emoticon", getImageUri(bitmap))
+        clipboard.setPrimaryClip(clip)
+
+        Toast.makeText(this, "이모티콘이 클립보드에 복사되었습니다. 붙여넣기를 시도해보세요.", Toast.LENGTH_SHORT).show()
+    }
+
+    // 비트맵을 Uri로 변환하는 메서드
+    private fun getImageUri(bitmap: Bitmap): Uri {
+        val path = MediaStore.Images.Media.insertImage(contentResolver, bitmap, "Emoticon", null)
+        return Uri.parse(path)
     }
 
 
@@ -83,6 +126,5 @@ class KeyboardAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(serviceStateReceiver)
     }
 }
