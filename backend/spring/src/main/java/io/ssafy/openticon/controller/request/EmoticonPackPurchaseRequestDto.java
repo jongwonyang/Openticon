@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PointRequestDto {
-    @JsonProperty("imp_uid")
-    private String impUid;
-
-    private int point;
+public class EmoticonPackPurchaseRequestDto {
+    @JsonProperty("emoticon_pack_id")
+    private Long emoticonPackId;
 }
