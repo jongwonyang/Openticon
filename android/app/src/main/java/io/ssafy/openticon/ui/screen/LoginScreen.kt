@@ -1,6 +1,8 @@
 package io.ssafy.openticon.ui.screen
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.local.TokenDataSource
-import io.ssafy.openticon.ui.data.remote.createApiClient
+import io.ssafy.openticon.ui.data.remote.ApiClient
+import io.ssafy.openticon.ui.data.remote.NetworkConfig
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -30,10 +33,8 @@ import kotlinx.coroutines.launch
 fun LoginScreen() {
     val context = LocalContext.current
     val tokenDataSource = TokenDataSource(context)
-    val apiClient = createApiClient(context)
-
+    val memberApi = ApiClient(context).memberApi
     val coroutineScope = rememberCoroutineScope()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,18 +60,9 @@ fun LoginScreen() {
 
         Button(
             onClick = {
-                coroutineScope.launch {
-                    try {
-                        val response = apiClient.getMemberInfo() // Adjust if ApiService is defined
-                        if (response.isSuccessful) {
-                            println("User info: ${response.body()}")
-                        } else {
-                            println("Failed with status code: ${response.code()}")
-                        }
-                    } catch (e: Exception) {
-                        println("Error: ${e.message}")
-                    }
-                }
+                val googleLoginUrl = NetworkConfig.BaseURL+"oauth2/authorization/kakao?redirect_uri=openticon://successLogin&mode=login"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
+                context.startActivity(intent)
             },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
@@ -93,7 +85,11 @@ fun LoginScreen() {
 
         // Button for Naver Login with Image
         Button(
-            onClick = { /* Handle Naver login */ },
+            onClick = {
+                val googleLoginUrl = NetworkConfig.BaseURL+"oauth2/authorization/naver?redirect_uri=openticon://successLogin&mode=login"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
+                context.startActivity(intent)
+            },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .height(48.dp),
@@ -128,7 +124,11 @@ fun LoginScreen() {
 
         // Button for Google Login with Image
         Button(
-            onClick = { /* Handle Google login */ },
+            onClick = {
+                val googleLoginUrl = NetworkConfig.BaseURL+"oauth2/authorization/google?redirect_uri=openticon://successLogin&mode=login"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
+                context.startActivity(intent)
+            },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .height(48.dp),
@@ -142,7 +142,7 @@ fun LoginScreen() {
                 horizontalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.google), // replace with your Google image file
+                    painter = painterResource(R.drawable.google),
                     contentDescription = "Google Image",
                     modifier = Modifier.size(23.dp)
                 )

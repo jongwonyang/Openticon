@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import io.ssafy.openticon.data.local.TokenDataSource
 import kotlinx.coroutines.flow.firstOrNull
 import android.util.Log
+import io.ssafy.openticon.ui.data.remote.NetworkConfig;
 
 class AuthInterceptor(
     private val tokenDataSource: TokenDataSource
@@ -28,16 +29,17 @@ class AuthInterceptor(
     }
 }
 
-fun createApiClient(context: Context): MemberApi {
-    val tokenDataSource = TokenDataSource(context)
-    val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AuthInterceptor(tokenDataSource))
-        .build()
+//fun createApiClient(context: Context): MemberApi {
+//    val tokenDataSource = TokenDataSource(context)
+//    val okHttpClient = OkHttpClient.Builder()
+//        .addInterceptor(AuthInterceptor(tokenDataSource))
+//        .build()
+//
+//    return Retrofit.Builder()
+//        .baseUrl(NetworkConfig.BaseURL)
+//        .client(okHttpClient)
+//        .addConverterFactory(GsonConverterFactory.create())
+//        .build()
+//        .create(MemberApi::class.java)
+//}
 
-    return Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8080/api/v1/") // Include api/v1 in the base URL
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(MemberApi::class.java)
-}

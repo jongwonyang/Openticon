@@ -20,9 +20,11 @@
             android:exported="true"
             android:theme="@style/Theme.Openticon">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="successLogin" android:scheme="openticon"
+                    tools:ignore="AppLinkUrlError" />
             </intent-filter>
         </activity>
     </application>
