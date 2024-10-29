@@ -18,6 +18,7 @@ class TokenDataSource(context: Context) {
 
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("token_key")
+        private val DEVICE_TOKEN_KEY = stringPreferencesKey("device_token_key")
     }
 
     // 토큰 가져오기
@@ -38,4 +39,17 @@ class TokenDataSource(context: Context) {
             preferences.remove(TOKEN_KEY)
         }
     }
+
+    // 디바이스 토큰 가져오기
+    val deviceToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[DEVICE_TOKEN_KEY]
+    }
+
+    // 디바이스 토큰 저장 (덮어쓰기)
+    suspend fun saveDeviceToken(deviceToken: String) {
+        dataStore.edit { preferences ->
+            preferences[DEVICE_TOKEN_KEY] = deviceToken
+        }
+    }
+
 }
