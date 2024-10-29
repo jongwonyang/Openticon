@@ -55,7 +55,7 @@ public class PointService {
                     .type(PointType.PURCHASE)      // 포인트 타입 설정
                     .point(pointRequestDto.getPoint())    // 포인트 금액
                     .build();
-
+            System.out.println(pointHistory.toString());
             pointHistoryRepository.save(pointHistory);  // 저장
             // 3. member의 point를 변경
             Long point = member.getPoint() + pointRequestDto.getPoint();
