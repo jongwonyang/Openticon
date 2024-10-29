@@ -1,0 +1,17 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/openticon?stringtype=unspecified&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DEV_NAME}
+    password: ${DEV_PASSWORD}
+
+
+server:
+  port: 8081
+  address: 0.0.0.0
+
+serverName: dev_server
+
