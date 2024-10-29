@@ -1,5 +1,6 @@
 package io.ssafy.openticon
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -15,7 +16,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.HorizontalScrollView
+import android.widget.LinearLayout
+import android.widget.TableLayout
 import androidx.core.app.NotificationCompat
+import io.ssafy.openticon.data.model.EmoticonPack
+import io.ssafy.openticon.ui.component.EmoticonPackView
+import kotlinx.serialization.json.Json
 
 class FloatingService : Service() {
 
@@ -24,6 +31,7 @@ class FloatingService : Service() {
     private lateinit var secondFloatingView: View
     private var isSecondViewVisible = false  // 두 번째 뷰의 표시 상태
     private lateinit var secondLayoutParams: WindowManager.LayoutParams
+
 
     private var initialTouchX = 0
     private var initialTouchY = 0
@@ -35,8 +43,67 @@ class FloatingService : Service() {
         Log.d("FloatingService", "onCreate called")
         startForegroundServiceWithNotification()
         setupFloatingView()
-        setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
+        //setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
+        loadInitialData()
     }
+
+    private fun loadInitialData() {
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val jsonString = sharedPreferences.getString("emoticon_data", null)
+
+        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
+        val data = jsonString?.let {
+            Json.decodeFromString<List<EmoticonPack>>(it)
+        } ?: emptyList()
+
+        updateFloatingView(data)
+    }
+
+    private fun updateFloatingView(data: List<EmoticonPack>) {
+        // WindowManager를 사용하여 floatingView 설정
+        secondLayoutParams = WindowManager.LayoutParams(
+            dpToPx(380),  // 380dp를 px로 변환하여 넓이 설정
+            dpToPx(300),  // 300dp를 px로 변환하여 높이 설정
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        secondLayoutParams.gravity = Gravity.CENTER
+        secondFloatingView = LayoutInflater.from(this).inflate(R.layout.new_compose_activity_layout, null)
+        // 두 번째 플로팅 뷰 설정
+        // 터치 리스너 설정
+        secondFloatingView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialTouchX = event.rawX.toInt()
+                    initialTouchY = event.rawY.toInt()
+                    initialX = secondLayoutParams.x
+                    initialY = secondLayoutParams.y
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    secondLayoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
+                    secondLayoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(secondFloatingView, secondLayoutParams)
+                    true
+                }
+                else -> false
+            }
+        }
+        val horizontalScrollView = secondFloatingView.findViewById<HorizontalScrollView>(R.id.progress_horizontal)
+        val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
+
+        // 데이터에 따라 UI 업데이트
+        horizontalScrollView.removeAllViews()
+        data.forEach { pack ->
+            val emoticonPackView = EmoticonPackView(this)
+            emoticonPackView.setupEmoticonPack(pack) { images ->
+                emoticonPackView.displayImagesInTable(tableLayout, images)
+            }
+            horizontalScrollView.addView(emoticonPackView)
+        }
+    }
+
 
     private fun startForegroundServiceWithNotification() {
         val channelId = "floating_service_channel"
@@ -110,7 +177,7 @@ class FloatingService : Service() {
         val density = resources.displayMetrics.density
         return (dp * density).toInt()
     }
-
+/**
     private fun setupSecondFloatingView() {
         // dp 값을 px로 변환하여 고정된 크기 설정
         secondLayoutParams = WindowManager.LayoutParams(
@@ -145,7 +212,7 @@ class FloatingService : Service() {
             }
         }
     }
-
+**/
     private fun toggleSecondFloatingView() {
         if (isSecondViewVisible) {
             windowManager.removeView(secondFloatingView)
