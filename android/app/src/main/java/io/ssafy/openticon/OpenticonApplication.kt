@@ -6,5 +6,4 @@ import io.ssafy.openticon.ui.viewmodel.ImoticonViewModel
 
 @HiltAndroidApp
 class OpenticonApplication : Application() {
-    val myViewModel by lazy { ImoticonViewModel() }
 }
