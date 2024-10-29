@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "emoticon_pack")
 public class EmoticonPackEntity {
 
 
@@ -78,13 +79,14 @@ public class EmoticonPackEntity {
         this.updatedAt = now;
     }
 
-    public EmoticonPackEntity(EmoticonPack emoticonPack, String thumbnailImg, String listImg){
+    public EmoticonPackEntity(EmoticonPack emoticonPack, MemberEntity member, String thumbnailImg, String listImg){
         this.title=emoticonPack.getPackTitle();
         this.isAiGenerated=emoticonPack.isAiGenerated();
         this.isPublic=emoticonPack.isPublic();
         this.category=emoticonPack.getCategory();
         this.description=emoticonPack.getDescription();
         this.price=emoticonPack.getPrice();
+        this.member=member;
         this.thumbnailImg=thumbnailImg;
         this.listImg=listImg;
     }
