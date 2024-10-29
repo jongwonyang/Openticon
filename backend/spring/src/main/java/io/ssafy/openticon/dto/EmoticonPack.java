@@ -15,6 +15,8 @@ public class EmoticonPack {
 
     private String packTitle;
 
+    private String username;
+
     private boolean isAiGenerated;
 
     private boolean isPublic;
@@ -33,7 +35,7 @@ public class EmoticonPack {
 
     private List<MultipartFile> emoticons;
 
-    public EmoticonPack(EmoticonUploadRequestDto emoticonUploadRequestDto){
+    public EmoticonPack(EmoticonUploadRequestDto emoticonUploadRequestDto, String username){
         this.packTitle=emoticonUploadRequestDto.getPackTitle();
         this.isAiGenerated=emoticonUploadRequestDto.isAiGenerated();
         this.isPublic=emoticonUploadRequestDto.isPublic();
@@ -41,6 +43,7 @@ public class EmoticonPack {
         this.description=emoticonUploadRequestDto.getDescription();
         this.price=emoticonUploadRequestDto.getPrice();
         this.tags=emoticonUploadRequestDto.getTags();
+        this.username=username;
     }
 
     public void setImages(MultipartFile thumbnailImg, MultipartFile listImg, List<MultipartFile> emoticons){

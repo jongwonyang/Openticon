@@ -29,5 +29,5 @@ public class EmoticonUploadRequestDto {
 
     private MultipartFile listImg;
 
-    private List<MultipartFile> emoticons;
+    //private List<MultipartFile> emoticons;
 }

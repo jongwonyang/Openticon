@@ -1,6 +1,7 @@
 package io.ssafy.openticon.service;
 
 import io.ssafy.openticon.dto.EmoticonPack;
+import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.repository.PackRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -40,6 +41,9 @@ public class PackService {
         for(MultipartFile emoticon: emoticonPack.getEmoticons()){
             emoticonsUrls.add(saveImage(emoticon));
         }
+
+        EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,thumbnailImgUrl,listImgUrl);
+        packRepository.save(emoticonPackEntity);
     }
 
     private String saveImage(MultipartFile image){
