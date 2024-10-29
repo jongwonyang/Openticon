@@ -10,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import io.ssafy.openticon.entity.Member;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import io.ssafy.openticon.entity.MemberEntity;
 
 @RestController
 @RequestMapping("member")
@@ -22,12 +24,11 @@ public class MemberController {
 
     private final MemberRepository memberRepository;
 
-    @GetMapping
-    @Operation(summary = "내 정보 보기")
-    public ResponseEntity<Member> getMember(@AuthenticationPrincipal UserDetails userDetails) {
-        Member member = memberRepository.findMemberByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
 
+    @GetMapping("member")
+    public ResponseEntity<MemberEntity> getMember(@AuthenticationPrincipal UserDetails userDetails) {
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
         return ResponseEntity.ok(member);
     }
 
@@ -35,7 +36,7 @@ public class MemberController {
     @Operation(summary = "device token 저장 api")
     public ResponseEntity<String> editDeviceToken(@AuthenticationPrincipal UserDetails userDetails,@RequestBody EditDeviceTokenRequestDto editDeviceTokenRequestDto) {
 
-        Member member = memberRepository.findMemberByEmail(userDetails.getUsername())
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
 
         if (editDeviceTokenRequestDto.getDeviceToken() == null) {
