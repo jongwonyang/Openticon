@@ -1,5 +1,6 @@
 package io.ssafy.openticon.service;
 
+import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
+import javax.security.sasl.AuthenticationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,12 +29,14 @@ public class PackService {
     private final PackRepository packRepository;
     private final MemberService memberService;
     private final EmoticonService emoticonService;
+    private final PermissionService permissionService;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
         this.emoticonService=emoticonService;
+        this.permissionService = permissionService;
     }
 
     @Transactional
@@ -84,5 +88,34 @@ public class PackService {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("upload", new FileSystemResource(file));
         return body;
+    }
+
+    public PackInfoResponseDto getPackInfo(String uuid, String email) throws AuthenticationException {
+
+        EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
+
+        if(!validatePrivatePack(email,emoticonPackEntity.getId())){
+            throw new AuthenticationException("접근 권한이 없습니다.");
+        }
+
+        List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
+
+        return new PackInfoResponseDto(emoticonPackEntity,emoticons);
+    }
+
+    private boolean validatePrivatePack(String email, Long packId){
+
+        if(memberService.getMemberByEmail(email).isEmpty()){
+            throw new IllegalArgumentException();
+        }
+        Long memberId=memberService.getMemberByEmail(email).get().getId();
+        List<Long> accessedUsers=permissionService.permissionUsers(packId);
+
+        for(Long user: accessedUsers){
+            if(memberId.equals(user)){
+                return true;
+            }
+        }
+        return false;
     }
 }

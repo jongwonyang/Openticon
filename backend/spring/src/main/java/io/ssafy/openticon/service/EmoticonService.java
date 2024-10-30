@@ -6,6 +6,8 @@ import io.ssafy.openticon.repository.EmoticonRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -20,5 +22,17 @@ public class EmoticonService {
             EmoticonEntity emoticonEntity=new EmoticonEntity(emoticonPackEntity,i, emoticons.get(i));
             emoticonRepository.save(emoticonEntity);
         }
+    }
+
+    public List<String> getEmoticons(Long packId){
+
+        List<EmoticonEntity> emoticonEntities=emoticonRepository.getEmoticonEntitiesByEmoticonPackId(packId);
+        Collections.sort(emoticonEntities);
+
+        List<String> result=new ArrayList<>();
+        for(EmoticonEntity emoticonEntity:emoticonEntities){
+            result.add(emoticonEntity.getImagePath());
+        }
+        return result;
     }
 }
