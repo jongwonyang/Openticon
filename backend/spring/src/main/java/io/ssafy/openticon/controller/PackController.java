@@ -40,6 +40,7 @@ public class PackController {
                                                ){
 
         EmoticonPack emoticonPack=new EmoticonPack(emoticonUploadRequest,userDetails.getUsername());
+
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
 
         String shareLink=packService.emoticonPackUpload(emoticonPack);

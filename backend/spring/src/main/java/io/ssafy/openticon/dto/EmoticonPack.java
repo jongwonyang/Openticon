@@ -17,9 +17,9 @@ public class EmoticonPack {
 
     private String username;
 
-    private boolean isAiGenerated;
+    private Boolean isAiGenerated;
 
-    private boolean isPublic;
+    private Boolean isPublic;
 
     private Category category;
 
@@ -37,8 +37,8 @@ public class EmoticonPack {
 
     public EmoticonPack(EmoticonUploadRequestDto emoticonUploadRequestDto, String username){
         this.packTitle=emoticonUploadRequestDto.getPackTitle();
-        this.isAiGenerated=emoticonUploadRequestDto.isAiGenerated();
-        this.isPublic=emoticonUploadRequestDto.isPublic();
+        this.isAiGenerated=emoticonUploadRequestDto.getIsAiGenerated();
+        this.isPublic=emoticonUploadRequestDto.getIsPublic();
         this.category=emoticonUploadRequestDto.getCategory();
         this.description=emoticonUploadRequestDto.getDescription();
         this.price=emoticonUploadRequestDto.getPrice();

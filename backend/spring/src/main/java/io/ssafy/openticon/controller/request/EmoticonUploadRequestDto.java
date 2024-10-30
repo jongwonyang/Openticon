@@ -13,9 +13,9 @@ public class EmoticonUploadRequestDto {
 
     private String packTitle;
 
-    private boolean isAiGenerated;
+    private Boolean isAiGenerated;
 
-    private boolean isPublic;
+    private Boolean isPublic;
 
     private Category category;
 
