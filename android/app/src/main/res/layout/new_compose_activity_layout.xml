@@ -16,12 +16,11 @@
         android:layout_height="52dp"
         android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
 
-        <io.ssafy.openticon.ui.component.EmoticonPackView
-            android:id="@+id/imoticonPackView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-        </io.ssafy.openticon.ui.component.EmoticonPackView>
+        <LinearLayout
+            android:id="@+id/horizontal_linear"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"/>
     </HorizontalScrollView>
 
     <TextView

@@ -21,6 +21,10 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class KeyboardAccessibilityService : AccessibilityService() {
 
@@ -71,12 +75,19 @@ class KeyboardAccessibilityService : AccessibilityService() {
         Toast.makeText(this, "이모티콘이 클립보드에 복사되었습니다. 붙여넣기를 시도해보세요.", Toast.LENGTH_SHORT).show()
     }
 
-    // 비트맵을 Uri로 변환하는 메서드
-    private fun getImageUri(bitmap: Bitmap): Uri {
-        val path = MediaStore.Images.Media.insertImage(contentResolver, bitmap, "Emoticon", null)
-        return Uri.parse(path)
+    fun getImageUri(bitmap: Bitmap): Uri? {
+        val file = File(cacheDir, "emoticon.png")
+        try {
+            val stream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.flush()
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
     }
-
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event?.let {

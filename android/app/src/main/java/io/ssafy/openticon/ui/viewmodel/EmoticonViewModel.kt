@@ -18,6 +18,6 @@ class EmoticonViewModel : ViewModel() {
     }
 
     private fun loadEmoticonPacks() {
-        _emoticonPacks.value = repository.getImoticonPacks()
+        _emoticonPacks.value = repository.getEmoticonPacks()
     }
 }
