@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Emoticon(
     val imageResource: Int,
-    val imageUrl: String
+    val imageUrl: String,
+    val name : String = "Default"
 )
