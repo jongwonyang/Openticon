@@ -5,6 +5,8 @@ import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.service.PackService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/emoticonpacks")
+@Tag(name="이모티콘팩")
 public class PackController {
 
     @Value("${spring.base-url}")
@@ -32,6 +35,7 @@ public class PackController {
     }
 
     @PostMapping("/upload")
+    @Operation(summary = "작가가 이모티콘팩을 등록합니다.")
     public ResponseEntity<UploadEmoticonResponseDto> uploadEmoticon(@AuthenticationPrincipal UserDetails userDetails,
                                                                     @RequestPart("packInfo") EmoticonUploadRequestDto emoticonUploadRequest,
                                                                     @RequestPart("thumbnail_img")MultipartFile thumbnailImg,
@@ -50,6 +54,7 @@ public class PackController {
     }
 
     @GetMapping("/info/{uuid}")
+    @Operation(summary = "비공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfo(@AuthenticationPrincipal UserDetails userDetails,
                                                             @PathVariable("uuid") String uuid) throws AuthenticationException {
 
@@ -60,6 +65,7 @@ public class PackController {
     }
 
     @GetMapping("/info")
+    @Operation(summary = "공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfoPublic(@AuthenticationPrincipal UserDetails userDetails,
                                                                   @RequestParam("emoticonPackId") String packId) throws AuthenticationException {
 
