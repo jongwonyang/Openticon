@@ -5,6 +5,7 @@ import DebugView from '@/views/DebugView.vue'
 import NewEmoticonListView from '@/views/NewEmoticonListView.vue'
 import PopularEmoticonListView from '@/views/PopularEmoticonListView.vue'
 import UploadEmoticonView from '@/views/UploadEmoticonView.vue'
+import EmoticonDetailView from '@/views/EmoticonDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/upload',
       name: 'uploadEmoticon',
       component: UploadEmoticonView
+    },
+    {
+      path: '/packDetail/:id',
+      name: 'packDetail',
+      component: EmoticonDetailView
     }
   ]
 })
