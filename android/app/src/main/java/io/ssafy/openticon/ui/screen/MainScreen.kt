@@ -28,7 +28,7 @@ fun MainScreen(navController: NavController) {
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedItem) {
                 0 -> StoreScreen()
-                1 -> SearchScreen()
+                1 -> SearchScreen(navController = navController)
                 2 -> MyEmoticonsScreen()
                 3 -> ProfileScreen(navController = navController)
             }

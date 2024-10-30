@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,13 +32,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import io.ssafy.openticon.ui.sample.EmoticonPackSampleData
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(viewModel: SearchScreenViewModel = hiltViewModel()) {
+fun SearchScreen(
+    viewModel: SearchScreenViewModel = hiltViewModel(),
+    navController: NavController
+) {
     val keyItems = listOf("제목", "태그", "작가")
 
     val key = viewModel.key.collectAsState()
@@ -102,7 +107,7 @@ fun SearchScreen(viewModel: SearchScreenViewModel = hiltViewModel()) {
 
         Spacer(Modifier.height(16.dp))
 
-        LazyColumn {
+        LazyColumn() {
             items(
                 items = EmoticonPackSampleData.latestPacks,
                 key = { it.id }
@@ -117,7 +122,11 @@ fun SearchScreen(viewModel: SearchScreenViewModel = hiltViewModel()) {
                         },
                         headlineContent = { Text(item.title) },
                         supportingContent = { Text(item.author) },
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                navController.navigate("emoticonPack/${item.id}")
+                            }
                     )
                     HorizontalDivider()
                 }
