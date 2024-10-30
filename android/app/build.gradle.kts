@@ -56,6 +56,7 @@ dependencies {
 
 
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.runtime.livedata)
     kapt("androidx.room:room-compiler:2.6.1")
     implementation(libs.androidx.room.ktx)
 
@@ -92,6 +93,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.androidx.lifecycle.livedata.ktx) // 버전은 필요에 따라 최신으로
 }
 
 kapt {
