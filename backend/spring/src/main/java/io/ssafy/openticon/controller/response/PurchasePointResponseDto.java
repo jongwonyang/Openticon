@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchasePointReponseDto {
+public class PurchasePointResponseDto {
     String status;
     String message;
 }
