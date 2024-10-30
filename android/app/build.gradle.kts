@@ -62,6 +62,9 @@ dependencies {
 
     // Hilt for Dependency Injection
     implementation(libs.hilt.android)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
+    implementation(libs.androidx.room.common)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.androidx.datastore.preferences.core.jvm)
