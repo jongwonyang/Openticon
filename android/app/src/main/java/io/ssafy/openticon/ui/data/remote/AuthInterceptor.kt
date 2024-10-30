@@ -23,6 +23,7 @@ class AuthInterceptor(
         val token = runBlocking { tokenDataSource.token.firstOrNull() }
         if (!token.isNullOrBlank()) {
             requestBuilder.addHeader("Authorization", "Bearer $token")
+            Log.d("토큰 사용", "Access Token: $token")
         }
         Log.d("AuthInterceptor", "Request URL: ${chain.request().url}")
         return chain.proceed(requestBuilder.build())

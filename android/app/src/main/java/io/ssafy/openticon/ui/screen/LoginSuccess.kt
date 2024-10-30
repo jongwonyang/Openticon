@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,13 +29,21 @@ import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.lang.reflect.Member
 
-
 @Composable
 fun LoginSuccessScreen(accessToken: String) {
     val context = LocalContext.current
     val memberApi = ApiClient(context).memberApi
     val coroutineScope = rememberCoroutineScope()
     Log.d("LoginSuccess", "Access Token: $accessToken")
+
+    // 화면이 실행되자마자 saveDeviceToken 호출
+    LaunchedEffect(Unit) {
+        val deviceToken = "your_device_token"
+        coroutineScope.launch {
+            saveDeviceToken(accessToken, deviceToken, isMobile = true, context)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,7 +62,8 @@ fun LoginSuccessScreen(accessToken: String) {
         Button(onClick = {
             coroutineScope.launch {
                 try {
-                    val response = memberApi.getMemberInfo() // Adjust if ApiService is defined
+                    // 사용자 정보 가져오기
+                    val response = memberApi.getMemberInfo()
                     if (response.isSuccessful) {
                         println("User info: ${response.body()}")
                     } else {
@@ -63,16 +73,27 @@ fun LoginSuccessScreen(accessToken: String) {
                     println("Error: ${e.message}")
                 }
             }
-        },) {
+        }) {
             Text(text = "내 정보", fontSize = 16.sp)
         }
     }
 }
+
 // 디바이스 토큰 저장 함수
-suspend fun saveDeviceToken(accessToken: String, deviceToken: String, isMobile: Boolean, context : Context) {
+suspend fun saveDeviceToken(accessToken: String, deviceToken: String, isMobile: Boolean, context: Context) {
     val tokenDataSource = TokenDataSource(context)
     val memberApi = ApiClient(context).memberApi
-    val request = EditDeviceTokenRequestDto(deviceToken, true)
-    tokenDataSource.saveDeviceToken("Bearer $accessToken")
-}
+    val request = EditDeviceTokenRequestDto(deviceToken, isMobile)
+    tokenDataSource.saveToken("Bearer $accessToken")
 
+//    try {
+//        val response = memberApi.updateDeviceToken("Bearer $accessToken", request)
+//        if (response.isSuccessful) {
+//            Log.d("DeviceToken", "Device token saved successfully.")
+//        } else {
+//            Log.e("DeviceToken", "Failed to save device token: ${response.code()}")
+//        }
+//    } catch (e: HttpException) {
+//        Log.e("DeviceToken", "Error: ${e.message}")
+//    }
+}
