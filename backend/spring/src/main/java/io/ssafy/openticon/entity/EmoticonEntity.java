@@ -3,12 +3,13 @@ package io.ssafy.openticon.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "emoticon")
 @Getter
 @NoArgsConstructor
-public class EmoticonEntity {
+public class EmoticonEntity implements Comparable<EmoticonEntity>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,4 +31,8 @@ public class EmoticonEntity {
         this.imagePath=imagePath;
     }
 
+    @Override
+    public int compareTo(@NotNull EmoticonEntity o) {
+        return this.emoticonOrder-o.emoticonOrder;
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
+    public EmoticonPackEntity findByShareLink(String uuid);
 
     Page<EmoticonPackEntity> findByTitleContaining(String title, Pageable pageable);
 
