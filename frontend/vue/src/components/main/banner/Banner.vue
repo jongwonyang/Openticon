@@ -13,7 +13,7 @@ const slides = ref([
 ]);
 
 const currentSlide = ref(0);
-const slideInterval = ref<number | null>(null);
+const slideInterval = ref<ReturnType<typeof setInterval> | null>(null);
 const direction = ref('next');
 const isButtonDisabled = ref(false);
 
@@ -55,7 +55,7 @@ const goToSlide = (index: number) => {
 };
 
 const startSlideShow = () => {
-  slideInterval.value = setInterval(nextSlide, 5000); // 5초마다 슬라이드 변경
+  slideInterval.value = setInterval(nextSlide, 10000); // 10초마다 슬라이드 변경
 };
 
 const stopSlideShow = () => {
