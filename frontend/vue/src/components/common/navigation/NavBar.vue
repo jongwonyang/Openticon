@@ -4,14 +4,13 @@
     <div class="w-12">
     </div>
     <h1 class="text-2xl font-bold">
-      <span style="font-family: 'NanumSquareNeoHeavy', sans-serif;">OPEN</span><span
-        style="font-family: 'NanumSquareNeoLight', sans-serif;">TICON</span>
+      <span class="font-nnsqneo-heavy">OPEN</span><span class="font-nnsqneo">TICON</span>
     </h1>
     <div>
       <img src="" alt="프로필 사진" class="w-12 h-12 rounded-full" />
     </div>
   </div>
-  <nav class="mt-2 px-2 pt-4  mx-auto border-b-2 border-gray-200">
+  <nav class="px-2 pt-4  mx-auto border-b-2 border-gray-200">
     <ul class="flex justify-center">
       <li>
         <RouterLink :to="{ name: 'main' }" :class="['nav-link', { active: isActive('main') }]">
@@ -50,9 +49,9 @@ function isActive(routeName: string) {
 <style scoped>
 .nav-link {
   font-family: 'NanumSquareNeo', sans-serif;
-  
+
   @apply text-black font-light text-lg;
-  @apply flex justify-center items-center px-8 sm:px-8 md:px-12 lg:px-16 py-2;
+  @apply flex justify-center items-center px-8 sm:px-8 md:px-12 lg:px-16 py-2 border-b-2 border-transparent;
   @apply hover:border-b-2 hover:border-black;
   @apply hover:font-bold hover:bg-gray-100;
 
@@ -60,7 +59,8 @@ function isActive(routeName: string) {
 }
 
 .nav-link.active {
-  @apply border-b-2 border-black font-bold; /* 현재 경로일 때 강조 효과 */
+  @apply border-b-2 border-black font-bold;
+  /* 현재 경로일 때 강조 효과 */
 }
 </style>
 <!-- End Generation Here -->
