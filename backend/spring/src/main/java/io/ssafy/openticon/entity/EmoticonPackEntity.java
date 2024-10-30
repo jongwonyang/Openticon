@@ -83,8 +83,8 @@ public class EmoticonPackEntity {
 
     public EmoticonPackEntity(EmoticonPack emoticonPack, MemberEntity member, String thumbnailImg, String listImg){
         this.title=emoticonPack.getPackTitle();
-        this.isAiGenerated=emoticonPack.isAiGenerated();
-        this.isPublic=emoticonPack.isPublic();
+        this.isAiGenerated=emoticonPack.getIsAiGenerated();
+        this.isPublic=emoticonPack.getIsPublic();
         this.category=emoticonPack.getCategory();
         this.description=emoticonPack.getDescription();
         this.price=emoticonPack.getPrice();
