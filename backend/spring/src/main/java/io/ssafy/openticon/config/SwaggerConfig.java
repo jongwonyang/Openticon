@@ -54,7 +54,7 @@ public class SwaggerConfig {
     public GroupedOpenApi emoticonPackApi() {
         return GroupedOpenApi.builder()
                 .group("이모티콘 팩 관련 기능")
-                .pathsToMatch("/upload")
+                .pathsToMatch("/emoticonpacks/**")
                 .build();
     }
 
@@ -66,12 +66,6 @@ public class SwaggerConfig {
                 .build();
     }
 
-    @Bean
-    public GroupedOpenApi packApi() {
-        return GroupedOpenApi.builder()
-                .group("이모티콘팩 관련 기능")
-                .pathsToMatch("/emoticonspacks/**")
-                .build();
-    }
+
 
 }

@@ -1,5 +1,6 @@
 package io.ssafy.openticon.service;
 
+import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
@@ -8,6 +9,8 @@ import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.repository.PackRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -135,5 +138,23 @@ public class PackService {
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
 
         return new PackInfoResponseDto(emoticonPackEntity,emoticons);
+    }
+
+    public Page<EmoticonPackResponseDto> search(String query, String type, Pageable pageable) {
+        if (query == null || query.isEmpty()) {
+            return packRepository.findAll(pageable).map(EmoticonPackResponseDto::new); // 검색어가 없으면 전체 조회
+        }
+
+        // TODO: type 기준
+        switch (type.toLowerCase()) {
+            case "title":
+                return packRepository.findByTitleContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
+//            case "tag":
+//                return packRepository.findByTagContaining(query, pageable).map(EmoticonPackResponseDto::new);   // 부분 일치
+//            case "author":
+//                return packRepository.findByAuthorContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
+            default:
+                return packRepository.findAll(pageable).map(EmoticonPackResponseDto::new); // 기본 전체 조회
+        }
     }
 }

@@ -1,14 +1,20 @@
 package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EmoticonUploadRequestDto;
+import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
+import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.service.PackService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -73,4 +79,28 @@ public class PackController {
 
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EmoticonPackResponseDto>> searchEmoticonPacks(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "new") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, getSort(sort));
+        Page<EmoticonPackResponseDto> results = packService.search(query, type, pageable);
+        return ResponseEntity.ok(results);
+    }
+
+    private Sort getSort(String sort) {
+        // TODO: sort 기준 만들어야함
+        if (sort.equalsIgnoreCase("new")) {
+            return Sort.by("createdAt").descending(); // 최신순 정렬 (내림차순)
+        }
+//        else if (sort.equalsIgnoreCase("most")) {
+//            return Sort.by("popularity").descending(); // 인기순 정렬 (내림차순)
+//        }
+        return Sort.unsorted(); // 기본 정렬 없음
+    }
 }
