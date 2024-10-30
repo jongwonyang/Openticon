@@ -91,7 +91,7 @@ class FloatingService : Service() {
                 else -> false
             }
         }
-        val horizontalScrollView = secondFloatingView.findViewById<HorizontalScrollView>(R.id.progress_horizontal)
+        val horizontalScrollView = secondFloatingView.findViewById<LinearLayout>(R.id.horizontal_linear)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
 
         // 데이터에 따라 UI 업데이트
