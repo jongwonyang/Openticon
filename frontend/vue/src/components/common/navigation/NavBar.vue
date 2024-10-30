@@ -19,17 +19,17 @@
         </RouterLink>
       </li>
       <li>
-        <RouterLink :to="{ name: 'new' }" :class="['nav-link', { active: isActive('new') }]">
+        <RouterLink :to="{ name: 'newList' }" :class="['nav-link', { active: isActive('newList') }]">
           신규
         </RouterLink>
       </li>
       <li>
-        <RouterLink :to="{ name: 'popular' }" :class="['nav-link', { active: isActive('popular') }]">
+        <RouterLink :to="{ name: 'popularList' }" :class="['nav-link', { active: isActive('popularList') }]">
           인기
         </RouterLink>
       </li>
       <li>
-        <RouterLink :to="{ name: 'upload' }" :class="['nav-link', { active: isActive('upload') }]">
+        <RouterLink :to="{ name: 'uploadEmoticon' }" :class="['nav-link', { active: isActive('uploadEmoticon') }]">
           업로드
         </RouterLink>
       </li>

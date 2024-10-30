@@ -16,17 +16,17 @@ const router = createRouter({
     },
     {
       path: '/new',
-      name: 'new',
+      name: 'newList',
       component: NewEmoticonListView
     },
     {
       path: '/popular',
-      name: 'popular',
+      name: 'popularList',
       component: PopularEmoticonListView
     },
     {
       path: '/upload',
-      name: 'upload',
+      name: 'uploadEmoticon',
       component: UploadEmoticonView
     }
   ]
