@@ -51,11 +51,18 @@ public class PackController {
     @GetMapping("/info/{uuid}")
     public ResponseEntity<PackInfoResponseDto> viewPackInfo(@AuthenticationPrincipal UserDetails userDetails,
                                                             @PathVariable("uuid") String uuid) throws AuthenticationException {
-        System.out.println("Received request with uuid: " + uuid);
 
         String email=userDetails.getUsername();
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(packService.getPackInfo(uuid,email));
+        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfo(uuid,email));
+
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<PackInfoResponseDto> viewPackInfoPublic(@AuthenticationPrincipal UserDetails userDetails,
+                                                                  @RequestParam("emoticonPackId") String packId) throws AuthenticationException {
+
+        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId));
 
     }
 

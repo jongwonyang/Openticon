@@ -118,4 +118,22 @@ public class PackService {
         }
         return false;
     }
+
+    public PackInfoResponseDto getPackInfoByPackId(String emoticonPackId) throws AuthenticationException {
+
+        Long packId=Long.parseLong(emoticonPackId);
+        if(packRepository.findById(packId).isEmpty()){
+            throw new IllegalArgumentException("해당하는 EmoticonPack 이 없음");
+        }
+
+        EmoticonPackEntity emoticonPackEntity=packRepository.findById(packId).get();
+
+        if(!emoticonPackEntity.isPublic()){
+            throw new AuthenticationException("비공개 이모티콘팩입니다.");
+        }
+
+        List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
+
+        return new PackInfoResponseDto(emoticonPackEntity,emoticons);
+    }
 }
