@@ -6,19 +6,20 @@ import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
-import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.service.PackService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -41,15 +42,19 @@ public class PackController {
         this.packService=packService;
     }
 
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "작가가 이모티콘팩을 등록합니다.")
-    public ResponseEntity<UploadEmoticonResponseDto> uploadEmoticon(@AuthenticationPrincipal UserDetails userDetails,
-                                                                    @RequestPart("packInfo") EmoticonUploadRequestDto emoticonUploadRequest,
-                                                                    @RequestPart("thumbnail_img")MultipartFile thumbnailImg,
-                                                                    @RequestPart("list_img") MultipartFile listImg,
-                                                                    @RequestPart("emoticons")List<MultipartFile> emoticons
+    public ResponseEntity<UploadEmoticonResponseDto> uploadEmoticon(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(description = "이모티콘 팩 정보", required = true)
+            @RequestPart("packInfo") EmoticonUploadRequestDto emoticonUploadRequest,
+            @Parameter(description = "이모티콘 팩 대표 이미지", required = true)
+            @RequestPart("thumbnail_img") MultipartFile thumbnailImg,
+            @Parameter(description = "이모티콘 팩 리스트 이미지", required = true)
+            @RequestPart("list_img") MultipartFile listImg,
+            @Parameter(description = "이모티콘 이미지", required = true)
+            @RequestPart("emoticons") List<MultipartFile> emoticons
     ){
-
         EmoticonPack emoticonPack=new EmoticonPack(emoticonUploadRequest,userDetails.getUsername());
 
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
@@ -81,6 +86,7 @@ public class PackController {
     }
 
     @GetMapping("/search")
+    @Operation(summary = "이모티콘 팩을 검색합니다.")
     public ResponseEntity<Page<EmoticonPackResponseDto>> searchEmoticonPacks(
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "title") String type, // title, tag, author
@@ -104,6 +110,7 @@ public class PackController {
     }
 
     @GetMapping("/download")
+    @Operation(summary = "이모티콘 팩을 다운로드합니다.")
     public ResponseEntity<PackDownloadResponseDto> downloadPack(@RequestParam("emoticonPackId")String packId,
                                                                 @AuthenticationPrincipal UserDetails userDetails){
         String email=userDetails.getUsername();
