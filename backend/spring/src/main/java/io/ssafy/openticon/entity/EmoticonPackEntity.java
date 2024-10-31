@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -62,6 +63,9 @@ public class EmoticonPackEntity {
     @Column(name = "share_link", nullable = false)
     private String shareLink="public";
 
+    @OneToMany(mappedBy = "emoticonPack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TagListEntity> tagLists;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -83,8 +87,8 @@ public class EmoticonPackEntity {
 
     public EmoticonPackEntity(EmoticonPack emoticonPack, MemberEntity member, String thumbnailImg, String listImg){
         this.title=emoticonPack.getPackTitle();
-        this.isAiGenerated=emoticonPack.isAiGenerated();
-        this.isPublic=emoticonPack.isPublic();
+        this.isAiGenerated=emoticonPack.getIsAiGenerated();
+        this.isPublic=emoticonPack.getIsPublic();
         this.category=emoticonPack.getCategory();
         this.description=emoticonPack.getDescription();
         this.price=emoticonPack.getPrice();

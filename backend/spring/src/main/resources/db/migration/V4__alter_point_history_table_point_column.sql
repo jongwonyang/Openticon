@@ -1,0 +1,1 @@
+ALTER TABLE "point_history" ALTER COLUMN "point" TYPE INT;

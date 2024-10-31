@@ -26,7 +26,7 @@ public class MemberEntity {
     private String nickname;  // 닉네임 (유니크)
 
     @Builder.Default
-    private Long point = 0L;  // 보유 포인트
+    private int point = 0;  // 보유 포인트
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
