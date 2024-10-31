@@ -22,6 +22,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.HorizontalScrollView
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.Toast
@@ -31,6 +32,7 @@ import androidx.core.content.FileProvider
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -57,6 +59,7 @@ class FloatingService : Service() {
         setupFloatingView()
         //setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
         loadInitialData()
+        loadLikeDate()
     }
 
     private fun loadInitialData() {
@@ -70,6 +73,30 @@ class FloatingService : Service() {
 
         updateFloatingView(data)
     }
+
+    private fun loadLikeDate() {
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val jsonString = sharedPreferences.getString("like_emoticon_data", null)
+
+        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
+        val data = jsonString?.let {
+            Json.decodeFromString<EmoticonPack>(it)
+        }
+
+        val likeView = secondFloatingView.findViewById<EmoticonPackView>(R.id.imageLike)
+        val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
+        data?.let {
+            likeView.removeAllViews() // 이미 존재하는 이미지 삭제
+            likeView.setupEmoticonPack(it) { images ->
+                likeView.displayImagesInTable(tableLayout, images,
+                    onImageClick = { emoticon: Emoticon ->
+                        insertEmoticonIntoFocusedEditText(emoticon.imageResource)
+                    }
+                )
+            }
+        }
+    }
+
 
     private fun updateFloatingView(data: List<EmoticonPack>) {
         // WindowManager를 사용하여 floatingView 설정
@@ -124,15 +151,37 @@ class FloatingService : Service() {
     }
 
     private fun lkeEmoticon(emoticon: Emoticon){
-        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-            PixelFormat.TRANSLUCENT
-        )
-        windowManager.addView(alertView, params)
+//        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
+//        val params = WindowManager.LayoutParams(
+//            WindowManager.LayoutParams.WRAP_CONTENT,
+//            WindowManager.LayoutParams.WRAP_CONTENT,
+//            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+//            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+//            PixelFormat.TRANSLUCENT
+//        )
+//        windowManager.addView(alertView, params)
+
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
+
+        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
+        val emoticonPack = past_jsonString?.let {
+            Json.decodeFromString<EmoticonPack>(it)
+        }
+
+
+        emoticonPack?.let {
+            val mutableImages = it.images.toMutableList()  // MutableList로 변환
+            mutableImages.add(emoticon.copy())
+            it.images = mutableImages.toList()  // 다시 List로 변환하여 할당
+        }
+
+        val editor = sharedPreferences.edit()
+        val jsonString = Json.encodeToString(emoticonPack)
+        editor.putString("like_emoticon_data", jsonString)
+        editor.apply()
+        loadLikeDate()
+        Log.d("floating", "Maybe.... success,..?")
     }
 
     private fun copyEmoticon(clickedEmoticon: Emoticon) {
