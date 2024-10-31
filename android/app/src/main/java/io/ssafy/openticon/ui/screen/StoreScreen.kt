@@ -1,3 +1,5 @@
+package io.ssafy.openticon.ui.screen
+
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
