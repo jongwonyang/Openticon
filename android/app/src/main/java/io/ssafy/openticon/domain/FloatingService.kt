@@ -22,6 +22,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.HorizontalScrollView
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
@@ -29,6 +30,8 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.shape.CornerFamily
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
@@ -249,6 +252,7 @@ class FloatingService : Service() {
         startForeground(1, notification)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupFloatingView() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
@@ -265,20 +269,26 @@ class FloatingService : Service() {
         layoutParams.gravity = Gravity.TOP or Gravity.LEFT
 
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_layout, null)
-        floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
-            if (floatingView.windowToken != null) {
-                windowManager.removeView(floatingView)
-                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
-                stopSelf()  // 서비스 종료
-            }
-        }
+//        floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
+//            if (floatingView.windowToken != null) {
+//                windowManager.removeView(floatingView)
+//                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
+//                stopSelf()  // 서비스 종료
+//            }
+//        }
 
         // 토글 버튼 설정
-        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
-            toggleSecondFloatingView()
-        }
+//        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
+//            toggleSecondFloatingView()
+//        }
 
-        floatingView.setOnTouchListener { _, event ->
+
+        val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton)
+        imageButton.shapeAppearanceModel = imageButton.shapeAppearanceModel.toBuilder()
+            .setAllCorners(CornerFamily.ROUNDED, 100f) // 원하는 크기의 반지름 설정
+            .build()
+
+        floatingView.findViewById<ShapeableImageView>(R.id.imageButton).setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     initialTouchX = event.rawX.toInt()
@@ -293,9 +303,18 @@ class FloatingService : Service() {
                     windowManager.updateViewLayout(floatingView, layoutParams)
                     true
                 }
+                MotionEvent.ACTION_UP -> {
+                    // 터치 움직임이 작으면 클릭으로 간주
+                    if (Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
+                        toggleSecondFloatingView()
+                    }
+                    true
+                }
                 else -> false
             }
         }
+
+
         windowManager.addView(floatingView, layoutParams)
         Log.d("FloatingService", "Floating view added successfully")
     }
