@@ -1,13 +1,13 @@
 package io.ssafy.openticon.service;
 
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
+import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
-import io.ssafy.openticon.entity.EmoticonPackEntity;
-import io.ssafy.openticon.entity.MemberEntity;
-import io.ssafy.openticon.entity.TagEntity;
-import io.ssafy.openticon.entity.TagListEntity;
+import io.ssafy.openticon.entity.*;
+import io.ssafy.openticon.exception.ErrorCode;
+import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.TagListRepository;
 import io.ssafy.openticon.repository.TagRepository;
@@ -44,8 +44,9 @@ public class PackService {
     private final PermissionService permissionService;
     private final TagRepository tagRepository;
     private final TagListRepository tagListRepository;
+    private final PurchaseHistoryService purchaseHistoryService;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -53,6 +54,7 @@ public class PackService {
         this.permissionService = permissionService;
         this.tagRepository = tagRepository;
         this.tagListRepository = tagListRepository;
+        this.purchaseHistoryService = purchaseHistoryService;
     }
 
     @Transactional
@@ -135,7 +137,7 @@ public class PackService {
 
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
 
-        if(!validatePrivatePack(email,emoticonPackEntity.getId())){
+        if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
             throw new AuthenticationException("접근 권한이 없습니다.");
         }
 
@@ -194,5 +196,18 @@ public class PackService {
             default:
                 return packRepository.findAll(pageable).map(EmoticonPackResponseDto::new); // 기본 전체 조회
         }
+    }
+
+    public PackDownloadResponseDto downloadPack(String email, Long packId) {
+        MemberEntity member=memberService.getMemberByEmail(email).orElseThrow();
+        EmoticonPackEntity emoticonPackEntity=packRepository.findById(packId).orElseThrow();
+        if(!purchaseHistoryService.isMemberPurchasePack(member,emoticonPackEntity)){
+            throw new OpenticonException(ErrorCode.ACCESS_DENIED);
+        }
+
+        String thumbnailImg=emoticonPackEntity.getThumbnailImg();
+        String listImg=emoticonPackEntity.getListImg();
+        List<String> emoticons=emoticonService.getEmoticons(packId);
+        return new PackDownloadResponseDto(thumbnailImg,listImg,emoticons);
     }
 }
