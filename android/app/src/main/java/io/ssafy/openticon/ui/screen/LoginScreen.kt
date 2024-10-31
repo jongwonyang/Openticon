@@ -24,16 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.local.TokenDataSource
-import io.ssafy.openticon.ui.data.remote.ApiClient
-import io.ssafy.openticon.ui.data.remote.NetworkConfig
+import io.ssafy.openticon.data.remote.ApiClient
+import io.ssafy.openticon.data.remote.NetworkConfig
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen() {
     val context = LocalContext.current
-    val tokenDataSource = TokenDataSource(context)
-    val memberApi = ApiClient(context).memberApi
+    val tokenDataSource = TokenDataSource
+    val memberApi = ApiClient().memberApi
     val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
