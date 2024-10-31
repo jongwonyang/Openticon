@@ -34,7 +34,6 @@ const Home = () => {
             },
             (rsp) => {
                 if (rsp.success) {
-                    // 필요한 값을 함께 전달
                     verifyPayment(rsp.imp_uid, 1, 1, 100);
                 } else {
                     alert(`결제에 실패하였습니다. 에러: ${rsp.error_msg}`);
@@ -45,16 +44,16 @@ const Home = () => {
 
     const verifyPayment = (imp_uid, member_id, emoticon_pack_id, point) => {
         console.log(accessToken);
-        fetch("http://127.0.0.1:8080/api/v1/points/payment", {
+        fetch(`${process.env.REACT_APP_API_BASE_URL}/api/v1/points/payment`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${accessToken}` // Access Token 추가
+                "Authorization": `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
-                imp_uid, // 결제 고유 ID
-                emoticon_pack_id, // 이모티콘 팩 ID
-                point, // 포인트
+                imp_uid,
+                emoticon_pack_id,
+                point,
             }),
         })
             .then((res) => res.json())
@@ -78,22 +77,22 @@ const Home = () => {
                 결제하기
             </button>
             <div>
-                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=login">
+                <a href={`${process.env.REACT_APP_API_BASE_URL}/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=login`}>
                     <button>Google Login</button>
                 </a>
-                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=unlink">
+                <a href={`${process.env.REACT_APP_API_BASE_URL}/api/v1/oauth2/authorization/google?redirect_uri=http://127.0.0.1:3000&mode=unlink`}>
                     <button>Google Unlink</button>
                 </a>
-                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=login">
+                <a href={`${process.env.REACT_APP_API_BASE_URL}/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=login`}>
                     <button>Naver Login</button>
                 </a>
-                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=unlink">
+                <a href={`${process.env.REACT_APP_API_BASE_URL}/api/v1/oauth2/authorization/naver?redirect_uri=http://127.0.0.1:3000&mode=unlink`}>
                     <button>Naver Unlink</button>
                 </a>
-                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=login">
+                <a href={`${process.env.REACT_APP_API_BASE_URL}/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=login`}>
                     <button>Kakao Login</button>
                 </a>
-                <a href="http://127.0.0.1:8080/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=unlink">
+                <a href={`${process.env.REACT_APP_API_BASE_URL}/api/v1/oauth2/authorization/kakao?redirect_uri=http://127.0.0.1:3000&mode=unlink`}>
                     <button>Kakao Unlink</button>
                 </a>
                 <p>Access Token : {accessToken}</p>
@@ -103,4 +102,5 @@ const Home = () => {
     );
 };
 
+// default export 추가
 export default Home;
