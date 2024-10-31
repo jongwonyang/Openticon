@@ -3,6 +3,9 @@ FROM gradle:8.10.2-jdk17 AS build
 
 WORKDIR /app
 
+ADD build.gradle /app/
+RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
+
 COPY . .
 
 RUN gradle build --no-daemon -x test
