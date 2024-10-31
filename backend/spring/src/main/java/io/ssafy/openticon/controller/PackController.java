@@ -55,7 +55,7 @@ public class PackController {
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
 
         String shareLink=packService.emoticonPackUpload(emoticonPack);
-        String shareUrl=baseUrl+"/emoticonpacks/info/"+shareLink;
+        String shareUrl=baseUrl+"/api/v1/emoticonpacks/info/"+shareLink;
         UploadEmoticonResponseDto uploadEmoticonResponseDto=new UploadEmoticonResponseDto(shareUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadEmoticonResponseDto);
     }

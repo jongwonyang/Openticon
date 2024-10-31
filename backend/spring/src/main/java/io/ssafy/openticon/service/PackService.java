@@ -137,7 +137,7 @@ public class PackService {
 
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
 
-        if(!validatePrivatePack(email,emoticonPackEntity.getId())){
+        if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
             throw new AuthenticationException("접근 권한이 없습니다.");
         }
 
