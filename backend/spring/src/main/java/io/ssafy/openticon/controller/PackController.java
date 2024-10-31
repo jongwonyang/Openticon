@@ -2,6 +2,7 @@ package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EmoticonUploadRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
+import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
@@ -100,5 +101,12 @@ public class PackController {
             return Sort.by("view").descending(); // 인기순 정렬 (내림차순)
         }
         return Sort.unsorted(); // 기본 정렬 없음
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<PackDownloadResponseDto> downloadPack(@RequestParam("emoticonPackId")String packId,
+                                                                @AuthenticationPrincipal UserDetails userDetails){
+        String email=userDetails.getUsername();
+        return ResponseEntity.status(HttpStatus.OK).body(packService.downloadPack(email,Long.parseLong(packId)));
     }
 }
