@@ -25,9 +25,9 @@ public class EmoticonUploadRequestDto {
 
     private List<String> tags;
 
-    private MultipartFile thumbnailImg;
-
-    private MultipartFile listImg;
+//    private MultipartFile thumbnailImg;
+//
+//    private MultipartFile listImg;
 
     //private List<MultipartFile> emoticons;
 }
