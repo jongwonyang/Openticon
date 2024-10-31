@@ -48,7 +48,6 @@ fun StoreScreen() {
         ItemData(R.drawable.kakao, "이모티콘 제목 5", "작성자 5"),
         ItemData(R.drawable.naver, "이모티콘 제목 6", "작성자 6")
     )
-
     val items = List(5) { baseItems }.flatten()
     var centerIndex by remember { mutableStateOf(baseItems.size) } // 중앙 인덱스로 초기화
     val listState = rememberLazyListState(centerIndex)
@@ -74,7 +73,6 @@ fun StoreScreen() {
             .fillMaxSize()
             .padding(0.dp)
     ) {
-
         item {
             Text(
                 text = "신규",
@@ -111,7 +109,7 @@ fun StoreScreen() {
                             .scale(scale)
                             .alpha(alpha)
                             .width(150.dp)
-                            .clickable { centerIndex = index }
+                            .clickable { }
                     ) {
                         Image(
                             painter = painterResource(id = item.imageRes),
@@ -204,7 +202,7 @@ fun StoreScreen() {
         }
         // 태그 섹션
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(35.dp))
             Text(
                 text = "태그",
                 style = MaterialTheme.typography.titleLarge,

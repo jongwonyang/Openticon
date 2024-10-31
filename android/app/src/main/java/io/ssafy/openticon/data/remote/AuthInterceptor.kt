@@ -1,4 +1,4 @@
-package io.ssafy.openticon.ui.data.remote
+package io.ssafy.openticon.data.remote
 
 import android.content.Context
 import kotlinx.coroutines.runBlocking
@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import io.ssafy.openticon.data.local.TokenDataSource
 import kotlinx.coroutines.flow.firstOrNull
 import android.util.Log
-import io.ssafy.openticon.ui.data.remote.NetworkConfig;
+import io.ssafy.openticon.data.remote.NetworkConfig;
 
 class AuthInterceptor(
     private val tokenDataSource: TokenDataSource
@@ -23,7 +23,7 @@ class AuthInterceptor(
         val token = runBlocking { tokenDataSource.token.firstOrNull() }
         if (!token.isNullOrBlank()) {
             requestBuilder.addHeader("Authorization", "Bearer $token")
-            Log.d("토큰 사용", "Access Token: $token")
+            Log.d("use token", "Access Token: $token")
         }
         Log.d("AuthInterceptor", "Request URL: ${chain.request().url}")
         return chain.proceed(requestBuilder.build())

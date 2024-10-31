@@ -1,4 +1,4 @@
-package io.ssafy.openticon.ui.data.remote
+package io.ssafy.openticon.data.remote
 
 import android.content.Context
 import okhttp3.OkHttpClient
@@ -8,12 +8,13 @@ import io.ssafy.openticon.data.local.TokenDataSource
 
 object NetworkConfig {
     const val BaseURL = "https://apitest.openticon.store/api/v1/"
+//    const val BaseURL = "http://10.0.2.2:8080/api/v1/"
 }
 
-class ApiClient(context: Context) {
+class ApiClient() {
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(TokenDataSource(context))) // TokenDataSource에 context 전달
+            .addInterceptor(AuthInterceptor(TokenDataSource)) // TokenDataSource에 context 전달
             .build()
     }
 

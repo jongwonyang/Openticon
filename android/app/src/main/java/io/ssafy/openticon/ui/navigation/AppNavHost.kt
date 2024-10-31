@@ -34,7 +34,7 @@ fun AppNavHost() {
             )
         ) { backStackEntry ->
             val accessToken = backStackEntry.arguments?.getString("accessToken") ?: ""
-            LoginSuccessScreen(accessToken)
+            LoginSuccessScreen(accessToken, navController)
         }
     }
 
