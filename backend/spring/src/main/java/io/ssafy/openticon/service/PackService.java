@@ -72,7 +72,7 @@ public class PackService {
 
 
 
-        MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).get();
+        MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
         EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
         packRepository.save(emoticonPackEntity);
         emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
@@ -138,7 +138,7 @@ public class PackService {
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
 
         if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
-            throw new AuthenticationException("접근 권한이 없습니다.");
+            throw new OpenticonException(ErrorCode.PRIVATE_PACK);
         }
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
@@ -162,7 +162,7 @@ public class PackService {
         return false;
     }
 
-    public PackInfoResponseDto getPackInfoByPackId(String emoticonPackId) throws AuthenticationException {
+    public PackInfoResponseDto getPackInfoByPackId(String emoticonPackId){
 
         Long packId=Long.parseLong(emoticonPackId);
         if(packRepository.findById(packId).isEmpty()){
@@ -172,7 +172,7 @@ public class PackService {
         EmoticonPackEntity emoticonPackEntity=packRepository.findById(packId).get();
 
         if(!emoticonPackEntity.isPublic()){
-            throw new AuthenticationException("비공개 이모티콘팩입니다.");
+            throw new OpenticonException(ErrorCode.PRIVATE_PACK);
         }
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());

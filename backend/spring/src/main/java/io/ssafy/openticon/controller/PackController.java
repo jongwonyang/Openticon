@@ -79,7 +79,7 @@ public class PackController {
     @GetMapping("/info")
     @Operation(summary = "공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfoPublic(@AuthenticationPrincipal UserDetails userDetails,
-                                                                  @RequestParam("emoticonPackId") String packId) throws AuthenticationException {
+                                                                  @RequestParam("emoticonPackId") String packId){
 
         return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId));
 

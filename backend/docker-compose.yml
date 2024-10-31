@@ -1,11 +1,11 @@
-name: openticon-test
+name: ${ENV_PROJECT_NAME}
 services:
   spring:
     build:
       context: ./spring
       dockerfile: Dockerfile
-    # ports:
-    #   - "7000:8080"
+    ports:
+      - "${ENV_SPRING_EXPOSE_PORT}:8080"
     environment:
       SPRING_PROFILES_ACTIVE: ${ENV_SPRING_PROFILES_ACTIVE}
       DEV_NAME : ${ENV_DEV_NAME}
@@ -19,6 +19,8 @@ services:
       JWT_SECRET_KEY : ${ENV_JWT_SECRET_KEY}
       IAMPORT_API_KEY : ${ENV_IAMPORT_API_KEY}
       IAMPORT_API_SECRET : ${ENV_IAMPORT_API_SECRET}
+      DEV_BASE_URL : ${ENV_DEV_BASE_URL}
+      DEV_IMAGE_SERVER_URL: "http://express:8070"
       TZ: Asia/Seoul
     restart: unless-stopped
     depends_on:
@@ -27,6 +29,21 @@ services:
     networks:
       - openticon_network
 
+  express:
+    build:
+      context: ./express
+      dockerfile: Dockerfile
+    ports:
+      - "${ENV_IMAGE_SERVER_EXPOSE_PORT}:8070"
+    environment:
+      IMAGE_SERVER_URL: ${ENV_DEV_IMAGE_SERVER_URL}
+      PORT: 8070
+    restart: unless-stopped
+    networks:
+      - openticon_network
+    volumes:
+      - image_server_data:/app/static
+
   postgres:
     image: postgres
     environment:
@@ -34,7 +51,7 @@ services:
       - POSTGRES_USER=${ENV_DEV_NAME}
       - POSTGRES_PASSWORD=${ENV_DEV_PASSWORD}
     ports:
-      - "5433:5432"
+      - "${ENV_POSTGRES_EXPOSE_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -53,3 +70,4 @@ networks:
 
 volumes:
   postgres_data:
+  image_server_data:
