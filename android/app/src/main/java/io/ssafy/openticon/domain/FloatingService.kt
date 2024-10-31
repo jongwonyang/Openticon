@@ -110,12 +110,29 @@ class FloatingService : Service() {
         data.forEach { pack ->
             val emoticonPackView = EmoticonPackView(this)
             emoticonPackView.setupEmoticonPack(pack) { images ->
-                emoticonPackView.displayImagesInTable(tableLayout, images){ emoticon: Emoticon ->
-                    insertEmoticonIntoFocusedEditText(emoticon.imageResource)
-                }
+                emoticonPackView.displayImagesInTable(tableLayout, images,
+                    onImageClick = { emoticon: Emoticon ->
+                        insertEmoticonIntoFocusedEditText(emoticon.imageResource) },
+                    onImageLongClick = {
+                        emoticon: Emoticon ->
+                        lkeEmoticon(emoticon)
+                    }
+                )
             }
             horizontalScrollView.addView(emoticonPackView)
         }
+    }
+
+    private fun lkeEmoticon(emoticon: Emoticon){
+        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            PixelFormat.TRANSLUCENT
+        )
+        windowManager.addView(alertView, params)
     }
 
     private fun copyEmoticon(clickedEmoticon: Emoticon) {
