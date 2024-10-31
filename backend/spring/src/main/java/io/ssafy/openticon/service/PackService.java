@@ -97,7 +97,7 @@ public class PackService {
 
 
     private String saveImage(MultipartFile image){
-        String uploadServerUrl="http://192.168.31.188:8070/upload/image";
+        String uploadServerUrl="http://localhost:8070/upload/image";
 
         File tempFile = null;
         try {
