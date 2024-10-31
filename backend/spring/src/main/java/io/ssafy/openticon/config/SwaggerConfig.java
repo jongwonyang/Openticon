@@ -1,5 +1,7 @@
 package io.ssafy.openticon.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -8,6 +10,14 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springdoc.core.models.GroupedOpenApi;
+
+@OpenAPIDefinition(
+        servers = {
+                @Server(url = "https://apitest.openticon.store/api/v1", description = "Public Openticon https 서버"),
+                @Server(url = "http://127.0.0.1:8080/api/v1", description = "Local Openticon http 서버"),
+                @Server(url = "http://localhost:8080/api/v1", description = "Local Openticon http 서버")
+        }
+)
 
 @Configuration
 public class SwaggerConfig {
