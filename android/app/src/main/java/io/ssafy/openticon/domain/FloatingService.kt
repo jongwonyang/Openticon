@@ -4,9 +4,14 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -19,11 +24,17 @@ import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TableLayout
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class FloatingService : Service() {
 
@@ -100,7 +111,7 @@ class FloatingService : Service() {
             val emoticonPackView = EmoticonPackView(this)
             emoticonPackView.setupEmoticonPack(pack) { images ->
                 emoticonPackView.displayImagesInTable(tableLayout, images){ emoticon: Emoticon ->
-                    copyEmoticon(emoticon)
+                    insertEmoticonIntoFocusedEditText(emoticon.imageResource)
                 }
             }
             horizontalScrollView.addView(emoticonPackView)
@@ -108,21 +119,51 @@ class FloatingService : Service() {
     }
 
     private fun copyEmoticon(clickedEmoticon: Emoticon) {
-        /**
+        /***
         val intent = Intent("io.ssafy.openticon.INSERT_EMOTICON").setClassName(/* TODO: provide the application ID. For example: */
             packageName,
         )
         intent.putExtra("emoticonResource", clickedEmoticon.imageResource)
         Log.d("serviceInsert", intent.action.toString())
         sendBroadcast(intent)
-        **/
+        ***/
         // 다른 서비스에서 실행
         val intent = Intent(this, KeyboardAccessibilityService::class.java)
         intent.putExtra("CALL_METHOD", "insertEmoticon")
         intent.putExtra("resourceId", clickedEmoticon.imageResource)
         startService(intent)
-
     }
+
+    fun insertEmoticonIntoFocusedEditText(resourceId: Int) {
+        Log.d("AccessInsert", resourceId.toString())
+        val drawable = ContextCompat.getDrawable(applicationContext, resourceId) ?: return
+        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+
+        // 클립보드에 비트맵 복사
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newUri(contentResolver, "Emoticon", getImageUri(bitmap))
+        clipboard.setPrimaryClip(clip)
+
+        Toast.makeText(this, "이모티콘이 클립보드에 복사되었습니다. 붙여넣기를 시도해보세요.", Toast.LENGTH_SHORT).show()
+    }
+
+    fun getImageUri(bitmap: Bitmap): Uri? {
+        val file = File(cacheDir, "emoticon.png")
+        try {
+            val stream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.flush()
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
+    }
+
 
 
     private fun startForegroundServiceWithNotification() {
