@@ -28,7 +28,7 @@ class EmoticonPackView @JvmOverloads constructor(
         addView(imageView)
     }
 
-    fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit, onImageLongClick: (Emoticon) -> Unit) {
+    fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit, onImageLongClick: (Emoticon) -> Unit = {}) {
         tableLayout.removeAllViews()
         var currentRow: TableRow? = null
 
