@@ -7,18 +7,18 @@ import kotlinx.coroutines.flow.StateFlow
 
 class SearchScreenViewModel : ViewModel() {
 
-    private val _key = MutableStateFlow("제목")
-    private val _query = MutableStateFlow("")
+    private val _searchKey = MutableStateFlow("제목")
+    private val _searchText = MutableStateFlow("")
     private val _searchResult = MutableStateFlow(emptyList<EmoticonPack>())
 
-    val key: StateFlow<String> = _key
-    val query: StateFlow<String> = _query
+    val searchKey: StateFlow<String> = _searchKey
+    val searchText: StateFlow<String> = _searchText
 
-    fun onQueryChange(value: String) {
-        _query.value = value
+    fun onSearchTextChange(value: String) {
+        _searchText.value = value
     }
 
-    fun onKeyChange(value: String) {
-        _key.value = value
+    fun onSearchKeyChange(value: String) {
+        _searchKey.value = value
     }
 }
