@@ -20,6 +20,7 @@ services:
       IAMPORT_API_KEY : ${ENV_IAMPORT_API_KEY}
       IAMPORT_API_SECRET : ${ENV_IAMPORT_API_SECRET}
       DEV_BASE_URL : ${ENV_DEV_BASE_URL}
+      DEV_IMAGE_SERVER_URL: ${ENV_DEV_IMAGE_SERVER_URL}
       TZ: Asia/Seoul
     restart: unless-stopped
     depends_on:
