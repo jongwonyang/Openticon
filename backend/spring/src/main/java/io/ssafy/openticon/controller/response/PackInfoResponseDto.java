@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Getter
@@ -32,7 +33,7 @@ public class PackInfoResponseDto {
 
     private String description;
 
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     public PackInfoResponseDto(EmoticonPackEntity emoticonPackEntity, List<String> emoticons){
         this.title=emoticonPackEntity.getTitle();
