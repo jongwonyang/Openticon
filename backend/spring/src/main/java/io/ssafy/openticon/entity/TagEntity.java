@@ -22,11 +22,6 @@ public class TagEntity {
     @Column(name = "tag_name")
     private String tagName;
 
-    // One-to-Many relationship with TagList
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TagListEntity> tagLists;
-
-    // Getters and Setters
-
-    // Constructors, Getters, and Setters omitted for brevity
 }

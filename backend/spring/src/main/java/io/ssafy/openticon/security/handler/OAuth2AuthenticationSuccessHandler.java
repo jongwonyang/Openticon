@@ -20,6 +20,7 @@ import io.ssafy.openticon.entity.MemberEntity;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static io.ssafy.openticon.security.HttpCookieOAuth2AuthorizationRequestRepository.MODE_PARAM_COOKIE_NAME;
@@ -82,8 +83,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             if(!userExists){
 
                 MemberEntity member = MemberEntity.builder()
-                        .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
+                        .createdAt(LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime())
+                        .updatedAt(LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime())
                         .nickname(nickname)
                         .email(principal.getMemberInfo().getEmail())
                         .profile_image(Optional.ofNullable(principal.getMemberInfo().getProfileImageUrl()).orElse(""))  // null이면 빈 문자열
