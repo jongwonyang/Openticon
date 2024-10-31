@@ -9,6 +9,7 @@ spring:
     password: ${DEV_PASSWORD}
 
   base-url: ${DEV_BASE_URL}
+  image-server-url: ${DEV_IMAGE_SERVER_URL}
 server:
   port: 8080
   address: 0.0.0.0
