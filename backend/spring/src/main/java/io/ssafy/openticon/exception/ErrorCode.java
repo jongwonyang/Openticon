@@ -16,7 +16,8 @@ public enum ErrorCode {
     ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "적절하지 않은 인자"),
     MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰 없음"),
     INVALID_REQUEST_PARAMS(HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터"),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러"),;
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러"),
+    PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다.");
 
 
 
