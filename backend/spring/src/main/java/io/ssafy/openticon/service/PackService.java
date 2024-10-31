@@ -12,6 +12,7 @@ import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.TagListRepository;
 import io.ssafy.openticon.repository.TagRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,9 @@ import java.util.Optional;
 
 @Service
 public class PackService {
+
+    @Value("${spring.image-server-url}")
+    private String imageServerUrl;
 
     private final WebClient webClient;
     private final PackRepository packRepository;
@@ -99,7 +103,7 @@ public class PackService {
 
 
     private String saveImage(MultipartFile image){
-        String uploadServerUrl="http://localhost:8070/upload/image";
+        String uploadServerUrl = imageServerUrl+ "/upload/image";
 
         File tempFile = null;
         try {
@@ -113,7 +117,6 @@ public class PackService {
                     .retrieve()
                     .bodyToMono(ImageUrl.class)
                     .block();
-
 
             return imageUrl.getUrl();
 

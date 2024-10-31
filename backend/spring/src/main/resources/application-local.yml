@@ -8,10 +8,13 @@ spring:
     username: ${LOCAL_NAME}
     password: ${LOCAL_PASSWORD}
 
-
   base-url: ${LOCAL_BASE_URL}
+  image-server-url: ${LOCAL_IMAGE_SERVER_URL}
+
 server:
   port: 8080
   address: localhost
 
 serverName: local_server
+
+
