@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -61,6 +62,9 @@ public class EmoticonPackEntity {
 
     @Column(name = "share_link", nullable = false)
     private String shareLink="public";
+
+    @OneToMany(mappedBy = "emoticonPack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TagListEntity> tagLists;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
