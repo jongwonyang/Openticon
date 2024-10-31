@@ -14,8 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="52dp">
 
-        <ImageView
-            android:id="@+id/imageView2"
+        <io.ssafy.openticon.ui.component.EmoticonPackView
+            android:id="@+id/imageLike"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             app:srcCompat="@drawable/ic_launcher_foreground" />
