@@ -2,6 +2,7 @@ package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EmoticonUploadRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
+import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
@@ -54,7 +55,7 @@ public class PackController {
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
 
         String shareLink=packService.emoticonPackUpload(emoticonPack);
-        String shareUrl=baseUrl+"/emoticonpacks/info/"+shareLink;
+        String shareUrl=baseUrl+"/api/v1/emoticonpacks/info/"+shareLink;
         UploadEmoticonResponseDto uploadEmoticonResponseDto=new UploadEmoticonResponseDto(shareUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadEmoticonResponseDto);
     }
@@ -73,7 +74,7 @@ public class PackController {
     @GetMapping("/info")
     @Operation(summary = "공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfoPublic(@AuthenticationPrincipal UserDetails userDetails,
-                                                                  @RequestParam("emoticonPackId") String packId) throws AuthenticationException {
+                                                                  @RequestParam("emoticonPackId") String packId){
 
         return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId));
 
@@ -100,5 +101,12 @@ public class PackController {
             return Sort.by("view").descending(); // 인기순 정렬 (내림차순)
         }
         return Sort.unsorted(); // 기본 정렬 없음
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<PackDownloadResponseDto> downloadPack(@RequestParam("emoticonPackId")String packId,
+                                                                @AuthenticationPrincipal UserDetails userDetails){
+        String email=userDetails.getUsername();
+        return ResponseEntity.status(HttpStatus.OK).body(packService.downloadPack(email,Long.parseLong(packId)));
     }
 }
