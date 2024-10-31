@@ -27,8 +27,4 @@ public class TagListEntity {
     @MapsId("tagId")
     @JoinColumn(name = "tag_id")
     private TagEntity tag;
-
-    // Getters and Setters
-
-    // Constructors, Getters, and Setters omitted for brevity
 }

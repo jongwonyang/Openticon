@@ -47,7 +47,7 @@ public class PackController {
                                                                     @RequestPart("thumbnail_img")MultipartFile thumbnailImg,
                                                                     @RequestPart("list_img") MultipartFile listImg,
                                                                     @RequestPart("emoticons")List<MultipartFile> emoticons
-                                               ){
+    ){
 
         EmoticonPack emoticonPack=new EmoticonPack(emoticonUploadRequest,userDetails.getUsername());
 
@@ -79,12 +79,11 @@ public class PackController {
 
     }
 
-
     @GetMapping("/search")
     public ResponseEntity<Page<EmoticonPackResponseDto>> searchEmoticonPacks(
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) String type,
-            @RequestParam(defaultValue = "new") String sort,
+            @RequestParam(defaultValue = "title") String type, // title, tag, author
+            @RequestParam(defaultValue = "new") String sort, // new, most
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -94,13 +93,12 @@ public class PackController {
     }
 
     private Sort getSort(String sort) {
-        // TODO: sort 기준 만들어야함
         if (sort.equalsIgnoreCase("new")) {
             return Sort.by("createdAt").descending(); // 최신순 정렬 (내림차순)
         }
-//        else if (sort.equalsIgnoreCase("most")) {
-//            return Sort.by("popularity").descending(); // 인기순 정렬 (내림차순)
-//        }
+        else if (sort.equalsIgnoreCase("most")) {
+            return Sort.by("view").descending(); // 인기순 정렬 (내림차순)
+        }
         return Sort.unsorted(); // 기본 정렬 없음
     }
 }

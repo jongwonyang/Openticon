@@ -6,7 +6,11 @@ import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
+import io.ssafy.openticon.entity.TagEntity;
+import io.ssafy.openticon.entity.TagListEntity;
 import io.ssafy.openticon.repository.PackRepository;
+import io.ssafy.openticon.repository.TagListRepository;
+import io.ssafy.openticon.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
@@ -24,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PackService {
@@ -33,13 +38,17 @@ public class PackService {
     private final MemberService memberService;
     private final EmoticonService emoticonService;
     private final PermissionService permissionService;
+    private final TagRepository tagRepository;
+    private final TagListRepository tagListRepository;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
         this.emoticonService=emoticonService;
         this.permissionService = permissionService;
+        this.tagRepository = tagRepository;
+        this.tagListRepository = tagListRepository;
     }
 
     @Transactional
@@ -53,17 +62,42 @@ public class PackService {
         for(MultipartFile emoticon: emoticonPack.getEmoticons()){
             emoticonsUrls.add(saveImage(emoticon));
         }
+
+
+
+
         MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).get();
         EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
         packRepository.save(emoticonPackEntity);
         emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
 
+
+        // 태그 정보 추가
+        List<String> tagNames = emoticonPack.getTags();
+        for(String tag : tagNames){
+            TagEntity findTagEntity = null;
+            Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
+            if(getTagEntity.isEmpty()){
+                TagEntity tagEntity = TagEntity.builder()
+                        .tagName(tag)
+                        .build();
+                tagRepository.save(tagEntity);
+                findTagEntity = tagEntity;
+            }else{
+                findTagEntity = getTagEntity.get();
+            }
+            TagListEntity tagListEntity = TagListEntity.builder()
+                    .emoticonPack(emoticonPackEntity)
+                    .tag(findTagEntity)
+                    .build();
+            tagListRepository.save(tagListEntity);
+        }
         return emoticonPackEntity.getShareLink();
     }
 
 
     private String saveImage(MultipartFile image){
-        String uploadServerUrl="http://localhost:8070/upload/image";
+        String uploadServerUrl="http://192.168.31.188:8070/upload/image";
 
         File tempFile = null;
         try {
@@ -149,10 +183,10 @@ public class PackService {
         switch (type.toLowerCase()) {
             case "title":
                 return packRepository.findByTitleContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
-//            case "tag":
-//                return packRepository.findByTagContaining(query, pageable).map(EmoticonPackResponseDto::new);   // 부분 일치
-//            case "author":
-//                return packRepository.findByAuthorContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
+            case "tag":
+                return packRepository.findByTag(query, pageable).map(EmoticonPackResponseDto::new);   // 부분 일치
+            case "author":
+                return packRepository.findByAuthorContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
             default:
                 return packRepository.findAll(pageable).map(EmoticonPackResponseDto::new); // 기본 전체 조회
         }
