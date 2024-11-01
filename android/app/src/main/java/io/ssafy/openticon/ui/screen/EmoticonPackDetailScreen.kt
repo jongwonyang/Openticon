@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -46,7 +47,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.decode.GifDecoder
 import coil.request.ImageRequest
 import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel
@@ -145,6 +148,11 @@ fun EmoticonPackDetailScreen(
                                     .crossfade(true)
                                     .build(),
                                 contentDescription = null,
+                                imageLoader = ImageLoader.Builder(LocalContext.current)
+                                    .components {
+                                        add(GifDecoder.Factory())
+                                    }
+                                    .build(),
                                 modifier = Modifier
                                     .size(128.dp)
                             )
@@ -192,42 +200,50 @@ fun EmoticonPackDetailScreen(
                         Spacer(Modifier.height(16.dp))
                     }
 
-                    item {
-                        for (row in emoticonPack.items.chunked(3)) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                if (row.size == 3) {
-                                    for (item in row) {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(LocalContext.current)
-                                                .data(item)
-                                                .crossfade(true)
-                                                .build(),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f)
-                                        )
-                                    }
-                                } else {
-                                    for (item in row) {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(LocalContext.current)
-                                                .data(item)
-                                                .crossfade(true)
-                                                .build(),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f)
-                                        )
-                                    }
-                                    for (i in row.size until 3) {
-                                        Spacer(Modifier.weight(1f))
-                                    }
+                    items(emoticonPack.items.chunked(3)) { row ->
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            if (row.size == 3) {
+                                for (item in row) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(item)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = null,
+                                        imageLoader = ImageLoader.Builder(LocalContext.current)
+                                            .components {
+                                                add(GifDecoder.Factory())
+                                            }
+                                            .build(),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .aspectRatio(1f)
+                                    )
+                                }
+                            } else {
+                                for (item in row) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(item)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = null,
+                                        imageLoader = ImageLoader.Builder(LocalContext.current)
+                                            .components {
+                                                add(GifDecoder.Factory())
+                                            }
+                                            .build(),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .aspectRatio(1f)
+                                    )
+                                }
+                                for (i in row.size until 3) {
+                                    Spacer(Modifier.weight(1f))
                                 }
                             }
                         }
