@@ -53,23 +53,21 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.datastore.preferences)
-
-
-    implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.material)
-    kapt("androidx.room:room-compiler:2.6.1")
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
     // Hilt for Dependency Injection
     implementation(libs.hilt.android)
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.androidx.datastore.preferences.core.jvm)
-    implementation(libs.androidx.room.common)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.androidx.datastore.preferences.core.jvm)
-    implementation(libs.androidx.room.common)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 

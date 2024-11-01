@@ -10,13 +10,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
-import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.load
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.model.Emoticon
-import io.ssafy.openticon.data.model.EmoticonPack
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 
 class EmoticonPackView @JvmOverloads constructor(
     context: Context,
@@ -42,7 +41,7 @@ class EmoticonPackView @JvmOverloads constructor(
         }
     }
 
-    fun setupEmoticonPack(pack: EmoticonPack, onPackClick: (List<Emoticon>) -> Unit) {
+    fun setupEmoticonPack(pack: SampleEmoticonPack, onPackClick: (List<Emoticon>) -> Unit) {
 // 네모 박스를 만들기 위한 FrameLayout 생성
         val frameLayout = FrameLayout(context).apply {
             layoutParams = LayoutParams(

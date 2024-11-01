@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class EmoticonPack(
+data class SampleEmoticonPack(
     val name: String,
     val mainImageResource: Int,
     var images: List<Emoticon> , // Imoticon 객체 리스트로 구성
