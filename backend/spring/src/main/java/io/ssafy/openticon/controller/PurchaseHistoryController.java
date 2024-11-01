@@ -2,6 +2,7 @@ package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.response.PurchaseEmoticonResponseDto;
 import io.ssafy.openticon.service.PurchaseHistoryService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/members/emoticnos")
+@RequestMapping("/purchased")
 public class PurchaseHistoryController {
 
 
@@ -25,6 +26,7 @@ public class PurchaseHistoryController {
     }
 
     @GetMapping("")
+    @Operation(summary = "구매한 이모티콘팩을 보여줍니다.")
     public ResponseEntity<List<PurchaseEmoticonResponseDto>> viewPurchasedEmoticons(@AuthenticationPrincipal UserDetails userDetails,
                                                                                     Pageable pageable){
 
