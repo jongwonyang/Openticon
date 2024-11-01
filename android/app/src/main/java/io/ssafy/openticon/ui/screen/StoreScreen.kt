@@ -1,5 +1,7 @@
 package io.ssafy.openticon.ui.screen
 
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -42,35 +44,35 @@ import kotlin.math.abs
 data class ItemData(val imageRes: Int, val title: String, val author: String)
 @Composable
 fun StoreScreen() {
-    val baseItems = listOf(
+    val items = listOf(
         ItemData(R.drawable.google, "이모티콘 제목 1", "작성자 1"),
         ItemData(R.drawable.kakao, "이모티콘 제목 2", "작성자 2"),
         ItemData(R.drawable.naver, "이모티콘 제목 3", "작성자 3"),
         ItemData(R.drawable.google, "이모티콘 제목 4", "작성자 4"),
         ItemData(R.drawable.kakao, "이모티콘 제목 5", "작성자 5"),
-        ItemData(R.drawable.naver, "이모티콘 제목 6", "작성자 6")
+        ItemData(R.drawable.naver, "이모티콘 제목 6", "작성자 6"),
     )
 
-    val items = List(5) { baseItems }.flatten()
-    var centerIndex by remember { mutableStateOf(baseItems.size) } // 중앙 인덱스로 초기화
+    var centerIndex by remember { mutableStateOf(items.size / 2) }
     val listState = rememberLazyListState(centerIndex)
     val coroutineScope = rememberCoroutineScope()
 
-    // 스크롤 상태를 추적하여 가장 가까운 항목으로 스크롤
+    // 중앙에 맞추기 위해 여백과 오프셋 설정
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
             val viewportCenter = listState.layoutInfo.viewportEndOffset / 2
             val closestItem = listState.layoutInfo.visibleItemsInfo.minByOrNull { item ->
-                abs((item.offset + item.size / 2) - viewportCenter)
+                abs((item.offset + item.size / 2) - viewportCenter+470)
             }
             closestItem?.let {
                 centerIndex = it.index
                 coroutineScope.launch {
-                    listState.animateScrollToItem(centerIndex, scrollOffset = -viewportCenter + it.size / 2)
+                    listState.animateScrollToItem(centerIndex, scrollOffset = -viewportCenter + it.size / 2+470 )
                 }
             }
         }
     }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -85,7 +87,6 @@ fun StoreScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
         }
-        // 신규 섹션 (Header)
         item {
             Spacer(modifier = Modifier.height(50.dp))
             LazyRow(
@@ -94,12 +95,12 @@ fun StoreScreen() {
                 horizontalArrangement = Arrangement.spacedBy(30.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                itemsIndexed(items) { index, item ->
-                    val center = listState.layoutInfo.viewportEndOffset / 2
-                    val itemOffset = listState.layoutInfo.visibleItemsInfo
-                        .find { it.index == index }?.offset ?: 0
-                    val offset = abs(center - itemOffset)
+                // 앞쪽 빈 박스 추가
+                item {
+                    Box(modifier = Modifier.width(154.dp))
+                }
 
+                itemsIndexed(items) { index, item ->
                     val scale by animateFloatAsState(
                         targetValue = if (index == centerIndex) 1.3f else 0.8f
                     )
@@ -113,7 +114,7 @@ fun StoreScreen() {
                             .scale(scale)
                             .alpha(alpha)
                             .width(150.dp)
-                            .clickable {}
+                            .clickable{}
                     ) {
                         Image(
                             painter = painterResource(id = item.imageRes),
@@ -132,6 +133,11 @@ fun StoreScreen() {
                             fontSize = 14.sp
                         )
                     }
+                }
+
+                // 뒤쪽 빈 박스 추가
+                item {
+                    Box(modifier = Modifier.width(154.dp))
                 }
             }
             Spacer(modifier = Modifier.height(40.dp))
@@ -153,7 +159,7 @@ fun StoreScreen() {
             LazyRow(
                 modifier = Modifier.padding(vertical = 0.dp)
             ) {
-                items(2) { outerIndex -> // LazyRow에서 2개의 Column만 표시
+                items(3) { outerIndex -> // LazyRow에서 2개의 Column만 표시
                     Column(
                         modifier = Modifier
                             .padding(horizontal = 0.dp)
