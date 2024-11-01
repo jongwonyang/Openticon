@@ -22,18 +22,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.local.TokenDataSource
-import io.ssafy.openticon.data.remote.ApiClient
-import io.ssafy.openticon.data.remote.NetworkConfig
+import io.ssafy.openticon.di.NetworkModule
+import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen() {
+
+    val network : NetworkModule = NetworkModule;
     val context = LocalContext.current
+    val memberViewModel: MemberViewModel = hiltViewModel()
     val tokenDataSource = TokenDataSource
-    val memberApi = ApiClient().memberApi
     val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
@@ -60,7 +63,7 @@ fun LoginScreen() {
 
         Button(
             onClick = {
-                val googleLoginUrl = NetworkConfig.BaseURL+"oauth2/authorization/kakao?redirect_uri=openticon://successLogin&mode=login"
+                val googleLoginUrl = memberViewModel.baseUrl+"oauth2/authorization/kakao?redirect_uri=openticon://successLogin&mode=login"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
                 context.startActivity(intent)
             },
@@ -86,7 +89,7 @@ fun LoginScreen() {
         // Button for Naver Login with Image
         Button(
             onClick = {
-                val googleLoginUrl = NetworkConfig.BaseURL+"oauth2/authorization/naver?redirect_uri=openticon://successLogin&mode=login"
+                val googleLoginUrl = memberViewModel.baseUrl+"oauth2/authorization/naver?redirect_uri=openticon://successLogin&mode=login"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
                 context.startActivity(intent)
             },
@@ -119,13 +122,12 @@ fun LoginScreen() {
                 Text("네이버로 시작하기", fontSize = 17.sp, color = Color.White)
             }
         }
-
         Spacer(modifier = Modifier.height(10.dp))
 
         // Button for Google Login with Image
         Button(
             onClick = {
-                val googleLoginUrl = NetworkConfig.BaseURL+"oauth2/authorization/google?redirect_uri=openticon://successLogin&mode=login"
+                val googleLoginUrl = memberViewModel.baseUrl+"oauth2/authorization/google?redirect_uri=openticon://successLogin&mode=login"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
                 context.startActivity(intent)
             },
