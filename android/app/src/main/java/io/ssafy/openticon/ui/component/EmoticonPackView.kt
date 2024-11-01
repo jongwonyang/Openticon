@@ -28,6 +28,20 @@ class EmoticonPackView @JvmOverloads constructor(
         orientation = HORIZONTAL
     }
 
+    fun makeGray() {
+        for (i in 0 until childCount) {
+            val frameLayout = getChildAt(i) as? FrameLayout
+            frameLayout?.setBackgroundColor(Color.parseColor("#80B0B0B0")) // 투명한 회색
+        }
+    }
+
+    fun resetColor() {
+        for (i in 0 until childCount) {
+            val frameLayout = getChildAt(i) as? FrameLayout
+            frameLayout?.setBackgroundColor(Color.TRANSPARENT) // 배경색을 투명으로 초기화
+        }
+    }
+
     fun setupEmoticonPack(pack: EmoticonPack, onPackClick: (List<Emoticon>) -> Unit) {
 // 네모 박스를 만들기 위한 FrameLayout 생성
         val frameLayout = FrameLayout(context).apply {
@@ -67,7 +81,7 @@ class EmoticonPackView @JvmOverloads constructor(
     fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit, onImageLongClick: (Emoticon) -> Unit = {}) {
         tableLayout.removeAllViews()
         var currentRow: TableRow? = null
-
+        var width_size: Int = (tableLayout.width - dpToPx(10))/4
         images.forEachIndexed { index, emoticon ->
             if (index % 4 == 0) {
                 currentRow = TableRow(context).apply {
@@ -76,7 +90,7 @@ class EmoticonPackView @JvmOverloads constructor(
                         TableLayout.LayoutParams.WRAP_CONTENT
                     )
                     gravity = Gravity.CENTER // 가운데 정렬
-                    setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8)) // 패딩 8dp 적용
+                    setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4)) // 패딩 8dp 적용
                 }
                 tableLayout.addView(currentRow)
             }
@@ -88,8 +102,8 @@ class EmoticonPackView @JvmOverloads constructor(
 
 // ImageView 생성 및 설정
             val imageView = ImageView(context).apply {
-                layoutParams = TableRow.LayoutParams(dpToPx(95), dpToPx(95))
-                setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+                layoutParams = TableRow.LayoutParams((width_size), (width_size))
+                setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4))
 
                 setOnClickListener {
                     onImageClick(emoticon)
@@ -114,8 +128,8 @@ class EmoticonPackView @JvmOverloads constructor(
         if (remainingViews in 1..3 && lastRow != null) {
             for (i in 1..remainingViews) {
                 val spacerView = View(context).apply {
-                    layoutParams = TableRow.LayoutParams(dpToPx(95), dpToPx(95))
-                    setPadding(dpToPx(8),dpToPx(8),dpToPx(8),dpToPx(8))
+                    layoutParams = TableRow.LayoutParams((width_size), (width_size))
+                    setPadding(dpToPx(4),dpToPx(4),dpToPx(4),dpToPx(4))
                 }
                 lastRow.addView(spacerView)
             }

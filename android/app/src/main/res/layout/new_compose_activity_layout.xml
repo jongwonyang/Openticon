@@ -10,6 +10,25 @@
     android:background="@drawable/round_border">
 
     <!-- TableRow로 요소 배치 -->
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:background="#D3D3D3">
+
+        <!-- 왼쪽에 빈 공간을 추가하여 ImageView를 오른쪽 끝으로 보냄 -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/closeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_dialog" />
+    </TableRow>
+
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="52dp"
