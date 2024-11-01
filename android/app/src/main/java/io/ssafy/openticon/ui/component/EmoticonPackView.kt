@@ -11,6 +11,10 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
+import coil.decode.GifDecoder
+import coil.load
+import io.ssafy.openticon.R
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPack
 
@@ -76,18 +80,34 @@ class EmoticonPackView @JvmOverloads constructor(
                 }
                 tableLayout.addView(currentRow)
             }
+            val imageLoader = ImageLoader.Builder(context)
+                .components {
+                    add(GifDecoder.Factory()) // GIF 디코더 추가
+                }
+                .build()
+
+// ImageView 생성 및 설정
             val imageView = ImageView(context).apply {
-                setImageResource(emoticon.imageResource)
                 layoutParams = TableRow.LayoutParams(dpToPx(95), dpToPx(95))
-                setPadding(dpToPx(8),dpToPx(8),dpToPx(8),dpToPx(8))
+                setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+
                 setOnClickListener {
                     onImageClick(emoticon)
                 }
-                setOnLongClickListener{
+                setOnLongClickListener {
                     onImageLongClick(emoticon)
-                    true // 이벤트 소비
+                    true
                 }
             }
+
+// Coil을 사용하여 첫 프레임만 로드
+            imageView.load(emoticon.imageResource) {
+                crossfade(false) // 페이드 애니메이션 비활성화
+                allowHardware(false) // 하드웨어 가속 비활성화로 GIF 애니메이션 멈춤
+                placeholder(R.drawable.icon_1) // 로딩 중 기본 이미지
+                error(R.drawable.icon_2) // 로딩 실패 시 표시할 이미지
+            }
+
             currentRow?.addView(imageView)
         }
         val lastRow = tableLayout.getChildAt(tableLayout.childCount - 1) as? TableRow

@@ -29,7 +29,14 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import io.ssafy.openticon.KeyboardAccessibilityService
+import io.ssafy.openticon.R
 
 
 @Composable
@@ -56,7 +63,11 @@ fun MainScreen(navController: NavController) {
                     }
                 }
             ) {
-                Text("Start Service")
+                Image(
+                    painter = painterResource(R.drawable.sin),
+                    contentDescription = "Start Service Icon",
+                    modifier = Modifier.size(48.dp)
+                )
             }
         }
     ) { innerPadding ->
