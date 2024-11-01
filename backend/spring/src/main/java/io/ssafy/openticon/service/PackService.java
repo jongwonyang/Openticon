@@ -210,4 +210,8 @@ public class PackService {
         List<String> emoticons=emoticonService.getEmoticons(packId);
         return new PackDownloadResponseDto(thumbnailImg,listImg,emoticons);
     }
+
+    public EmoticonPackEntity getPackById(Long packId){
+        return packRepository.findById(packId).orElseThrow();
+    }
 }

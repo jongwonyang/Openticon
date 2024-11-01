@@ -76,6 +76,14 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
+    public GroupedOpenApi purchasedApi() {
+        return GroupedOpenApi.builder()
+                .group("구매한 이모티콘팩 관련 기능")
+                .pathsToMatch("/purchased/**")
+                .build();
+    }
+
 
 
 }
