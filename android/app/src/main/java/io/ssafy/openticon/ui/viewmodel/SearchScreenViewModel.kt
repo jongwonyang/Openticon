@@ -16,12 +16,12 @@ class SearchScreenViewModel @Inject constructor(
     private val searchEmoticonPacksUseCase: SearchEmoticonPacksUseCase
 ) : ViewModel() {
 
-    private val _searchKey = MutableStateFlow("제목")
+    private val _searchKey = MutableStateFlow(SearchKey.Title)
     private val _searchText = MutableStateFlow("")
     private val _searchResult = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
     private val _isLoading = MutableStateFlow(false)
 
-    val searchKey: StateFlow<String> = _searchKey
+    val searchKey: StateFlow<SearchKey> = _searchKey
     val searchText: StateFlow<String> = _searchText
     val searchResult: StateFlow<List<SearchEmoticonPacksListItem>> = _searchResult
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -34,7 +34,7 @@ class SearchScreenViewModel @Inject constructor(
         _searchText.value = value
     }
 
-    fun onSearchKeyChange(value: String) {
+    fun onSearchKeyChange(value: SearchKey) {
         _searchKey.value = value
     }
 
@@ -56,17 +56,26 @@ class SearchScreenViewModel @Inject constructor(
             Log.d("SEARCH", "page: $page")
             Log.d("SEARCH", "pageSize: $pageSize")
             val (newItems, isLast) = searchEmoticonPacksUseCase(
-                searchKey = _searchKey.value,
+                searchKey = _searchKey.value.key,
                 searchText = _searchText.value,
                 page = page,
                 size = pageSize
             )
             Log.d("SEARCH", "newItems: $newItems")
-            _searchResult.value = _searchResult.value + newItems
+            _searchResult.value += newItems
             lastPageReached = isLast
             page++
             _isLoading.value = false
             Log.d("SEARCH", "searchResult.value: ${searchResult.value}")
         }
     }
+}
+
+enum class SearchKey(
+    val key: String,
+    val displayName: String
+) {
+    Title("title", "제목"),
+    Author("author", "작가"),
+    Tag("tag", "태그")
 }

@@ -1,5 +1,6 @@
 package io.ssafy.openticon.data.remote
 
+import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -13,4 +14,9 @@ interface EmoticonPacksApi {
         @Query("size") size: Int,
         @Query("page") page: Int
     ): PageEmoticonPackResponseDto
+
+    @GET("emoticonpacks/info")
+    suspend fun getPublicPackInfo(
+        @Query("emoticonPackId") emoticonPackId: Int
+    ) : PackInfoResponseDto
 }
