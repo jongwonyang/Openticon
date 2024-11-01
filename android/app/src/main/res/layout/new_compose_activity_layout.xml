@@ -10,18 +10,35 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <HorizontalScrollView
-        android:id="@+id/progress_horizontal"
+    <TableRow
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
+        android:layout_height="52dp">
 
-        <LinearLayout
-            android:id="@+id/horizontal_linear"
-            android:layout_width="wrap_content"
+        <io.ssafy.openticon.ui.component.EmoticonPackView
+            android:id="@+id/imageLike"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:orientation="horizontal"/>
-    </HorizontalScrollView>
+            app:srcCompat="@drawable/ic_launcher_foreground" />
+
+        <HorizontalScrollView
+            android:id="@+id/progress_horizontal"
+            android:layout_width="247dp"
+            android:layout_height="52dp"
+            android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
+
+            <LinearLayout
+                android:id="@+id/horizontal_linear"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_launcher_foreground" />
+    </TableRow>
 
     <TextView
         android:id="@+id/floatingTextView"
@@ -32,13 +49,14 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
 
         <TableLayout
             android:id="@+id/tableLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:maxHeight="300dp">
 
             <TableRow
                 android:layout_width="match_parent"
@@ -82,9 +100,4 @@
         </TableLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/closeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Close" />
 </LinearLayout>

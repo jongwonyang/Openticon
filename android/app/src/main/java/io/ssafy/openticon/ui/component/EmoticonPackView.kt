@@ -28,7 +28,7 @@ class EmoticonPackView @JvmOverloads constructor(
         addView(imageView)
     }
 
-    fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit) {
+    fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit, onImageLongClick: (Emoticon) -> Unit = {}) {
         tableLayout.removeAllViews()
         var currentRow: TableRow? = null
 
@@ -42,6 +42,10 @@ class EmoticonPackView @JvmOverloads constructor(
                 layoutParams = TableRow.LayoutParams(200, 200)
                 setOnClickListener {
                     onImageClick(emoticon)
+                }
+                setOnLongClickListener{
+                    onImageLongClick(emoticon)
+                    true // 이벤트 소비
                 }
             }
             currentRow?.addView(imageView)

@@ -22,15 +22,20 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.HorizontalScrollView
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.shape.CornerFamily
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -57,6 +62,7 @@ class FloatingService : Service() {
         setupFloatingView()
         //setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
         loadInitialData()
+        loadLikeDate()
     }
 
     private fun loadInitialData() {
@@ -70,6 +76,30 @@ class FloatingService : Service() {
 
         updateFloatingView(data)
     }
+
+    private fun loadLikeDate() {
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val jsonString = sharedPreferences.getString("like_emoticon_data", null)
+
+        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
+        val data = jsonString?.let {
+            Json.decodeFromString<EmoticonPack>(it)
+        }
+
+        val likeView = secondFloatingView.findViewById<EmoticonPackView>(R.id.imageLike)
+        val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
+        data?.let {
+            likeView.removeAllViews() // 이미 존재하는 이미지 삭제
+            likeView.setupEmoticonPack(it) { images ->
+                likeView.displayImagesInTable(tableLayout, images,
+                    onImageClick = { emoticon: Emoticon ->
+                        insertEmoticonIntoFocusedEditText(emoticon.imageResource)
+                    }
+                )
+            }
+        }
+    }
+
 
     private fun updateFloatingView(data: List<EmoticonPack>) {
         // WindowManager를 사용하여 floatingView 설정
@@ -110,12 +140,51 @@ class FloatingService : Service() {
         data.forEach { pack ->
             val emoticonPackView = EmoticonPackView(this)
             emoticonPackView.setupEmoticonPack(pack) { images ->
-                emoticonPackView.displayImagesInTable(tableLayout, images){ emoticon: Emoticon ->
-                    insertEmoticonIntoFocusedEditText(emoticon.imageResource)
-                }
+                emoticonPackView.displayImagesInTable(tableLayout, images,
+                    onImageClick = { emoticon: Emoticon ->
+                        insertEmoticonIntoFocusedEditText(emoticon.imageResource) },
+                    onImageLongClick = {
+                        emoticon: Emoticon ->
+                        lkeEmoticon(emoticon)
+                    }
+                )
             }
             horizontalScrollView.addView(emoticonPackView)
         }
+    }
+
+    private fun lkeEmoticon(emoticon: Emoticon){
+//        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
+//        val params = WindowManager.LayoutParams(
+//            WindowManager.LayoutParams.WRAP_CONTENT,
+//            WindowManager.LayoutParams.WRAP_CONTENT,
+//            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+//            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+//            PixelFormat.TRANSLUCENT
+//        )
+//        windowManager.addView(alertView, params)
+
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
+
+        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
+        val emoticonPack = past_jsonString?.let {
+            Json.decodeFromString<EmoticonPack>(it)
+        }
+
+
+        emoticonPack?.let {
+            val mutableImages = it.images.toMutableList()  // MutableList로 변환
+            mutableImages.add(emoticon.copy())
+            it.images = mutableImages.toList()  // 다시 List로 변환하여 할당
+        }
+
+        val editor = sharedPreferences.edit()
+        val jsonString = Json.encodeToString(emoticonPack)
+        editor.putString("like_emoticon_data", jsonString)
+        editor.apply()
+        loadLikeDate()
+        Log.d("floating", "Maybe.... success,..?")
     }
 
     private fun copyEmoticon(clickedEmoticon: Emoticon) {
@@ -183,6 +252,7 @@ class FloatingService : Service() {
         startForeground(1, notification)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupFloatingView() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
@@ -199,20 +269,26 @@ class FloatingService : Service() {
         layoutParams.gravity = Gravity.TOP or Gravity.LEFT
 
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_layout, null)
-        floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
-            if (floatingView.windowToken != null) {
-                windowManager.removeView(floatingView)
-                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
-                stopSelf()  // 서비스 종료
-            }
-        }
+//        floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
+//            if (floatingView.windowToken != null) {
+//                windowManager.removeView(floatingView)
+//                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
+//                stopSelf()  // 서비스 종료
+//            }
+//        }
 
         // 토글 버튼 설정
-        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
-            toggleSecondFloatingView()
-        }
+//        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
+//            toggleSecondFloatingView()
+//        }
 
-        floatingView.setOnTouchListener { _, event ->
+
+        val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton)
+        imageButton.shapeAppearanceModel = imageButton.shapeAppearanceModel.toBuilder()
+            .setAllCorners(CornerFamily.ROUNDED, 100f) // 원하는 크기의 반지름 설정
+            .build()
+
+        floatingView.findViewById<ShapeableImageView>(R.id.imageButton).setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     initialTouchX = event.rawX.toInt()
@@ -227,9 +303,18 @@ class FloatingService : Service() {
                     windowManager.updateViewLayout(floatingView, layoutParams)
                     true
                 }
+                MotionEvent.ACTION_UP -> {
+                    // 터치 움직임이 작으면 클릭으로 간주
+                    if (Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
+                        toggleSecondFloatingView()
+                    }
+                    true
+                }
                 else -> false
             }
         }
+
+
         windowManager.addView(floatingView, layoutParams)
         Log.d("FloatingService", "Floating view added successfully")
     }
