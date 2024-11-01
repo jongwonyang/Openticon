@@ -8,7 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface MemberApi {
-    @GET("member/member")
+    @GET("member")
     suspend fun getMemberInfo(): Response<MemberEntity?>
 
 
