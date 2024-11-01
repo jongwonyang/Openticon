@@ -57,6 +57,8 @@ class FloatingService : Service() {
     private var initialX = 0
     private var initialY = 0
 
+    private lateinit var selectedEmoticonPackView: EmoticonPackView
+
     override fun onCreate() {
         super.onCreate()
         Log.d("FloatingService", "onCreate called")
@@ -137,6 +139,11 @@ class FloatingService : Service() {
         }
         val horizontalScrollView = secondFloatingView.findViewById<LinearLayout>(R.id.horizontal_linear)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
+        val closeButton = secondFloatingView.findViewById<ImageView>(R.id.closeButton)
+
+        closeButton.setOnClickListener {
+            toggleSecondFloatingView()
+        }
 
         // 데이터에 따라 UI 업데이트
         horizontalScrollView.removeAllViews()
@@ -151,6 +158,14 @@ class FloatingService : Service() {
                         lkeEmoticon(emoticon)
                     }
                 )
+                if (::selectedEmoticonPackView.isInitialized) {
+                    emoticonPackView.makeGray()
+                    selectedEmoticonPackView.resetColor()
+                    selectedEmoticonPackView = emoticonPackView
+                } else {
+                    emoticonPackView.makeGray()
+                    selectedEmoticonPackView = emoticonPackView
+                }
             }
             horizontalScrollView.addView(emoticonPackView)
         }
