@@ -336,18 +336,6 @@ class FloatingService : Service() {
         layoutParams.gravity = Gravity.TOP or Gravity.LEFT
 
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_layout, null)
-//        floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
-//            if (floatingView.windowToken != null) {
-//                windowManager.removeView(floatingView)
-//                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
-//                stopSelf()  // 서비스 종료
-//            }
-//        }
-
-        // 토글 버튼 설정
-//        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
-//            toggleSecondFloatingView()
-//        }
 
 
         val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton)
