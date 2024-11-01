@@ -3,6 +3,7 @@ package io.ssafy.openticon.ui.screen
 import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -156,11 +157,30 @@ fun allPermissionsGranted(context: Context): Boolean {
 
 private fun startFloatingService(context: Context) {
     val intent = Intent(context, FloatingService::class.java)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        context.startForegroundService(intent)
+
+    // 서비스 실행 여부 확인
+    if (isServiceRunning(context, FloatingService::class.java)) {
+        // 이미 실행 중인 경우 종료
+        context.stopService(intent)
     } else {
-        context.startService(intent)
+        // 서비스가 실행 중이 아니면 시작
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
     }
+}
+
+// 서비스 실행 여부를 확인하는 함수
+private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+    val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
+        if (serviceClass.name == service.service.className) {
+            return true
+        }
+    }
+    return false
 }
 
 

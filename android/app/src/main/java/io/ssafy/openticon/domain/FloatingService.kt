@@ -3,6 +3,7 @@ package io.ssafy.openticon
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -136,9 +137,12 @@ class FloatingService : Service() {
         val horizontalScrollView = secondFloatingView.findViewById<LinearLayout>(R.id.horizontal_linear)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
         val closeButton = secondFloatingView.findViewById<ImageView>(R.id.closeButton)
-
+        val settingButton = secondFloatingView.findViewById<ImageView>(R.id.settingButton)
         closeButton.setOnClickListener {
             toggleSecondFloatingView()
+        }
+        settingButton.setOnClickListener{
+            popupSetting()
         }
 
         // 데이터에 따라 UI 업데이트
@@ -167,6 +171,19 @@ class FloatingService : Service() {
         }
     }
 
+    private fun popupSetting() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("navigate_to", "my_emoticons")
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE // FLAG_IMMUTABLE은 Android 12+에서 필요
+        )
+        pendingIntent.send()
+    }
     private fun lkeEmoticon(emoticon: Emoticon){
 //        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
 //        val params = WindowManager.LayoutParams(
@@ -332,18 +349,6 @@ class FloatingService : Service() {
         layoutParams.gravity = Gravity.TOP or Gravity.LEFT
 
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_layout, null)
-//        floatingView.findViewById<Button>(R.id.closeButton).setOnClickListener {
-//            if (floatingView.windowToken != null) {
-//                windowManager.removeView(floatingView)
-//                if (isSecondViewVisible) windowManager.removeView(secondFloatingView)
-//                stopSelf()  // 서비스 종료
-//            }
-//        }
-
-        // 토글 버튼 설정
-//        floatingView.findViewById<Button>(R.id.toggleButton).setOnClickListener {
-//            toggleSecondFloatingView()
-//        }
 
 
         val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton)
