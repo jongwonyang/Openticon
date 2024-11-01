@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Getter
@@ -32,7 +35,9 @@ public class PackInfoResponseDto {
 
     private String description;
 
-    private LocalDateTime createdAt;
+    private String createdAt;
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
     public PackInfoResponseDto(EmoticonPackEntity emoticonPackEntity, List<String> emoticons){
         this.title=emoticonPackEntity.getTitle();
@@ -44,9 +49,11 @@ public class PackInfoResponseDto {
         this.thumbnailImg=emoticonPackEntity.getThumbnailImg();
         this.listImg=emoticonPackEntity.getListImg();
         this.description=emoticonPackEntity.getDescription();
-        this.createdAt=emoticonPackEntity.getCreatedAt();
+        this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
         this.emoticons=emoticons;
     }
 
-
+    private String formatToKST(OffsetDateTime dateTime) {
+        return dateTime.atZoneSameInstant(ZoneId.of("Asia/Seoul")).format(formatter);
+    }
 }

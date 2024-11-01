@@ -3,12 +3,11 @@ package io.ssafy.openticon.controller.response;
 import io.ssafy.openticon.dto.Category;
 import io.ssafy.openticon.dto.ExamineType;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
-import io.ssafy.openticon.entity.MemberEntity;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 public class EmoticonPackResponseDto {
@@ -26,8 +25,10 @@ public class EmoticonPackResponseDto {
     private String description;
     private ExamineType examine;
     private String shareLink;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
     public EmoticonPackResponseDto(EmoticonPackEntity emoticonPackEntity) {
         PackMemberResponseDto packMemberResponseDto = new PackMemberResponseDto();
@@ -49,7 +50,13 @@ public class EmoticonPackResponseDto {
         this.description = emoticonPackEntity.getDescription();
         this.examine = emoticonPackEntity.getExamine();
         this.shareLink = emoticonPackEntity.getShareLink();
-        this.createdAt = emoticonPackEntity.getCreatedAt();
-        this.updatedAt = emoticonPackEntity.getUpdatedAt();
+
+        // KST 변환 및 포맷 적용
+        this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
+        this.updatedAt = formatToKST(emoticonPackEntity.getUpdatedAt());
+    }
+
+    private String formatToKST(OffsetDateTime dateTime) {
+        return dateTime.atZoneSameInstant(ZoneId.of("Asia/Seoul")).format(formatter);
     }
 }
