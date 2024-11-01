@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,18 +48,25 @@ class SearchScreenViewModel @Inject constructor(
 
     fun loadMoreSearchResult() {
         if (lastPageReached || _isLoading.value) return
+        Log.d("SEARCH", "viewModelScope.launch")
         viewModelScope.launch {
             _isLoading.value = true
+            Log.d("SEARCH", "_searchKey.value: ${_searchKey.value}")
+            Log.d("SEARCH", "_searchText.value: ${_searchText.value}")
+            Log.d("SEARCH", "page: $page")
+            Log.d("SEARCH", "pageSize: $pageSize")
             val (newItems, isLast) = searchEmoticonPacksUseCase(
                 searchKey = _searchKey.value,
                 searchText = _searchText.value,
                 page = page,
                 size = pageSize
             )
-            _searchResult.value += newItems
+            Log.d("SEARCH", "newItems: $newItems")
+            _searchResult.value = _searchResult.value + newItems
             lastPageReached = isLast
             page++
             _isLoading.value = false
+            Log.d("SEARCH", "searchResult.value: ${searchResult.value}")
         }
     }
 }

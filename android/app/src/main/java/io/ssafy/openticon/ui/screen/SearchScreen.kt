@@ -63,6 +63,8 @@ fun SearchScreen(
 ) {
     val selectedKey by viewModel.searchKey.collectAsState()
     val searchText by viewModel.searchText.collectAsState()
+    val searchResult by viewModel.searchResult.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val listState = rememberLazyListState()
 
     Column {
@@ -83,7 +85,7 @@ fun SearchScreen(
 
         LazyColumn(state = listState) {
             items(
-                items = viewModel.searchResult.value,
+                items = searchResult,
                 key = { it.id }
             ) { item ->
                 ListItem(
@@ -102,15 +104,24 @@ fun SearchScreen(
                 )
             }
 
-            if (viewModel.isLoading.value) {
-                item { CircularProgressIndicator() }
+            if (isLoading) {
+                item {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
         }
 
         LaunchedEffect(listState) {
             snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
                 .collect { lastVisibleItemIndex ->
-                    if (lastVisibleItemIndex == viewModel.searchResult.value.size - 1 && !viewModel.isLoading.value) {
+                    if (lastVisibleItemIndex == searchResult.size - 1 && !isLoading) {
                         viewModel.loadMoreSearchResult()
                     }
                 }
