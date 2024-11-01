@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import io.ssafy.openticon.ui.viewmodel.SearchKey
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
 @Composable
@@ -93,6 +96,8 @@ fun SearchScreen(
                         AsyncImage(
                             model = item.thumbnail,
                             contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            contentScale = ContentScale.Crop
                         )
                     },
                     headlineContent = { Text(item.title) },
@@ -139,14 +144,13 @@ fun SearchScreenPreview() {
 
 @Composable
 fun SearchBar(
-    selectedKey: String,
-    onKeyChange: (String) -> Unit,
+    selectedKey: SearchKey,
+    onKeyChange: (SearchKey) -> Unit,
     searchText: String,
     onTextChange: (String) -> Unit,
     viewModel: SearchScreenViewModel = hiltViewModel(),
 ) {
     val focusManager = LocalFocusManager.current
-    val searchKeys = listOf("제목", "작가", "태그")
     var isExpanded by remember { mutableStateOf(false) }
 
     Box(
@@ -172,7 +176,7 @@ fun SearchBar(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(selectedKey)
+                    Text(selectedKey.displayName)
                     Icon(
                         imageVector = if (isExpanded) {
                             Icons.Filled.ArrowDropUp
@@ -187,9 +191,9 @@ fun SearchBar(
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false }
             ) {
-                searchKeys.forEach {
+                SearchKey.entries.forEach {
                     DropdownMenuItem(
-                        text = { Text(it) },
+                        text = { Text(it.displayName) },
                         onClick = {
                             onKeyChange(it)
                             isExpanded = false
@@ -230,6 +234,18 @@ fun SearchBar(
                     .fillMaxHeight()
                     .wrapContentHeight()
             )
+            if (searchText.isNotEmpty()) {
+                IconButton(
+                    onClick = { onTextChange("") },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Cancel,
+                        contentDescription = "텍스트 초기화",
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
             IconButton(
                 onClick = {
                     focusManager.clearFocus()
