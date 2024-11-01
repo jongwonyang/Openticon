@@ -5,6 +5,7 @@ import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.PurchaseHistoryEntity;
 import io.ssafy.openticon.repository.PurchaseHistoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,5 +44,18 @@ public class PurchaseHistoryService {
         }
 
         return result;
+    }
+
+    public void switchIsHide(String email, EmoticonPackEntity packEntity){
+        MemberEntity member = memberService.getMemberByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("멤버를 찾을 수 없음"));
+
+        PurchaseHistoryEntity purchaseHistoryEntity = purchaseHistoryRepository
+                .findByMemberAndEmoticonPack(member, packEntity)
+                .orElseThrow(() -> new EntityNotFoundException("구매기록을 찾을 수 없음"));
+
+        purchaseHistoryEntity.setHide(!purchaseHistoryEntity.isHide());
+
+        purchaseHistoryRepository.save(purchaseHistoryEntity);
     }
 }
