@@ -96,6 +96,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.lifecycle.livedata.ktx) // 버전은 필요에 따라 최신으로
+    implementation(libs.coil.gif)
+
 }
 
 kapt {
