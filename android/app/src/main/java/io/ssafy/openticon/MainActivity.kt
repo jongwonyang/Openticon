@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.ui.navigation.AppNavHost
 import io.ssafy.openticon.ui.theme.OpenticonTheme
@@ -24,6 +25,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        TokenDataSource.initialize(applicationContext)
         enableEdgeToEdge()
         setContentView(R.layout.new_compose_activity_layout)
 

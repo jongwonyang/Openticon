@@ -1,4 +1,4 @@
-package io.ssafy.openticon.ui.data.model
+package io.ssafy.openticon.data.model
 
 
 import androidx.room.Entity
@@ -8,17 +8,17 @@ import java.time.LocalDateTime
 @Entity(tableName = "member")
 data class MemberEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    val id: Long = 0L,  // ID
 
-    val email: String,  // Email
+    val email: String = "",  // Email
 
-    val nickname: String,  // Unique Nickname
+    val nickname: String = "",  // Unique Nickname
 
     val point: Long = 0L,  // Points
 
-    val createdAt: String="",  // Creation Time
+    val createdAt: String = "",  // Creation Time
 
-    var updatedAt: String="",  // Updated Time
+    var updatedAt: String = "",  // Updated Time
 
     val manager: Boolean = false,  // Is Manager
 

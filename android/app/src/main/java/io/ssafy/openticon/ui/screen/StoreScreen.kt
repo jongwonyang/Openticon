@@ -113,7 +113,7 @@ fun StoreScreen() {
                             .scale(scale)
                             .alpha(alpha)
                             .width(150.dp)
-                            .clickable { centerIndex = index }
+                            .clickable {}
                     ) {
                         Image(
                             painter = painterResource(id = item.imageRes),

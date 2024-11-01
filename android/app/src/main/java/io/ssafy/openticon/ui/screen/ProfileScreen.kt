@@ -112,5 +112,11 @@ fun ProfileScreen(
         ) {
             Text("포인트 충전", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
+        Button(onClick = {
+            navController.navigate("login")
+        }) {
+            Text("임시 로그인 버튼")
+        }
+
     }
 }

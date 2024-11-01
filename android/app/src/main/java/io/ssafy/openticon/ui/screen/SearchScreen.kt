@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -33,11 +35,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,7 +54,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import io.ssafy.openticon.ui.sample.EmoticonPackSampleData
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
 @Composable
@@ -60,6 +63,7 @@ fun SearchScreen(
 ) {
     val selectedKey by viewModel.searchKey.collectAsState()
     val searchText by viewModel.searchText.collectAsState()
+    val listState = rememberLazyListState()
 
     Column {
         Spacer(Modifier.height(16.dp))
@@ -77,9 +81,9 @@ fun SearchScreen(
             modifier = Modifier.padding(16.dp)
         )
 
-        LazyColumn {
+        LazyColumn(state = listState) {
             items(
-                items = EmoticonPackSampleData.latestPacks,
+                items = viewModel.searchResult.value,
                 key = { it.id }
             ) { item ->
                 ListItem(
@@ -97,6 +101,19 @@ fun SearchScreen(
                         }
                 )
             }
+
+            if (viewModel.isLoading.value) {
+                item { CircularProgressIndicator() }
+            }
+        }
+
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+                .collect { lastVisibleItemIndex ->
+                    if (lastVisibleItemIndex == viewModel.searchResult.value.size - 1 && !viewModel.isLoading.value) {
+                        viewModel.loadMoreSearchResult()
+                    }
+                }
         }
     }
 }
@@ -115,6 +132,7 @@ fun SearchBar(
     onKeyChange: (String) -> Unit,
     searchText: String,
     onTextChange: (String) -> Unit,
+    viewModel: SearchScreenViewModel = hiltViewModel(),
 ) {
     val focusManager = LocalFocusManager.current
     val searchKeys = listOf("제목", "작가", "태그")
@@ -193,6 +211,7 @@ fun SearchBar(
                 keyboardActions = KeyboardActions(
                     onSearch = {
                         focusManager.clearFocus()
+                        viewModel.search()
                     }
                 ),
                 modifier = Modifier
@@ -203,6 +222,7 @@ fun SearchBar(
             IconButton(
                 onClick = {
                     focusManager.clearFocus()
+                    viewModel.search()
                 },
                 modifier = Modifier.size(48.dp)
             ) {
