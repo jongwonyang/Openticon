@@ -50,7 +50,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel
-import io.ssafy.openticon.ui.viewmodel.UiState
+import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
