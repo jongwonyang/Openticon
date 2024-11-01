@@ -101,6 +101,7 @@ class FloatingService : Service() {
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun updateFloatingView(data: List<EmoticonPack>) {
         // WindowManager를 사용하여 floatingView 설정
         secondLayoutParams = WindowManager.LayoutParams(
