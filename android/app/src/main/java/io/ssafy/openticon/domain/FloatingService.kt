@@ -21,9 +21,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.HorizontalScrollView
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
@@ -31,11 +28,10 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
 import io.ssafy.openticon.data.model.Emoticon
-import io.ssafy.openticon.data.model.EmoticonPack
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -75,7 +71,7 @@ class FloatingService : Service() {
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
         val data = jsonString?.let {
-            Json.decodeFromString<List<EmoticonPack>>(it)
+            Json.decodeFromString<List<SampleEmoticonPack>>(it)
         } ?: emptyList()
 
         updateFloatingView(data)
@@ -87,7 +83,7 @@ class FloatingService : Service() {
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
         val data = jsonString?.let {
-            Json.decodeFromString<EmoticonPack>(it)
+            Json.decodeFromString<SampleEmoticonPack>(it)
         }
 
         val likeView = secondFloatingView.findViewById<EmoticonPackView>(R.id.imageLike)
@@ -106,7 +102,7 @@ class FloatingService : Service() {
 
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun updateFloatingView(data: List<EmoticonPack>) {
+    private fun updateFloatingView(data: List<SampleEmoticonPack>) {
         // WindowManager를 사용하여 floatingView 설정
         secondLayoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,  // 화면 너비에 맞춤
@@ -186,19 +182,19 @@ class FloatingService : Service() {
         val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
-        val emoticonPack = past_jsonString?.let {
-            Json.decodeFromString<EmoticonPack>(it)
+        val sampleEmoticonPack = past_jsonString?.let {
+            Json.decodeFromString<SampleEmoticonPack>(it)
         }
 
 
-        emoticonPack?.let {
+        sampleEmoticonPack?.let {
             val mutableImages = it.images.toMutableList()  // MutableList로 변환
             mutableImages.add(emoticon.copy())
             it.images = mutableImages.toList()  // 다시 List로 변환하여 할당
         }
 
         val editor = sharedPreferences.edit()
-        val jsonString = Json.encodeToString(emoticonPack)
+        val jsonString = Json.encodeToString(sampleEmoticonPack)
         editor.putString("like_emoticon_data", jsonString)
         editor.apply()
         loadLikeDate()
