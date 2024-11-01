@@ -100,7 +100,6 @@ class EmoticonPackView @JvmOverloads constructor(
                 }
             }
 
-// Coil을 사용하여 첫 프레임만 로드
             imageView.load(emoticon.imageResource) {
                 crossfade(false) // 페이드 애니메이션 비활성화
                 allowHardware(false) // 하드웨어 가속 비활성화로 GIF 애니메이션 멈춤

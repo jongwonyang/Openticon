@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -30,6 +31,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
 import io.ssafy.openticon.data.model.Emoticon
@@ -105,8 +107,8 @@ class FloatingService : Service() {
     private fun updateFloatingView(data: List<EmoticonPack>) {
         // WindowManager를 사용하여 floatingView 설정
         secondLayoutParams = WindowManager.LayoutParams(
-            dpToPx(380),  // 380dp를 px로 변환하여 넓이 설정
-            dpToPx(300),  // 300dp를 px로 변환하여 높이 설정
+            WindowManager.LayoutParams.MATCH_PARENT,  // 화면 너비에 맞춤
+            dpToPx(350),  // 300dp 높이
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
@@ -188,22 +190,7 @@ class FloatingService : Service() {
         Log.d("floating", "Maybe.... success,..?")
     }
 
-    private fun copyEmoticon(clickedEmoticon: Emoticon) {
-        /***
-        val intent = Intent("io.ssafy.openticon.INSERT_EMOTICON").setClassName(/* TODO: provide the application ID. For example: */
-            packageName,
-        )
-        intent.putExtra("emoticonResource", clickedEmoticon.imageResource)
-        Log.d("serviceInsert", intent.action.toString())
-        sendBroadcast(intent)
-        ***/
-        // 다른 서비스에서 실행
-        val intent = Intent(this, KeyboardAccessibilityService::class.java)
-        intent.putExtra("CALL_METHOD", "insertEmoticon")
-        intent.putExtra("resourceId", clickedEmoticon.imageResource)
-        startService(intent)
-    }
-
+    /**
     fun insertEmoticonIntoFocusedEditText(resourceId: Int) {
         Log.d("AccessInsert", resourceId.toString())
         val drawable = ContextCompat.getDrawable(applicationContext, resourceId) ?: return
@@ -233,7 +220,71 @@ class FloatingService : Service() {
         }
         return FileProvider.getUriForFile(this, "${packageName}.provider", file)
     }
+**/
 
+    fun insertEmoticonIntoFocusedEditText(resourceId: Int) {
+        val drawable = ContextCompat.getDrawable(applicationContext, resourceId)
+        if (drawable !is BitmapDrawable) {
+            // 리소스가 GIF일 경우
+            val gifUri = getGifUri(resourceId)
+            if (gifUri != null) {
+                copyToClipboard(gifUri)
+                Toast.makeText(this, "GIF가 클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "GIF 복사 실패", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // 리소스가 정적 이미지일 경우
+            val bitmap = Bitmap.createBitmap(drawable!!.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+
+            val uri = getImageUri(bitmap)
+            if (uri != null) {
+                copyToClipboard(uri)
+                Toast.makeText(this, "이미지가 클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "이미지 복사 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun getGifUri(resourceId: Int): Uri? {
+        val inputStream = resources.openRawResource(resourceId)
+        val file = File(cacheDir, "emoticon.gif")
+        try {
+            val outputStream = FileOutputStream(file)
+            inputStream.copyTo(outputStream)
+            outputStream.flush()
+            outputStream.close()
+            inputStream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
+    }
+
+    fun getImageUri(bitmap: Bitmap): Uri? {
+        val file = File(cacheDir, "emoticon.png")
+        try {
+            val stream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.flush()
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
+    }
+
+    fun copyToClipboard(uri: Uri) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newUri(contentResolver, "Emoticon", uri)
+        clipboard.setPrimaryClip(clip)
+    }
 
 
     private fun startForegroundServiceWithNotification() {
@@ -286,7 +337,7 @@ class FloatingService : Service() {
 
         val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton)
         imageButton.shapeAppearanceModel = imageButton.shapeAppearanceModel.toBuilder()
-            .setAllCorners(CornerFamily.ROUNDED, 100f) // 원하는 크기의 반지름 설정
+            .setAllCorners(CornerFamily.ROUNDED, 75f) // 원하는 크기의 반지름 설정
             .build()
 
         floatingView.findViewById<ShapeableImageView>(R.id.imageButton).setOnTouchListener { _, event ->
