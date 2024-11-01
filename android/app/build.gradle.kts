@@ -97,6 +97,11 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.livedata.ktx) // 버전은 필요에 따라 최신으로
     implementation(libs.coil.gif)
+    implementation(libs.glide)
+    kapt(libs.compiler)
+
+    implementation(libs.kotlinx.coroutines.core) // 최신 버전 확인 가능
+    implementation(libs.kotlinx.coroutines.android)
 
 }
 
