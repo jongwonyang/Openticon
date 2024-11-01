@@ -1,43 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayoutInsideScrollView"
-    android:layout_width="380.dp"
-    android:layout_height="300.dp"
-    android:layout_margin="10.dp"
-    android:background="#AAFFFFFF"
+    android:layout_width="380dp"
+    android:layout_height="300dp"
+    android:layout_margin="1dp"
+    android:background="@drawable/round_border"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="1dp">
+
 
     <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="52dp">
+        android:layout_width="380dp"
+        android:layout_height="52dp"
+        android:background="#F8F5F5">
 
         <io.ssafy.openticon.ui.component.EmoticonPackView
             android:id="@+id/imageLike"
             android:layout_width="50dp"
             android:layout_height="match_parent"
-            app:srcCompat="@drawable/ic_launcher_foreground" />
+            app:srcCompat="@drawable/icon_17" />
 
         <HorizontalScrollView
             android:id="@+id/progress_horizontal"
-            android:layout_width="247dp"
-            android:layout_height="52dp"
+            android:layout_width="278.dp"
+            android:layout_height="match_parent"
             android:contentDescription="스크롤 가능한 콘텐츠 영역입니다.">
 
             <LinearLayout
                 android:id="@+id/horizontal_linear"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:orientation="horizontal" />
         </HorizontalScrollView>
 
         <ImageView
             android:id="@+id/imageView4"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:srcCompat="@drawable/ic_launcher_foreground" />
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@android:drawable/ic_menu_preferences" />
     </TableRow>
 
     <TextView
@@ -56,48 +59,7 @@
             android:id="@+id/tableLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="300dp">
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </TableRow>
-
-            <!-- 추가 행들 -->
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </TableRow>
-        </TableLayout>
+            android:maxHeight="300dp"/>
     </ScrollView>
 
 </LinearLayout>
