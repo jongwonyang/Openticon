@@ -1,5 +1,6 @@
 package io.ssafy.openticon.exception;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorCode errorCode = ErrorCode.ILLEGAL_ARGUMENT;
         return handleExceptionInternal(errorCode, e.getMessage());
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException e) {
+        log.warn("handleEntityNotFound", e);
+        ErrorCode errorCode = ErrorCode.ENTITY_NOT_FOUND;
+        return handleExceptionInternal(errorCode, e.getMessage());
+    }
+
 
 
     public ResponseEntity<Object> handleMethodArgumentNotValid(

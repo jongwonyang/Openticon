@@ -15,9 +15,11 @@ import java.util.List;
 @NoArgsConstructor
 public class PackInfoResponseDto {
 
+    private Long id;
+
     private String title;
 
-    private String nickname;
+    private AuthorResponseDto author;
 
     private boolean isAIGenerated;
 
@@ -40,8 +42,13 @@ public class PackInfoResponseDto {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
     public PackInfoResponseDto(EmoticonPackEntity emoticonPackEntity, List<String> emoticons){
+        this.id = emoticonPackEntity.getId();
         this.title=emoticonPackEntity.getTitle();
-        this.nickname=emoticonPackEntity.getMember().getNickname();
+        this.author = new AuthorResponseDto(
+                emoticonPackEntity.getMember().getId(),
+                emoticonPackEntity.getMember().getNickname(),
+                emoticonPackEntity.getMember().getProfile_image()
+                );
         this.isAIGenerated=emoticonPackEntity.isAiGenerated();
         this.price=emoticonPackEntity.getPrice();
         this.view=emoticonPackEntity.getView();
