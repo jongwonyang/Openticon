@@ -4,8 +4,9 @@ import io.ssafy.openticon.data.model.MemberEntity
 import io.ssafy.openticon.data.model.MemberResponseDTO
 import io.ssafy.openticon.data.remote.MemberApi
 import retrofit2.Response
+import javax.inject.Inject
 
-class MemberApiService(
+class MemberApiService @Inject constructor(
     private val memberApi: MemberApi
 ) {
     // Member 정보 가져오는 함수 (MemberResponseDTO로 성공/오류 상태 반환)

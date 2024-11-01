@@ -3,13 +3,11 @@ package io.ssafy.openticon.ui.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import io.ssafy.openticon.data.model.EmoticonPack
-import io.ssafy.openticon.data.repository.EmoticonPackRepository
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.data.repository.LikeEmoticonPackRepository
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -23,8 +21,8 @@ class LikeEmoticonViewModel @Inject constructor(
     private val repository = LikeEmoticonPackRepository()
 
     private val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-    private val _emoticonPacksLiveData = MutableLiveData<EmoticonPack?>()
-    val emoticonPacksLiveData: MutableLiveData<EmoticonPack?> get() = _emoticonPacksLiveData
+    private val _Sample_emoticonPacksLiveData = MutableLiveData<SampleEmoticonPack?>()
+    val sampleEmoticonPacksLiveData: MutableLiveData<SampleEmoticonPack?> get() = _Sample_emoticonPacksLiveData
 
     init {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
@@ -32,10 +30,10 @@ class LikeEmoticonViewModel @Inject constructor(
     }
 
     private fun initEmoticonDataFromPreferences(){
-        _emoticonPacksLiveData.value = repository.getLikeEmoticonPack()
+        _Sample_emoticonPacksLiveData.value = repository.getLikeEmoticonPack()
 
         val editor = sharedPreferences.edit()
-        val jsonString = Json.encodeToString(emoticonPacksLiveData.value)
+        val jsonString = Json.encodeToString(sampleEmoticonPacksLiveData.value)
         Log.d("MainJson",jsonString)
         editor.putString("like_emoticon_data", jsonString)
         editor.apply()
@@ -44,9 +42,9 @@ class LikeEmoticonViewModel @Inject constructor(
     private fun loadEmoticonDataFromPreferences() {
         val jsonString = sharedPreferences.getString("like_emoticon_data", null)
         val data = jsonString?.let {
-            Json.decodeFromString<EmoticonPack>(it)
+            Json.decodeFromString<SampleEmoticonPack>(it)
         }
-        _emoticonPacksLiveData.value = data
+        _Sample_emoticonPacksLiveData.value = data
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

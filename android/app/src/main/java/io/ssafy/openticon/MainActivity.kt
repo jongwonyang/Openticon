@@ -7,10 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.ssafy.openticon.data.local.TokenDataSource
-import io.ssafy.openticon.data.model.EmoticonPack
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.navigation.AppNavHost
 import io.ssafy.openticon.ui.theme.OpenticonTheme
 import io.ssafy.openticon.ui.viewmodel.EmoticonViewModel
@@ -29,11 +28,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.new_compose_activity_layout)
 
-        myViewModel.emoticonPacks.observe(this) { packs ->
+        myViewModel.sampleEmoticonPacks.observe(this) { packs ->
             saveDataToPreferences(packs)
         }
 
-        likeEmoticonViewModel.emoticonPacksLiveData.observe(this) { pack ->
+        likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(this) { pack ->
             if (pack != null) {
                 saveLikeDataToPreferences(pack)
             }
@@ -48,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
     private val json = Json { encodeDefaults = true } // Json 설정
 
-    private fun saveDataToPreferences(packs: List<EmoticonPack>) {
+    private fun saveDataToPreferences(packs: List<SampleEmoticonPack>) {
         val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val jsonString = json.encodeToString(packs)
@@ -57,7 +56,7 @@ class MainActivity : ComponentActivity() {
         editor.apply()
     }
 
-    private fun saveLikeDataToPreferences(pack: EmoticonPack) {
+    private fun saveLikeDataToPreferences(pack: SampleEmoticonPack) {
         val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val jsonString = json.encodeToString(pack)

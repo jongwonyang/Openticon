@@ -1,22 +1,18 @@
 package io.ssafy.openticon.ui.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,15 +41,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.ssafy.openticon.data.model.EmoticonPack
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
 
 @Preview(showBackground = true)
 @Composable
 fun MyEmoticonsScreen(viewModel: MyEmoticonViewModel = hiltViewModel()) {
 
-    val visibleEmoticonPacks by viewModel.visibleEmoticonPacks.observeAsState(emptyList())
-    val invisibleEmoticonPacks by viewModel.invisibleEmoticonPacks.observeAsState(emptyList())
+    val visibleEmoticonPacks by viewModel.visibleSampleEmoticonPacks.observeAsState(emptyList())
+    val invisibleEmoticonPacks by viewModel.invisibleSampleEmoticonPacks.observeAsState(emptyList())
 
     var isVisible by remember { mutableStateOf(true) }
 
@@ -142,7 +137,7 @@ fun MyEmoticonsScreen(viewModel: MyEmoticonViewModel = hiltViewModel()) {
 
 
 @Composable
-fun EmoticonItem(emoticonPack: EmoticonPack, viewModel: MyEmoticonViewModel) {
+fun EmoticonItem(sampleEmoticonPack: SampleEmoticonPack, viewModel: MyEmoticonViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -151,7 +146,7 @@ fun EmoticonItem(emoticonPack: EmoticonPack, viewModel: MyEmoticonViewModel) {
     ) {
         // Emoticon image
         Image(
-            painter = painterResource(id = emoticonPack.mainImageResource),
+            painter = painterResource(id = sampleEmoticonPack.mainImageResource),
             contentDescription = null,
             modifier = Modifier.size(50.dp)
         )
@@ -160,20 +155,20 @@ fun EmoticonItem(emoticonPack: EmoticonPack, viewModel: MyEmoticonViewModel) {
 
         // Emoticon name and visibility
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = emoticonPack.name)
+            Text(text = sampleEmoticonPack.name)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .width(50.dp)
                         .height(22.dp)
                         .background(
-                            color = if (emoticonPack.isPublic) Color(0xFFF4E845) else Color(0xFFD3D3D3),
+                            color = if (sampleEmoticonPack.isPublic) Color(0xFFF4E845) else Color(0xFFD3D3D3),
                             shape = RoundedCornerShape(9.dp),
                         ),
                     contentAlignment = Alignment.Center // 배경의 가운데에 텍스트 배치
                 ) {
                     Text(
-                        text = if (emoticonPack.isPublic) "public" else "private",
+                        text = if (sampleEmoticonPack.isPublic) "public" else "private",
                         color = Color(0xFF4A4A4A),
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp, // Text에만 패딩 적용
@@ -185,7 +180,7 @@ fun EmoticonItem(emoticonPack: EmoticonPack, viewModel: MyEmoticonViewModel) {
         }
 
         // Visibility and Drag icons
-        IconButton(onClick = { viewModel.changeVisible(emoticonPack) }) {
+        IconButton(onClick = { viewModel.changeVisible(sampleEmoticonPack) }) {
             Icon(
                 imageVector = Icons.Default.VisibilityOff,
                 contentDescription = "Toggle Visibility"

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FAF8FF"/>
+    <size android:width="150dp" android:height="150dp"/> <!-- 크기 조정 -->
+    <corners android:radius="8dp"/> <!-- 네모칸 모서리 라운드 설정 가능 -->
+</shape>

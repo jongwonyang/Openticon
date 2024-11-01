@@ -4,23 +4,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.ssafy.openticon.data.model.EmoticonPack
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.data.repository.EmoticonPackRepository
 
 class MyEmoticonViewModel: ViewModel() {
 
     private val repository = EmoticonPackRepository()
-    private val _emoticonPacks = MutableLiveData<List<EmoticonPack>>()
-    val emoticonPacks: LiveData<List<EmoticonPack>> get() = _emoticonPacks
+    private val _Sample_emoticonPacks = MutableLiveData<List<SampleEmoticonPack>>()
+    val sampleEmoticonPacks: LiveData<List<SampleEmoticonPack>> get() = _Sample_emoticonPacks
 
-    val visibleEmoticonPacks = MediatorLiveData<List<EmoticonPack>>().apply {
-        addSource(_emoticonPacks) { list ->
+    val visibleSampleEmoticonPacks = MediatorLiveData<List<SampleEmoticonPack>>().apply {
+        addSource(_Sample_emoticonPacks) { list ->
             value = list.filter { it.isVisible }
         }
     }
 
-    val invisibleEmoticonPacks = MediatorLiveData<List<EmoticonPack>>().apply {
-        addSource(_emoticonPacks) { list ->
+    val invisibleSampleEmoticonPacks = MediatorLiveData<List<SampleEmoticonPack>>().apply {
+        addSource(_Sample_emoticonPacks) { list ->
             value = list.filter { !it.isVisible }
         }
     }
@@ -38,14 +38,14 @@ class MyEmoticonViewModel: ViewModel() {
     private fun loadEmoticonPacks() {
        // _visiblePacks.value = repository.getEmoticonPacks().filter { it.isVisible }
        // _invisiblePacks.value = repository.getEmoticonPacks().filter { !it.isVisible }
-        _emoticonPacks.value = repository.getEmoticonPacks()
+        _Sample_emoticonPacks.value = repository.getEmoticonPacks()
     }
 
 
-    fun changeVisible(emoticonPack: EmoticonPack) {
+    fun changeVisible(sampleEmoticonPack: SampleEmoticonPack) {
         // 기존 리스트를 가져와서 수정한 리스트 생성
-        val updatedList = _emoticonPacks.value?.map { pack ->
-            if (pack.name == emoticonPack.name) {
+        val updatedList = _Sample_emoticonPacks.value?.map { pack ->
+            if (pack.name == sampleEmoticonPack.name) {
                 pack.copy(isVisible = !pack.isVisible) // isVisible 값만 반대로 변경
             } else {
                 pack
@@ -53,6 +53,6 @@ class MyEmoticonViewModel: ViewModel() {
         } ?: emptyList()
 
         // _emoticonPacks LiveData 업데이트
-        _emoticonPacks.value = updatedList
+        _Sample_emoticonPacks.value = updatedList
     }
 }
