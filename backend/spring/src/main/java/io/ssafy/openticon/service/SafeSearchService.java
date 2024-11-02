@@ -25,6 +25,7 @@ public class SafeSearchService {
 
         List<byte[]> imageBytesList = new ArrayList<>();
         for(MultipartFile image : multipartFiles){
+            System.out.println(image.getName()+": "+image.getContentType());
             imageBytesList.add(image.getBytes());
         }
         List<AnnotateImageRequest> requests = new ArrayList<>();

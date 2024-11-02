@@ -63,27 +63,36 @@ public class PackService {
     @Transactional
     public String emoticonPackUpload(EmoticonPack emoticonPack){
         try{
-            List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
             List<MultipartFile> infoImages = new ArrayList<>();
+            infoImages.add(emoticonPack.getThumbnailImg());
+            infoImages.add(emoticonPack.getListImg());
+            boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
+
+
+            List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
             MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
             MultipartFile listImg= emoticonPack.getListImg();
             String thumbnailImgUrl=saveImage(thumbnailImg);
             String listImgUrl=saveImage(listImg);
             List<String> emoticonsUrls=new ArrayList<>();
 
-            // TODO: thumbnailImg 이거랑 listImg 이거도 세이프 서치하도록 해야함
-//            infoImages.add(thumbnailImg);
-//            infoImages.add(listImg);
-//            boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
+
 
             MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
             EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
 
 
-            boolean problematicImage = safeSearchService.detectSafeSearch(emoticonList); // true면 이상한 이미지
+            boolean problematicImage = false;
+            for (int i = 0; i < emoticonList.size(); i += 16) {
+                int end = Math.min(i + 16, emoticonList.size());
+                List<MultipartFile> subList = emoticonList.subList(i, end);
 
+                if (safeSearchService.detectSafeSearch(subList)) {
+                    problematicImage = true;
+                }
+            }
 
-            if(problematicImage) emoticonPackEntity.setBlacklist(true);
+            if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
             packRepository.save(emoticonPackEntity);
             // 여기 부분
             for(MultipartFile emoticon: emoticonList){
@@ -113,7 +122,7 @@ public class PackService {
             }
             return emoticonPackEntity.getShareLink();
         }catch (IOException e){
-            throw new RuntimeException("세이프 서치 도중 에러가 발생했습니다. 이미지를 다시 확인해주세요.");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
