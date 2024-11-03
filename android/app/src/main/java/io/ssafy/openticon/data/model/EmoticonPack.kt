@@ -1,13 +1,11 @@
 package io.ssafy.openticon.data.model
 
-import kotlinx.serialization.Serializable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-
-@Serializable
+@Entity(tableName = "emoticon_packs")
 data class EmoticonPack(
-    val name: String,
-    val mainImageResource: Int,
-    var images: List<Emoticon> , // Imoticon 객체 리스트로 구성
-    val isPublic: Boolean = true,
-    val isVisible: Boolean = true
+    @PrimaryKey val id: Int,
+    val title: String,
+    val downloaded: Boolean
 )

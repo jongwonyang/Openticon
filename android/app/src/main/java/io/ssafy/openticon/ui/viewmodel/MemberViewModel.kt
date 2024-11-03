@@ -37,7 +37,6 @@ class MemberViewModel @Inject constructor(
                     _memberEntity.value = result
                     _uiState.value = UiState.Success<MemberEntity>(result)
                     _isLoggedIn.value = true
-                    Log.d("isLoggedin2", _isLoggedIn.value.toString())
                 } else if(status == 401 || status == 403) {
                     _uiState.value = UiState.UnAuth
                 }
