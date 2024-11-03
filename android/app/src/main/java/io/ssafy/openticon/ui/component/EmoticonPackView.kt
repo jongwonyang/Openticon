@@ -14,7 +14,7 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.load
 import io.ssafy.openticon.R
-import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.SampleEmoticon
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 
 class EmoticonPackView @JvmOverloads constructor(
@@ -41,7 +41,7 @@ class EmoticonPackView @JvmOverloads constructor(
         }
     }
 
-    fun setupEmoticonPack(pack: SampleEmoticonPack, onPackClick: (List<Emoticon>) -> Unit) {
+    fun setupEmoticonPack(pack: SampleEmoticonPack, onPackClick: (List<SampleEmoticon>) -> Unit) {
 // 네모 박스를 만들기 위한 FrameLayout 생성
         val frameLayout = FrameLayout(context).apply {
             layoutParams = LayoutParams(
@@ -77,7 +77,7 @@ class EmoticonPackView @JvmOverloads constructor(
         return (dp * density).toInt()
     }
 
-    fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit, onImageLongClick: (Emoticon) -> Unit = {}) {
+    fun displayImagesInTable(tableLayout: TableLayout, images: List<SampleEmoticon>, onImageClick: (SampleEmoticon) -> Unit, onImageLongClick: (SampleEmoticon) -> Unit = {}) {
         tableLayout.removeAllViews()
         var currentRow: TableRow? = null
         var width_size: Int = (tableLayout.width - dpToPx(10))/4
