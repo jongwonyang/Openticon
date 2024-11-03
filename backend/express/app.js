@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const uploadDir = path.join(__dirname, 'static/upload/images');
+const uploadProfile = path.join(__dirname, 'static/upload/profile');
 
 const imageServerUrl = process.env.IMAGE_SERVER_URL;
 
@@ -30,6 +31,8 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 
 // 디렉토리가 존재하지 않으면 생성
 fs.mkdirSync(uploadDir, { recursive: true });
+fs.mkdirSync(uploadProfile, { recursive: true });
+
 
 app.post('/upload/image', (req, res) => {
   if (!req.files || !req.files.upload) {
@@ -47,6 +50,29 @@ app.post('/upload/image', (req, res) => {
 
     const response = {
       url: `/static/upload/images/${uploadId}`,
+      ...req.body,
+    };
+
+    return res.json({ url: `${imageServerUrl}${response.url}` });
+  });
+});
+
+app.post('/upload/profile', (req, res) => {
+  if (!req.files || !req.files.upload) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const uploadFile = req.files.upload;
+  const uploadId = `${uuidv4()}.${path.extname(uploadFile.name)}`;
+
+  uploadFile.mv(path.join(uploadDir, uploadId), (err) => {
+    if (err) {
+      console.error('Error saving the file:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    const response = {
+      url: `/static/upload/profile/${uploadId}`,
       ...req.body,
     };
 
