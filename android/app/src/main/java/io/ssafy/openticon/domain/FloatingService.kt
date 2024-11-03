@@ -31,7 +31,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
-import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.SampleEmoticon
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
 import kotlinx.serialization.encodeToString
@@ -93,8 +93,8 @@ class FloatingService : Service() {
             likeView.removeAllViews() // 이미 존재하는 이미지 삭제
             likeView.setupEmoticonPack(it) { images ->
                 likeView.displayImagesInTable(tableLayout, images,
-                    onImageClick = { emoticon: Emoticon ->
-                        insertEmoticonIntoFocusedEditText(emoticon.imageResource)
+                    onImageClick = { sampleEmoticon: SampleEmoticon ->
+                        insertEmoticonIntoFocusedEditText(sampleEmoticon.imageResource)
                     }
                 )
             }
@@ -151,11 +151,11 @@ class FloatingService : Service() {
             val emoticonPackView = EmoticonPackView(this)
             emoticonPackView.setupEmoticonPack(pack) { images ->
                 emoticonPackView.displayImagesInTable(tableLayout, images,
-                    onImageClick = { emoticon: Emoticon ->
-                        insertEmoticonIntoFocusedEditText(emoticon.imageResource) },
+                    onImageClick = { sampleEmoticon: SampleEmoticon ->
+                        insertEmoticonIntoFocusedEditText(sampleEmoticon.imageResource) },
                     onImageLongClick = {
-                        emoticon: Emoticon ->
-                        lkeEmoticon(emoticon)
+                            sampleEmoticon: SampleEmoticon ->
+                        lkeEmoticon(sampleEmoticon)
                     }
                 )
                 if (::selectedEmoticonPackView.isInitialized) {
@@ -184,7 +184,7 @@ class FloatingService : Service() {
         )
         pendingIntent.send()
     }
-    private fun lkeEmoticon(emoticon: Emoticon){
+    private fun lkeEmoticon(sampleEmoticon: SampleEmoticon){
 //        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
 //        val params = WindowManager.LayoutParams(
 //            WindowManager.LayoutParams.WRAP_CONTENT,
@@ -206,7 +206,7 @@ class FloatingService : Service() {
 
         sampleEmoticonPack?.let {
             val mutableImages = it.images.toMutableList()  // MutableList로 변환
-            mutableImages.add(emoticon.copy())
+            mutableImages.add(sampleEmoticon.copy())
             it.images = mutableImages.toList()  // 다시 List로 변환하여 할당
         }
 
