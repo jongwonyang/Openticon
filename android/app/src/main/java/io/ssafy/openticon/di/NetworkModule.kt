@@ -1,33 +1,27 @@
 package io.ssafy.openticon.di
 
-import android.content.Context
 import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.ssafy.openticon.MainActivity
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import io.ssafy.openticon.data.remote.MemberApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import retrofit2.converter.gson.GsonConverterFactory
-import javax.inject.Singleton
 import okhttp3.Request
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://apitest.openticon.store/api/v1/"
+    private const val BASE_URL = "https://apitest.openticon.store"
 
     @Provides
     @Singleton
