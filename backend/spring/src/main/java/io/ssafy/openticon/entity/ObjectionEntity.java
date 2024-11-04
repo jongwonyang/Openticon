@@ -29,10 +29,12 @@ public class ObjectionEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private ReportType type;
+    @Builder.Default
+    private ReportType type = ReportType.EXAMINE;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
-    private ReportStateType state;
+    @Builder.Default
+    private ReportStateType state = ReportStateType.PENDING;
 
 }
