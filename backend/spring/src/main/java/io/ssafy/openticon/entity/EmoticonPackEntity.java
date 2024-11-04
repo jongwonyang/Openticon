@@ -2,9 +2,7 @@ package io.ssafy.openticon.entity;
 
 import io.ssafy.openticon.dto.Category;
 import io.ssafy.openticon.dto.EmoticonPack;
-import io.ssafy.openticon.dto.ExamineType;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -61,10 +59,6 @@ public class EmoticonPackEntity {
 
     @Column(name = "description")
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "examine", nullable = false)
-    private ExamineType examine = ExamineType.COMPLETED;
 
     @Column(name = "share_link", nullable = false)
     private String shareLink="public";

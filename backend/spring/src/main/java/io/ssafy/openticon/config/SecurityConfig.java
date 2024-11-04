@@ -63,7 +63,6 @@ public class SecurityConfig {
                         .requestMatchers(antMatcher("/login/**")).permitAll()
                         .requestMatchers(antMatcher("/emoticonpacks/search")).permitAll()
                         .requestMatchers(antMatcher("/emoticonpacks/info")).permitAll()
-                        .requestMatchers(antMatcher("/emoticonpacks/safe-serach")).permitAll() // 나중에 지워야 함
                         .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated()
                         .anyRequest().permitAll()

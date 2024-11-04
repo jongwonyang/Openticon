@@ -1,0 +1,1 @@
+ALTER TABLE emoticon_pack DROP COLUMN examine;

@@ -6,7 +6,6 @@ import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
-import io.ssafy.openticon.dto.ExamineType;
 import io.ssafy.openticon.dto.ImageUrl;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
