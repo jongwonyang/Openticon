@@ -1,13 +1,14 @@
 package io.ssafy.openticon.controller.response;
 
 import io.ssafy.openticon.dto.Category;
-import io.ssafy.openticon.dto.ExamineType;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import lombok.Getter;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class EmoticonPackResponseDto {
@@ -23,10 +24,10 @@ public class EmoticonPackResponseDto {
     private String thumbnailImg;
     private String listImg;
     private String description;
-    private ExamineType examine;
     private String shareLink;
     private String createdAt;
     private String updatedAt;
+    private List<String> tags;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
@@ -48,12 +49,16 @@ public class EmoticonPackResponseDto {
         this.thumbnailImg = emoticonPackEntity.getThumbnailImg();
         this.listImg = emoticonPackEntity.getListImg();
         this.description = emoticonPackEntity.getDescription();
-        this.examine = emoticonPackEntity.getExamine();
         this.shareLink = emoticonPackEntity.getShareLink();
 
         // KST 변환 및 포맷 적용
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
         this.updatedAt = formatToKST(emoticonPackEntity.getUpdatedAt());
+
+        // 태그 이름 목록 설정
+        this.tags = emoticonPackEntity.getTagLists().stream()
+                .map(tagList -> tagList.getTag().getTagName())
+                .collect(Collectors.toList());
     }
 
     private String formatToKST(OffsetDateTime dateTime) {

@@ -34,7 +34,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 requestURI.equals("/tokens/refresh") ||
                 requestURI.equals("/emoticonpacks/search") ||
                 requestURI.equals("/emoticonpacks/info") ||
-                requestURI.equals("/emoticonpacks/safe-search") ||
                 requestURI.startsWith("/health") ||
                 requestURI.startsWith("/swagger-ui") || // 모든 /swagger-ui 경로를 거름
                 requestURI.startsWith("/v3/api-docs")) {

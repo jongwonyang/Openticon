@@ -11,11 +11,12 @@ import org.springframework.data.repository.query.Param;
 public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
     public EmoticonPackEntity findByShareLink(String uuid);
 
+    @Query("SELECT ep FROM EmoticonPackEntity ep WHERE ep.title LIKE %:title% AND ep.isBlacklist = false AND ep.isPublic = true")
     Page<EmoticonPackEntity> findByTitleContaining(String title, Pageable pageable);
 
-    @Query("SELECT ep FROM EmoticonPackEntity ep JOIN ep.tagLists tl JOIN tl.tag t WHERE t.tagName = :query")
+    @Query("SELECT ep FROM EmoticonPackEntity ep JOIN ep.tagLists tl JOIN tl.tag t WHERE t.tagName = :query AND ep.isBlacklist = false AND ep.isPublic = true")
     Page<EmoticonPackEntity> findByTag(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT ep FROM EmoticonPackEntity ep JOIN ep.member m WHERE m.nickname LIKE %:query%")
+    @Query("SELECT ep FROM EmoticonPackEntity ep JOIN ep.member m WHERE m.nickname LIKE %:query% AND ep.isBlacklist = false AND ep.isPublic = true")
     Page<EmoticonPackEntity> findByAuthorContaining(@Param("query") String query, Pageable pageable);
 }
