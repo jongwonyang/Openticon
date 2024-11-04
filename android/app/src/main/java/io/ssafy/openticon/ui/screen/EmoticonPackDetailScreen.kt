@@ -1,6 +1,7 @@
 package io.ssafy.openticon.ui.screen
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,11 +34,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +61,7 @@ import coil.request.ImageRequest
 import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel.UiState
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,10 +70,18 @@ fun EmoticonPackDetailScreen(
     navController: NavController,
     viewModel: EmoticonPackDetailScreenViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
     val uiState by viewModel.uiState.collectAsState()
+    val purchaseState by viewModel.purchaseState.collectAsState()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val isDownloading by viewModel.isDownloading.collectAsState()
+
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(emoticonPackId) {
         viewModel.fetchEmoticonPackDetail(emoticonPackId)
+        viewModel.fetchPurchaseInfo(emoticonPackId)
     }
 
     Scaffold(
@@ -100,17 +116,61 @@ fun EmoticonPackDetailScreen(
             Row(
                 modifier = Modifier
                     .padding(16.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Button(
-                    onClick = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "구매",
-                        fontWeight = FontWeight.Bold
-                    )
+                when (purchaseState) {
+                    is UiState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+                    is UiState.Success -> {
+                        val purchaseInfo = (purchaseState as UiState.Success).data
+
+                        if (!purchaseInfo.purchased) {
+                            // 테이블에 없음
+                            // 구매 버튼 표시
+                            Button(onClick = {
+                                if (!isLoggedIn) {
+                                    // 로그인 안됨
+                                    // 로그인 화면으로
+                                    navController.navigate("login")
+                                } else {
+                                    // 로그인 됨
+                                    // 구매 처리
+                                    showDialog = true
+                                }
+                            }) {
+                                Text("구매")
+                            }
+                        } else {
+                            // 테이블에 있음
+                            if (!purchaseInfo.downloaded) {
+                                // 다운로드 안됨
+                                // 다운로드 버튼 표시
+                                Button(
+                                    onClick = {
+                                        // 다운로드 처리
+                                        viewModel.downloadEmoticonPack(packId = emoticonPackId)
+                                    },
+                                    enabled = !isDownloading
+                                ) {
+                                    Text(if (isDownloading) "다운로드" else "다운로드 중...")
+                                }
+                            } else {
+                                // 다운로드 됨
+                                // 다운로드 완료 표시
+                                Button(
+                                    onClick = {},
+                                    enabled = false
+                                ) {
+                                    Text("다운로드 완료")
+                                }
+                            }
+                        }
+                    }
+                    is UiState.Error -> {
+                        Text("구매 정보를 불러오는데 실패했습니다.")
+                    }
                 }
             }
 
@@ -304,6 +364,51 @@ fun EmoticonPackDetailScreen(
             }
         }
 
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            icon = {
+                Icon(
+                    Icons.Outlined.Payments,
+                    contentDescription = null
+                )
+            },
+            title = {
+                Text(text = "이모티콘 구매")
+            },
+            text = {
+                Text(text = "이모티콘을 구매할까요?")
+            },
+            onDismissRequest = {
+                showDialog = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.purchaseEmoticonPack(packId = emoticonPackId)
+                        showDialog = false
+                    }
+                ) {
+                    Text("구매")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                    }
+                ) {
+                    Text("취소")
+                }
+            }
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.toastEvent.collectLatest {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
