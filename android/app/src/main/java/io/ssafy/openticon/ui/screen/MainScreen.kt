@@ -44,6 +44,7 @@ import coil.compose.rememberImagePainter
 import io.ssafy.openticon.KeyboardAccessibilityService
 import io.ssafy.openticon.R
 import io.ssafy.openticon.ui.component.UnAuthModal
+import io.ssafy.openticon.ui.viewmodel.MainViewModel
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 
 
@@ -51,8 +52,8 @@ import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 fun MainScreen(navController: NavController) {
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     val context = LocalContext.current
-    val memberViewModel: MemberViewModel = hiltViewModel()
-    val isLoggedIn by memberViewModel.isLoggedIn.collectAsState()
+    val mainViewModel: MainViewModel = hiltViewModel()
+    val isLoggedIn by mainViewModel.isLoggedIn.collectAsState()
     Log.d("isLoggedIn", isLoggedIn.toString());
     Scaffold(
         bottomBar = {
@@ -60,7 +61,7 @@ fun MainScreen(navController: NavController) {
                 selectedItem = selectedItem,
                 onItemSelected = {index ->
                     if (index == 3) {
-                        memberViewModel.isLoggedIn
+                        mainViewModel.isLoggedIn
                         if (isLoggedIn) {
                             selectedItem = index
                         } else {
