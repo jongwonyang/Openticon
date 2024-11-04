@@ -4,12 +4,16 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
+import retrofit2.http.Part
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -33,6 +37,13 @@ class EmoticonPacksRepository @Inject constructor(
             size = size,
             page = page
         )
+    }
+
+
+    suspend fun searchEmoticonPackByImage(
+        @Part image: MultipartBody.Part
+    ): PageEmoticonPackResponseDto {
+        return api.imageSearchEmoticonPacks(image)
     }
 
     suspend fun getPublicPackInfo(emoticonPackId: Int): PackInfoResponseDto {
@@ -90,4 +101,13 @@ class EmoticonPacksRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun getLocalEmoticonPacks(): Flow<List<EmoticonPack>> {
+        return emoticonDao.getAllEmoticonPacks()
+    }
+
+    suspend fun getEmotionsByPackId(packId: Int): Flow<List<Emoticon>>{
+        return emoticonDao.getEmoticonsByPack(packId)
+    }
+
 }
