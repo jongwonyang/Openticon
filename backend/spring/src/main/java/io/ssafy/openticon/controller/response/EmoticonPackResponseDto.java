@@ -1,7 +1,6 @@
 package io.ssafy.openticon.controller.response;
 
 import io.ssafy.openticon.dto.Category;
-import io.ssafy.openticon.dto.ExamineType;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import lombok.Getter;
 
@@ -23,7 +22,6 @@ public class EmoticonPackResponseDto {
     private String thumbnailImg;
     private String listImg;
     private String description;
-    private ExamineType examine;
     private String shareLink;
     private String createdAt;
     private String updatedAt;
@@ -48,7 +46,6 @@ public class EmoticonPackResponseDto {
         this.thumbnailImg = emoticonPackEntity.getThumbnailImg();
         this.listImg = emoticonPackEntity.getListImg();
         this.description = emoticonPackEntity.getDescription();
-        this.examine = emoticonPackEntity.getExamine();
         this.shareLink = emoticonPackEntity.getShareLink();
 
         // KST 변환 및 포맷 적용
