@@ -1,9 +1,11 @@
 package io.ssafy.openticon.service;
 
 import io.ssafy.openticon.controller.response.PurchaseEmoticonResponseDto;
+import io.ssafy.openticon.controller.response.PurchaseHistoryResponseDto;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.PurchaseHistoryEntity;
+import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.PurchaseHistoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,22 @@ public class PurchaseHistoryService {
 
     private final PurchaseHistoryRepository purchaseHistoryRepository;
     private final MemberService memberService;
+    private final PackRepository packRepository;
+
+    public Optional<PurchaseHistoryResponseDto> isPurchaseHisotry(MemberEntity member, Long emoticonPackId){
+        Optional<EmoticonPackEntity> emoticonPack = packRepository.findById(emoticonPackId);
+        // 구매 기록이 있다면 true 없다면 false
+        if (emoticonPack.isPresent()) {
+            Optional<PurchaseHistoryEntity> purchaseHistory = purchaseHistoryRepository.findByMemberAndEmoticonPack(member, emoticonPack.get());
+            PurchaseHistoryResponseDto purchaseHistoryResponseDto = PurchaseHistoryResponseDto.builder()
+                    .isPurchase(purchaseHistory.isPresent())
+                    .emoticonPackId(emoticonPack.get().getId())
+                    .build();
+            return Optional.of(purchaseHistoryResponseDto);
+        }
+
+        return Optional.empty();
+    }
 
     public boolean isMemberPurchasePack(MemberEntity member, EmoticonPackEntity emoticonPack){
         if(purchaseHistoryRepository.findByMemberAndEmoticonPack(member,emoticonPack).isEmpty())return false;
