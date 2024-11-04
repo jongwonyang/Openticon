@@ -41,8 +41,8 @@ object NetworkModule {
                 val newRequest = originalRequest.newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
-                val response = chain.proceed(newRequest)
-                response
+                chain.proceed(newRequest)
+
             }
             .addInterceptor(loggingInterceptor)
             .build()
@@ -75,6 +75,12 @@ object NetworkModule {
     @Singleton
     fun provideBaseUrl(): String {
         return BASE_URL
+    }
+
+    @Provides
+    @Singleton
+    fun providePointsApi(retrofit: Retrofit): PointsApi {
+        return retrofit.create(PointsApi::class.java)
     }
 
 }
