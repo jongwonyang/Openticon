@@ -19,10 +19,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import io.ssafy.openticon.R
+import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
 
 @Composable
 fun ProfileScreen(
-    navController: NavController
+    navController: NavController,
 ) {
     Column(
         modifier = Modifier
@@ -84,7 +85,7 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = { /* 회원 수정 기능 */ },
+                onClick = { navController.navigate("edit_profile") },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
