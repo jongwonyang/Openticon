@@ -7,6 +7,8 @@ import lombok.Getter;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class EmoticonPackResponseDto {
@@ -25,6 +27,7 @@ public class EmoticonPackResponseDto {
     private String shareLink;
     private String createdAt;
     private String updatedAt;
+    private List<String> tags;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
@@ -51,6 +54,11 @@ public class EmoticonPackResponseDto {
         // KST 변환 및 포맷 적용
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
         this.updatedAt = formatToKST(emoticonPackEntity.getUpdatedAt());
+
+        // 태그 이름 목록 설정
+        this.tags = emoticonPackEntity.getTagLists().stream()
+                .map(tagList -> tagList.getTag().getTagName())
+                .collect(Collectors.toList());
     }
 
     private String formatToKST(OffsetDateTime dateTime) {
