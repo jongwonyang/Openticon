@@ -8,19 +8,17 @@ import dagger.hilt.components.SingletonComponent
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import io.ssafy.openticon.data.remote.MemberApi
+import io.ssafy.openticon.data.remote.PointsApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import retrofit2.converter.gson.GsonConverterFactory
-import javax.inject.Singleton
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -33,6 +31,11 @@ object NetworkModule {
     fun provideOkHttpClient(): OkHttpClient {
         val token = runBlocking { TokenDataSource.token.firstOrNull() }
         Log.d("use token", "Access Token: $token")
+
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
         return OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
                 val originalRequest: Request = chain.request()
@@ -41,6 +44,7 @@ object NetworkModule {
                     .build()
                 chain.proceed(newRequest)
             }
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 
@@ -50,6 +54,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
+            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -70,6 +75,12 @@ object NetworkModule {
     @Singleton
     fun provideBaseUrl(): String {
         return BASE_URL
+    }
+
+    @Provides
+    @Singleton
+    fun providePointApi(retrofit: Retrofit): PointsApi {
+        return retrofit.create(PointsApi::class.java)
     }
 
 }

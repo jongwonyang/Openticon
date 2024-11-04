@@ -4,10 +4,12 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import java.io.File
@@ -37,6 +39,10 @@ class EmoticonPacksRepository @Inject constructor(
 
     suspend fun getPublicPackInfo(emoticonPackId: Int): PackInfoResponseDto {
         return api.getPublicPackInfo(emoticonPackId)
+    }
+
+    suspend fun savedEmoticonPack(emoticonPack: EmoticonPack) {
+        emoticonDao.insertEmoticonPack(emoticonPack)
     }
 
     suspend fun downloadAndSavePublicEmoticonPack(packId: Int, emoticonUrls: List<String>) {
@@ -89,5 +95,9 @@ class EmoticonPacksRepository @Inject constructor(
             e.printStackTrace()
             null
         }
+    }
+
+    fun getPurchasedPackInfo(packId: Int): Flow<EmoticonPack?> {
+        return emoticonDao.getEmoticonPack(packId)
     }
 }
