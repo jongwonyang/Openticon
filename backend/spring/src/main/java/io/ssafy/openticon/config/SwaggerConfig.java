@@ -84,6 +84,14 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
+    public GroupedOpenApi objectionApi() {
+        return GroupedOpenApi.builder()
+                .group("이의제기 관련 기능")
+                .pathsToMatch("/objection/**")
+                .build();
+    }
+
 
 
 }
