@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto alert-list" :class="{ 'hasMoreAlert': alerts.length > displayedAlertLimit }">
+  <div class="alert-list" :class="{ 'hasMoreAlert': alerts.length > displayedAlertLimit }">
     <TransitionGroup name="fade-shrink">
       <div
         class="mx-1 mt-1 p-4 flex justify-between border border-gray-300 rounded-md bg-gray-200 transition-colors duration-300 cursor-pointer shadow-md"
@@ -37,7 +37,7 @@ const { alerts } = storeToRefs(alertStore);
 const overflowExpaned = ref(false);
 
 watch(alerts, (newVal) => {
-  if (newVal.length <= 4) {
+  if (newVal.length <= 1) {
     overflowExpaned.value = false;
   }
 });
