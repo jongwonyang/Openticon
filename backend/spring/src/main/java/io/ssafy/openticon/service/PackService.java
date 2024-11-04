@@ -4,6 +4,7 @@ import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
+import io.ssafy.openticon.dto.ExamineType;
 import io.ssafy.openticon.dto.ImageUrl;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
@@ -45,8 +46,9 @@ public class PackService {
     private final TagRepository tagRepository;
     private final TagListRepository tagListRepository;
     private final PurchaseHistoryService purchaseHistoryService;
+    private final SafeSearchService safeSearchService;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -55,50 +57,73 @@ public class PackService {
         this.tagRepository = tagRepository;
         this.tagListRepository = tagListRepository;
         this.purchaseHistoryService = purchaseHistoryService;
+        this.safeSearchService = safeSearchService;
     }
 
     @Transactional
     public String emoticonPackUpload(EmoticonPack emoticonPack){
-        MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
-        MultipartFile listImg= emoticonPack.getListImg();
-        String thumbnailImgUrl=saveImage(thumbnailImg);
-        String listImgUrl=saveImage(listImg);
-
-        List<String> emoticonsUrls=new ArrayList<>();
-        for(MultipartFile emoticon: emoticonPack.getEmoticons()){
-            emoticonsUrls.add(saveImage(emoticon));
-        }
+        try{
+            List<MultipartFile> infoImages = new ArrayList<>();
+            infoImages.add(emoticonPack.getThumbnailImg());
+            infoImages.add(emoticonPack.getListImg());
+            boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
 
 
+            List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
+            MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
+            MultipartFile listImg= emoticonPack.getListImg();
+            String thumbnailImgUrl=saveImage(thumbnailImg);
+            String listImgUrl=saveImage(listImg);
+            List<String> emoticonsUrls=new ArrayList<>();
 
 
-        MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
-        EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
-        packRepository.save(emoticonPackEntity);
-        emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
+
+            MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
+            EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
 
 
-        // 태그 정보 추가
-        List<String> tagNames = emoticonPack.getTags();
-        for(String tag : tagNames){
-            TagEntity findTagEntity = null;
-            Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
-            if(getTagEntity.isEmpty()){
-                TagEntity tagEntity = TagEntity.builder()
-                        .tagName(tag)
-                        .build();
-                tagRepository.save(tagEntity);
-                findTagEntity = tagEntity;
-            }else{
-                findTagEntity = getTagEntity.get();
+            boolean problematicImage = false;
+            for (int i = 0; i < emoticonList.size(); i += 16) {
+                int end = Math.min(i + 16, emoticonList.size());
+                List<MultipartFile> subList = emoticonList.subList(i, end);
+
+                if (safeSearchService.detectSafeSearch(subList)) {
+                    problematicImage = true;
+                }
             }
-            TagListEntity tagListEntity = TagListEntity.builder()
-                    .emoticonPack(emoticonPackEntity)
-                    .tag(findTagEntity)
-                    .build();
-            tagListRepository.save(tagListEntity);
+
+            if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
+            packRepository.save(emoticonPackEntity);
+            // 여기 부분
+            for(MultipartFile emoticon: emoticonList){
+                emoticonsUrls.add(saveImage(emoticon));
+            }
+            emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
+
+            // 태그 정보 추가
+            List<String> tagNames = emoticonPack.getTags();
+            for(String tag : tagNames){
+                TagEntity findTagEntity = null;
+                Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
+                if(getTagEntity.isEmpty()){
+                    TagEntity tagEntity = TagEntity.builder()
+                            .tagName(tag)
+                            .build();
+                    tagRepository.save(tagEntity);
+                    findTagEntity = tagEntity;
+                }else{
+                    findTagEntity = getTagEntity.get();
+                }
+                TagListEntity tagListEntity = TagListEntity.builder()
+                        .emoticonPack(emoticonPackEntity)
+                        .tag(findTagEntity)
+                        .build();
+                tagListRepository.save(tagListEntity);
+            }
+            return emoticonPackEntity.getShareLink();
+        }catch (IOException e){
+            throw new RuntimeException(e.getMessage());
         }
-        return emoticonPackEntity.getShareLink();
     }
 
 

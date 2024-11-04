@@ -16,6 +16,7 @@ FROM eclipse-temurin:17
 WORKDIR /app
 
 COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/detectsafesearch-df3e757877a2.json detectsafesearch-df3e757877a2.json
 
 COPY entrypoint.sh entrypoint.sh
 

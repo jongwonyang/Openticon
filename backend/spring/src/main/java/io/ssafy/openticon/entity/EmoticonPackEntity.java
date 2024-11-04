@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @Table(name = "emoticon_pack")
 public class EmoticonPackEntity {
@@ -61,7 +64,7 @@ public class EmoticonPackEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "examine", nullable = false)
-    private ExamineType examine = ExamineType.IN_PROGRESS;
+    private ExamineType examine = ExamineType.COMPLETED;
 
     @Column(name = "share_link", nullable = false)
     private String shareLink="public";
