@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EmoticonDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertEmoticonPack(emoticonPack: EmoticonPack)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

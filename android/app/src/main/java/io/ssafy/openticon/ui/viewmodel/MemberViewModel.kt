@@ -8,6 +8,7 @@ import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.MemberEntity
 import io.ssafy.openticon.di.UserSession
 import io.ssafy.openticon.domain.usecase.GetMemberInfoUseCase
+import io.ssafy.openticon.domain.usecase.SyncPurchasedPacksUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class MemberViewModel @Inject constructor(
     private val getMemberInfoUseCase: GetMemberInfoUseCase,
     val baseUrl: String,
-    private val userSession: UserSession
+    private val userSession: UserSession,
+    private val syncPurchasedPacksUseCase: SyncPurchasedPacksUseCase
 ): ViewModel() {
 
     // 로그인 상태
@@ -52,6 +54,10 @@ class MemberViewModel @Inject constructor(
                     if (result != null) {
                         userSession.login(result)
                     }
+
+                    // 구매 목록 동기화
+                    syncPurchasedPacksUseCase()
+
                     _uiState.value = UiState.Success<MemberEntity>(result)
                 } else if (status == 401 || status == 403) {Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
                     _uiState.value = UiState.UnAuth
@@ -61,6 +67,10 @@ class MemberViewModel @Inject constructor(
 
             }
         }
+    }
+
+    suspend fun syncPurchasedList() {
+
     }
 
 
