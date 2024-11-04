@@ -1,5 +1,7 @@
 package io.ssafy.openticon.service;
 
+import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
+import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
@@ -28,6 +30,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.security.sasl.AuthenticationException;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +39,7 @@ import java.util.Optional;
 @Service
 public class PackService {
 
+    private final ImageHashService imageHashService;
     @Value("${spring.image-server-url}")
     private String imageServerUrl;
 
@@ -48,7 +53,7 @@ public class PackService {
     private final PurchaseHistoryService purchaseHistoryService;
     private final SafeSearchService safeSearchService;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -58,6 +63,7 @@ public class PackService {
         this.tagListRepository = tagListRepository;
         this.purchaseHistoryService = purchaseHistoryService;
         this.safeSearchService = safeSearchService;
+        this.imageHashService = imageHashService;
     }
 
     @Transactional
@@ -72,14 +78,21 @@ public class PackService {
             List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
             MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
             MultipartFile listImg= emoticonPack.getListImg();
-            String thumbnailImgUrl=saveImage(thumbnailImg);
-            String listImgUrl=saveImage(listImg);
+
+            File thumbnailImgFile=makeFile(thumbnailImg);
+            File listImgFile=makeFile(listImg);
+
+            String thumbnailImgUrl=saveImage(thumbnailImg,thumbnailImgFile);
+            String listImgUrl=saveImage(listImg,listImgFile);
+
+            //checkDuplicateThumbnailAndListImg(thumbnailImg,listImg);
             List<String> emoticonsUrls=new ArrayList<>();
-
-
 
             MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
             EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
+
+            imageHashService.saveThumbnailHash(thumbnailImgFile,emoticonPackEntity);
+            imageHashService.saveListImgHash(listImgFile,emoticonPackEntity);
 
 
             boolean problematicImage = false;
@@ -95,8 +108,12 @@ public class PackService {
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
             packRepository.save(emoticonPackEntity);
             // 여기 부분
+            int cnt=0;
             for(MultipartFile emoticon: emoticonList){
-                emoticonsUrls.add(saveImage(emoticon));
+                File emoticonFile=makeFile(emoticon);
+                emoticonsUrls.add(saveImage(emoticon, makeFile(emoticon)));
+                imageHashService.saveEmoticonHash(emoticonFile,emoticonPackEntity,cnt);
+                cnt++;
             }
             emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
 
@@ -126,31 +143,42 @@ public class PackService {
         }
     }
 
-
-    private String saveImage(MultipartFile image){
-        String uploadServerUrl = imageServerUrl+ "/upload/image";
-
+    private File makeFile(MultipartFile image){
         File tempFile = null;
         try {
             tempFile = File.createTempFile("upload", image.getOriginalFilename());
             image.transferTo(tempFile);
-
-            ImageUrl imageUrl = webClient.post()
-                    .uri(uploadServerUrl)
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .bodyValue(createMultipartBody(tempFile, image.getOriginalFilename()))
-                    .retrieve()
-                    .bodyToMono(ImageUrl.class)
-                    .block();
-
-            return imageUrl.getUrl();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save image",e);
+            return tempFile;
+        }catch (IOException e){
+            throw new RuntimeException("File만들기 실패");
         }
+
+    }
+
+
+    private String saveImage(MultipartFile image, File tempFile){
+        String uploadServerUrl = imageServerUrl+ "/upload/image";
+
+//        File tempFile = null;
+
+//            tempFile = File.createTempFile("upload", image.getOriginalFilename());
+//            image.transferTo(tempFile);
+
+
+        ImageUrl imageUrl = webClient.post()
+                .uri(uploadServerUrl)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .bodyValue(createMultipartBody(tempFile, image.getOriginalFilename()))
+                .retrieve()
+                .bodyToMono(ImageUrl.class)
+                .block();
+
+        return imageUrl.getUrl();
+
 
 
     }
+
 
     private MultiValueMap<String, Object> createMultipartBody(File file, String fileName) {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -238,5 +266,9 @@ public class PackService {
 
     public EmoticonPackEntity getPackById(Long packId){
         return packRepository.findById(packId).orElseThrow();
+    }
+
+    public List<EmoticonPackEntity> getAllEmoticonPack(){
+        return packRepository.findAll();
     }
 }
