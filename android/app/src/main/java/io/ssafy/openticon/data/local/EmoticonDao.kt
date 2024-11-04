@@ -27,4 +27,7 @@ interface EmoticonDao {
 
     @Query("SELECT * FROM emoticon_packs")
     fun getAllEmoticonPacks(): Flow<List<EmoticonPack>>
+
+    @Query("UPDATE emoticon_packs SET downloaded = :b WHERE id = :packId")
+    fun updateEmoticonPackDownloaded(packId: Int, b: Boolean)
 }

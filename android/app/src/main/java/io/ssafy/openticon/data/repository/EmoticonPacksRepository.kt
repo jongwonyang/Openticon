@@ -61,6 +61,7 @@ class EmoticonPacksRepository @Inject constructor(
                 throw Exception("Failed to download emoticon from $url")
             }
         }
+        emoticonDao.updateEmoticonPackDownloaded(packId, true)
     }
 
     private suspend fun downloadAndSaveEmoticonFile(emoticonUrl: String, packId: Int, fileName: String): String? {

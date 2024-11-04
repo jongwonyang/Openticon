@@ -150,11 +150,12 @@ fun EmoticonPackDetailScreen(
                                 Button(
                                     onClick = {
                                         // 다운로드 처리
-                                        viewModel.downloadEmoticonPack(packId = emoticonPackId)
+                                        if (!isDownloading)
+                                            viewModel.downloadEmoticonPack(packId = emoticonPackId)
                                     },
                                     enabled = !isDownloading
                                 ) {
-                                    Text(if (isDownloading) "다운로드" else "다운로드 중...")
+                                    Text(if (isDownloading) "다운로드 중..." else "다운로드")
                                 }
                             } else {
                                 // 다운로드 됨
