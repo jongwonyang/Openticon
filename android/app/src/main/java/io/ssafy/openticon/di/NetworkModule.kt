@@ -31,15 +31,15 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        val token = runBlocking { TokenDataSource.token.firstOrNull() }
-        Log.d("use token", "Access Token: $token")
         return OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
                 val originalRequest: Request = chain.request()
+                val token = runBlocking { TokenDataSource.token.firstOrNull() }
                 val newRequest = originalRequest.newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
-                chain.proceed(newRequest)
+                val response = chain.proceed(newRequest)
+                response
             }
             .build()
     }

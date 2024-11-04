@@ -18,4 +18,5 @@ class MainViewModel @Inject constructor(
     // 로그인 상태
     val isLoggedIn: StateFlow<Boolean> = userSession.isLoggedIn
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
 }
