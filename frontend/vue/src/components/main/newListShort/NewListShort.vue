@@ -1,8 +1,8 @@
 <template>
     <div class="container mt-4 p-4 mx-auto max-w-screen-lg">
-        <h2 class="text-2xl font-bold title">
-            <span class="title-text pr-2">신규 이모티콘</span>
-            <RouterLink :to="{ name: 'newList' }" class="text-sm text-gray-500 hover:font-bold">더보기 ></RouterLink>
+        <h2>
+            <span class="text-2xl font-nnsqneo font-bold pr-2">신규 이모티콘</span>
+            <RouterLink :to="{ name: 'newList' }" class="text-md text-gray-500 hover:font-bold font-nnsqneo">더보기 ></RouterLink>
         </h2>
         <!-- 이모티콘 리스트 -->
         <div class="md:grid md:grid-cols-5 md:gap-4 pt-4">
@@ -45,10 +45,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.title {
-    font-family: 'NanumSquareNeo', sans-serif;
-}
-
 /* 스크롤바 숨기기 */
 .overflow-x-auto {
     -ms-overflow-style: none; /* IE, Edge */
@@ -61,14 +57,9 @@ onMounted(() => {
 
 /* 호버 효과 추가 */
 .emoticon-item {
-    transition: transform 0.05s ease, box-shadow 0.05s ease, border-color 0.05s ease;
+    transition: transform 0.05s ease, box-shadow 0.05s ease, border-color 0.05s ease, border-radius 0.05s ease;
     cursor: pointer;
-    @apply hover:font-bold hover:underline;
-}
-
-.emoticon-item:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #e5e7eb;
+    @apply hover:font-bold hover:underline hover:rounded-lg hover:shadow-lg hover:scale-105;
+    
 }
 </style>
