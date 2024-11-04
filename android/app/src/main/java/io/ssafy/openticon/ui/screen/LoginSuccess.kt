@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.EditDeviceTokenRequestDto
 import io.ssafy.openticon.data.remote.MemberApiService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -36,9 +37,9 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
     LaunchedEffect(Unit) {
         val deviceToken = "your_device_token"
         coroutineScope.launch {
-            // 1. saveDeviceToken을 동기적으로 실행
+            val tokenDataSource = TokenDataSource
+            tokenDataSource.saveToken(accessToken)
             saveDeviceToken(accessToken, deviceToken, isMobile = true, context)
-            // 2. fetchMemberInfo가 완료될 때까지 기다렸다가 상태 확인
             memberViewModel.fetchMemberInfo()
         }
     }
@@ -90,6 +91,7 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
                 }
             }
             is MemberViewModel.UiState.Error -> {
+                Log.d("login error", "로그인 실패")
                 // 에러 다이얼로그를 띄움
                 if (showErrorDialog) {
                     ErrorDialog {
@@ -98,6 +100,7 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
                 }
             }
             is MemberViewModel.UiState.UnAuth -> {
+                Log.d("login unauth", "로그인 실패")
                 if (showErrorDialog) {
                     ErrorDialog {
                         showErrorDialog = false // 다이얼로그 닫기
@@ -118,6 +121,7 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
 }
 @Composable
 fun ErrorDialog(onDismiss: () -> Unit) {
+
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "오류 발생") },

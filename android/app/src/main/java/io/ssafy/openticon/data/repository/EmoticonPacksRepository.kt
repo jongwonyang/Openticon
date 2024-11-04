@@ -50,6 +50,10 @@ class EmoticonPacksRepository @Inject constructor(
         return api.getPublicPackInfo(emoticonPackId)
     }
 
+    suspend fun savedEmoticonPack(emoticonPack: EmoticonPack) {
+        emoticonDao.insertEmoticonPack(emoticonPack)
+    }
+
     suspend fun downloadAndSavePublicEmoticonPack(packId: Int, emoticonUrls: List<String>) {
         for ((index, url) in emoticonUrls.withIndex()) {
             val fileName = "emoticon_$index.${url.substringAfterLast(".")}"
@@ -110,4 +114,8 @@ class EmoticonPacksRepository @Inject constructor(
         return emoticonDao.getEmoticonsByPack(packId)
     }
 
+
+    fun getPurchasedPackInfo(packId: Int): Flow<EmoticonPack?> {
+        return emoticonDao.getEmoticonPack(packId)
+    }
 }

@@ -1,8 +1,6 @@
 package io.ssafy.openticon.data.repository
 
 import io.ssafy.openticon.data.model.MemberEntity
-import io.ssafy.openticon.data.model.MemberResponseDTO
-import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import io.ssafy.openticon.data.remote.MemberApi
 import retrofit2.Response
 import javax.inject.Inject

@@ -8,13 +8,16 @@ import dagger.hilt.components.SingletonComponent
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import io.ssafy.openticon.data.remote.MemberApi
+import io.ssafy.openticon.data.remote.PointsApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -26,16 +29,22 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        val token = runBlocking { TokenDataSource.token.firstOrNull() }
-        Log.d("use token", "Access Token: $token")
+
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
         return OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
                 val originalRequest: Request = chain.request()
+                val token = runBlocking { TokenDataSource.token.firstOrNull() }
                 val newRequest = originalRequest.newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
                 chain.proceed(newRequest)
+
             }
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 
@@ -45,6 +54,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
+            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -65,6 +75,12 @@ object NetworkModule {
     @Singleton
     fun provideBaseUrl(): String {
         return BASE_URL
+    }
+
+    @Provides
+    @Singleton
+    fun providePointsApi(retrofit: Retrofit): PointsApi {
+        return retrofit.create(PointsApi::class.java)
     }
 
 }
