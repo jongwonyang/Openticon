@@ -1,5 +1,6 @@
 package io.ssafy.openticon.service;
 
+import io.ssafy.openticon.controller.PurchaseHistoryController;
 import io.ssafy.openticon.controller.response.PurchaseEmoticonResponseDto;
 import io.ssafy.openticon.controller.response.PurchaseHistoryResponseDto;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
@@ -46,23 +47,39 @@ public class PurchaseHistoryService {
         return true;
     }
 
-    public List<PurchaseEmoticonResponseDto> viewPurchasedEmoticons(String email, Pageable pageable){
+    public List<PurchaseEmoticonResponseDto> viewPurchasedEmoticons(String email, boolean showAll, Pageable pageable){
         MemberEntity member=memberService.getMemberByEmail(email).orElseThrow();
+        List<PurchaseEmoticonResponseDto> result = new ArrayList<>();
 
-        Page<PurchaseHistoryEntity> purchaseHistoryEntities=purchaseHistoryRepository.findAllByMember(member,pageable);
+        if(showAll){
+            Optional<List<PurchaseHistoryEntity>> purchaseHistoryEntities = purchaseHistoryRepository.findAllByMemberOrderByMemberAsc(member);
+            if(purchaseHistoryEntities.isPresent()){
+                for(PurchaseHistoryEntity purchaseHistoryEntity: purchaseHistoryEntities.get()){
+                    EmoticonPackEntity emoticonPackEntity=purchaseHistoryEntity.getEmoticonPack();
+                    PurchaseEmoticonResponseDto purchaseEmoticonResponseDto=PurchaseEmoticonResponseDto.builder()
+                            .packId(emoticonPackEntity.getId())
+                            .packName(emoticonPackEntity.getTitle())
+                            .thumbnailImg(emoticonPackEntity.getThumbnailImg())
+                            .isHide(purchaseHistoryEntity.isHide())
+                            .build();
 
-        List<PurchaseEmoticonResponseDto> result=new ArrayList<>();
-        for(PurchaseHistoryEntity purchaseHistoryEntity: purchaseHistoryEntities){
-            EmoticonPackEntity emoticonPackEntity=purchaseHistoryEntity.getEmoticonPack();
-            PurchaseEmoticonResponseDto purchaseEmoticonResponseDto=PurchaseEmoticonResponseDto.builder()
-                    .packName(emoticonPackEntity.getTitle())
-                    .thumbnailImg(emoticonPackEntity.getThumbnailImg())
-                    .isHide(purchaseHistoryEntity.isHide())
-                    .build();
+                    result.add(purchaseEmoticonResponseDto);
+                }
+            }
+        }else{
+            Page<PurchaseHistoryEntity> purchaseHistoryEntities=purchaseHistoryRepository.findAllByMember(member,pageable);
+            for(PurchaseHistoryEntity purchaseHistoryEntity: purchaseHistoryEntities){
+                EmoticonPackEntity emoticonPackEntity=purchaseHistoryEntity.getEmoticonPack();
+                PurchaseEmoticonResponseDto purchaseEmoticonResponseDto=PurchaseEmoticonResponseDto.builder()
+                        .packId(emoticonPackEntity.getId())
+                        .packName(emoticonPackEntity.getTitle())
+                        .thumbnailImg(emoticonPackEntity.getThumbnailImg())
+                        .isHide(purchaseHistoryEntity.isHide())
+                        .build();
 
-            result.add(purchaseEmoticonResponseDto);
+                result.add(purchaseEmoticonResponseDto);
+            }
         }
-
         return result;
     }
 

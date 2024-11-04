@@ -9,7 +9,9 @@ import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.service.PackService;
 import io.ssafy.openticon.service.PurchaseHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,10 +39,14 @@ public class PurchaseHistoryController {
 
     @GetMapping("")
     @Operation(summary = "구매한 이모티콘팩을 보여줍니다.")
-    public ResponseEntity<List<PurchaseEmoticonResponseDto>> viewPurchasedEmoticons(@AuthenticationPrincipal UserDetails userDetails,
-                                                                                    Pageable pageable){
-
-        return ResponseEntity.status(HttpStatus.OK).body(purchaseHistoryService.viewPurchasedEmoticons(userDetails.getUsername(),pageable));
+    public ResponseEntity<List<PurchaseEmoticonResponseDto>> viewPurchasedEmoticons(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "true") boolean all,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        return ResponseEntity.status(HttpStatus.OK).body(purchaseHistoryService.viewPurchasedEmoticons(userDetails.getUsername(), all, pageable));
     }
 
     @GetMapping("history")
