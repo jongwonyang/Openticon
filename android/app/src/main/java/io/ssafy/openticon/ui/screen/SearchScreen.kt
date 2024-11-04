@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,15 +71,32 @@ fun SearchScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val listState = rememberLazyListState()
 
+    var isImageSearch by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver
+
     Column {
         Spacer(Modifier.height(16.dp))
 
-        SearchBar(
-            selectedKey = selectedKey,
-            onKeyChange = { viewModel.onSearchKeyChange(it) },
-            searchText = searchText,
-            onTextChange = { viewModel.onSearchTextChange(it) }
-        )
+        if(!isImageSearch){
+            SearchBar(
+                selectedKey = selectedKey,
+                onKeyChange = { viewModel.onSearchKeyChange(it) },
+                searchText = searchText,
+                onTextChange = { viewModel.onSearchTextChange(it) },
+                navController = navController,
+                isImageSearch = isImageSearch,  // Pass the state here
+                onImageSearchToggle = { isImageSearch = it }
+            )
+        }
+        else{
+            ImageSearchScreen(
+                isImageSearch = isImageSearch,  // Pass the state here
+                onImageSearchToggle = { isImageSearch = it },
+                contentResolver = contentResolver
+            )
+        }
 
         Text(
             text = "검색결과",
@@ -127,7 +145,14 @@ fun SearchScreen(
             snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
                 .collect { lastVisibleItemIndex ->
                     if (lastVisibleItemIndex == searchResult.size - 1 && !isLoading) {
-                        viewModel.loadMoreSearchResult()
+                        if(!isImageSearch) {
+                            viewModel.loadMoreSearchResult()
+                        }
+                        else{
+                            viewModel.loadMoreImageSearchResult(
+                                contentResolver
+                            )
+                        }
                     }
                 }
         }
@@ -149,6 +174,9 @@ fun SearchBar(
     searchText: String,
     onTextChange: (String) -> Unit,
     viewModel: SearchScreenViewModel = hiltViewModel(),
+    navController: NavController,
+    isImageSearch: Boolean,  // Accept the isImageSearch state
+    onImageSearchToggle: (Boolean) -> Unit  // Callback to toggle image search
 ) {
     val focusManager = LocalFocusManager.current
     var isExpanded by remember { mutableStateOf(false) }
@@ -262,6 +290,7 @@ fun SearchBar(
             IconButton(
                 onClick = {
                     focusManager.clearFocus()
+                    onImageSearchToggle(!isImageSearch)
                 },
                 modifier = Modifier.size(48.dp)
             ) {

@@ -11,7 +11,9 @@ import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
+import retrofit2.http.Part
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -35,6 +37,13 @@ class EmoticonPacksRepository @Inject constructor(
             size = size,
             page = page
         )
+    }
+
+
+    suspend fun searchEmoticonPackByImage(
+        @Part image: MultipartBody.Part
+    ): PageEmoticonPackResponseDto {
+        return api.imageSearchEmoticonPacks(image)
     }
 
     suspend fun getPublicPackInfo(emoticonPackId: Int): PackInfoResponseDto {
@@ -61,7 +70,6 @@ class EmoticonPacksRepository @Inject constructor(
                 throw Exception("Failed to download emoticon from $url")
             }
         }
-        emoticonDao.updateEmoticonPackDownloaded(packId, true)
     }
 
     private suspend fun downloadAndSaveEmoticonFile(emoticonUrl: String, packId: Int, fileName: String): String? {
@@ -97,6 +105,15 @@ class EmoticonPacksRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun getLocalEmoticonPacks(): Flow<List<EmoticonPack>> {
+        return emoticonDao.getAllEmoticonPacks()
+    }
+
+    suspend fun getEmotionsByPackId(packId: Int): Flow<List<Emoticon>>{
+        return emoticonDao.getEmoticonsByPack(packId)
+    }
+
 
     fun getPurchasedPackInfo(packId: Int): Flow<EmoticonPack?> {
         return emoticonDao.getEmoticonPack(packId)
