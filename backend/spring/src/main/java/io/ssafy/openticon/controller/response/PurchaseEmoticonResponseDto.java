@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PurchaseEmoticonResponseDto {
+    private Long packId;
 
     private String packName;
 

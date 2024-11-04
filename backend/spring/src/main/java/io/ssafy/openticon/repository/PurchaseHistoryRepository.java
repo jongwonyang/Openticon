@@ -17,4 +17,6 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
 
     Page<PurchaseHistoryEntity> findAllByMember(MemberEntity member, Pageable pageable);
 
+    Optional<List<PurchaseHistoryEntity>> findAllByMemberOrderByMemberAsc(MemberEntity member);
+
 }
