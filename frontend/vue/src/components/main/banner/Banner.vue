@@ -4,11 +4,11 @@ import { ref, onMounted, onUnmounted } from 'vue';
 const slides = ref([
   {
     id: 1,
-    image: 'https://mud-kage.kakaocdn.net/dn/calp54/btsKjHtWXxe/P4pXxUOx68r4xXKlU3FCZk/img.gif'
+    image: new URL(`/src/assets/banner/banner1.png`, import.meta.url).href
   },
   {
     id: 2,
-    image: 'https://item.kakaocdn.net/dn/bJyZM2/btsKhwg4KL4/JQvm5km7FDNG3IDXEwtgzk/img.gif'
+    image: new URL(`/src/assets/banner/banner2.png`, import.meta.url).href
   },
 ]);
 
