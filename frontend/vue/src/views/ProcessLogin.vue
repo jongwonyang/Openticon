@@ -12,7 +12,7 @@ const route = useRoute();
 
 onMounted(() => {
     console.log(route.query.access_token);
-    window.opener.postMessage(route.query.access_token , 'http://localhost:3000');
+    window.opener.postMessage(route.query.access_token, import.meta.env.VITE_APP_URL);
     window.close();
 });
 </script> 
