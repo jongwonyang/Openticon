@@ -33,6 +33,7 @@ public class PurchaseHistoryService {
             PurchaseHistoryResponseDto purchaseHistoryResponseDto = PurchaseHistoryResponseDto.builder()
                     .isPurchase(purchaseHistory.isPresent())
                     .emoticonPackId(emoticonPack.get().getId())
+                    .message(purchaseHistory.isPresent() ? "구매함" : "구매하지 않음")
                     .build();
             return Optional.of(purchaseHistoryResponseDto);
         }
