@@ -63,7 +63,7 @@ fun LoginScreen() {
 
         Button(
             onClick = {
-                val googleLoginUrl = memberViewModel.baseUrl+"oauth2/authorization/kakao?redirect_uri=openticon://successLogin&mode=login"
+                val googleLoginUrl = memberViewModel.baseUrl+"/api/v1/oauth2/authorization/kakao?redirect_uri=openticon://successLogin&mode=login"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
                 context.startActivity(intent)
             },
@@ -89,7 +89,7 @@ fun LoginScreen() {
         // Button for Naver Login with Image
         Button(
             onClick = {
-                val googleLoginUrl = memberViewModel.baseUrl+"oauth2/authorization/naver?redirect_uri=openticon://successLogin&mode=login"
+                val googleLoginUrl = memberViewModel.baseUrl+"/api/v1/oauth2/authorization/naver?redirect_uri=openticon://successLogin&mode=login"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
                 context.startActivity(intent)
             },
@@ -127,7 +127,7 @@ fun LoginScreen() {
         // Button for Google Login with Image
         Button(
             onClick = {
-                val googleLoginUrl = memberViewModel.baseUrl+"oauth2/authorization/google?redirect_uri=openticon://successLogin&mode=login"
+                val googleLoginUrl = memberViewModel.baseUrl+"/api/v1/oauth2/authorization/google?redirect_uri=openticon://successLogin&mode=login"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleLoginUrl))
                 context.startActivity(intent)
             },
