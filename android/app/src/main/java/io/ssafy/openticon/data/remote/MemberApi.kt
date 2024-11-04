@@ -8,11 +8,11 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface MemberApi {
-    @GET("member")
+    @GET("/api/v1/member")
     suspend fun getMemberInfo(): Response<MemberEntity?>
 
 
-    @POST("member/deviceToken")
+    @POST("/api/v1/member/deviceToken")
     suspend fun editDeviceToken(
         @Body requestDto: EditDeviceTokenRequestDto
     ): Response<String>

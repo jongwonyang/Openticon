@@ -12,10 +12,15 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import retrofit2.Retrofit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+import okhttp3.Request
 
 @Module
 @InstallIn(SingletonComponent::class)

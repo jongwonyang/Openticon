@@ -32,24 +32,44 @@ import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import io.ssafy.openticon.KeyboardAccessibilityService
 import io.ssafy.openticon.R
+import io.ssafy.openticon.ui.component.UnAuthModal
+import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 
 
 @Composable
 fun MainScreen(navController: NavController) {
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     val context = LocalContext.current
-
+    val memberViewModel: MemberViewModel = hiltViewModel()
+    val isLoggedIn by memberViewModel.isLoggedIn.collectAsState()
+    Log.d("isLoggedIn", isLoggedIn.toString());
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
                 selectedItem = selectedItem,
-                onItemSelected = { index -> selectedItem = index }
+                onItemSelected = {index ->
+                    if (index == 3) {
+                        memberViewModel.isLoggedIn
+                        if (isLoggedIn) {
+                            selectedItem = index
+                        } else {
+                            navController.navigate("login")
+                        }
+                    } else {
+                        selectedItem = index
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -82,7 +102,6 @@ fun MainScreen(navController: NavController) {
         }
     }
 }
-
 fun requestPermissionsAndStartService(context: Context) {
     // 1. 알림 권한 요청
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
