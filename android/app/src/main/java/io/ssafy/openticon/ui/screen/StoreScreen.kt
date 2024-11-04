@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,17 +39,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import io.ssafy.openticon.R
 import io.ssafy.openticon.ui.sample.CarouselSample
 import io.ssafy.openticon.ui.sample.EmoticonPackSampleData
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import coil.compose.rememberImagePainter
+import io.ssafy.openticon.ui.viewmodel.StoreViewModel
 
 
 data class ItemData(val imageRes: Int, val title: String, val author: String)
 @Composable
-fun StoreScreen() {
+fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
+                navController : NavController) {
+    val newEmoticonPack by viewModel.searchResult.collectAsState()
+    val popularEmoticonPack by viewModel.popularEmoticonPack.collectAsState()
+    val tag1EmoticonPack by viewModel.tag1EmoticonPack.collectAsState()
+    val tag2EmoticonPack by viewModel.tag2EmoticonPack.collectAsState()
+    val tag3EmoticonPack by viewModel.tag3EmoticonPack.collectAsState()
+    val tagQuery1 by viewModel.tagQuery1.collectAsState()
+    val tagQuery2 by viewModel.tagQuery2.collectAsState()
+    val tagQuery3 by viewModel.tagQuery3.collectAsState()
+
     val items = listOf(
         ItemData(R.drawable.empty, "", ""), // 왼쪽 빈 이미지
         ItemData(R.drawable.google, "이모티콘 제목 1", "작성자 1"),
@@ -65,7 +80,7 @@ fun StoreScreen() {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
-    LaunchedEffect(listState.isScrollInProgress) {
+    LaunchedEffect(listState.isScrollInProgress,Unit) {
         if (!listState.isScrollInProgress) {
             val viewportCenter = listState.layoutInfo.viewportEndOffset / 2
 
@@ -83,6 +98,15 @@ fun StoreScreen() {
             }
         }
     }
+//    LaunchedEffect(Unit) {
+//        val itemWidth = 150
+//        val viewportWidth = listState.layoutInfo.viewportSize.width
+//        listState.scrollToItem(centerIndex)
+//        with(LocalDensity) {
+//            val offset = (viewportWidth / 2) - (itemWidth / 2)
+//            listState.animateScrollToItem(centerIndex, scrollOffset = offset.toInt())
+//        }
+//    }
 
     LazyColumn(
         modifier = Modifier
@@ -105,24 +129,17 @@ fun StoreScreen() {
                 horizontalArrangement = Arrangement.spacedBy(30.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                itemsIndexed(items) { index, item ->
-                    val scale by animateFloatAsState(
-                        targetValue = if (index == centerIndex) 1.3f else 0.8f
-                    )
-                    val alpha by animateFloatAsState(
-                        targetValue = if (index == centerIndex) 1f else 0.5f
-                    )
-
+                itemsIndexed(newEmoticonPack) { index, item -> // Use itemsIndexed to get the index and item
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .scale(scale)
-                            .alpha(alpha)
+                            .scale(if (index == centerIndex) 1.3f else 0.8f)
+                            .alpha(if (index == centerIndex) 1f else 0.5f)
                             .width(150.dp)
-                            .clickable {
-                                if (index == centerIndex) {
-                                    // 선택된 아이템의 행동
-                                } else {
+                            .clickable{
+                                if(index == centerIndex){
+                                    navController.navigate("emoticonPack/${item.id}")
+                                }else{
                                     centerIndex = index
                                     coroutineScope.launch {
                                         val viewportCenter = listState.layoutInfo.viewportSize.width / 2
@@ -130,11 +147,12 @@ fun StoreScreen() {
                                         listState.animateScrollToItem(centerIndex, scrollOffset = -viewportCenter + itemSize / 2)
                                     }
                                 }
+
                             }
                     ) {
                         Image(
-                            painter = rememberImagePainter(data = item.imageRes),
-                            contentDescription = "Carousel Image",
+                            painter = rememberImagePainter(data = item.thumbnail),
+                            contentDescription = "New Emoticon Pack Image",
                             modifier = Modifier.size(150.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -170,28 +188,29 @@ fun StoreScreen() {
             LazyRow(
                 modifier = Modifier.padding(vertical = 0.dp)
             ) {
-                items(3) { outerIndex ->
+                val chunkedPopularItems = popularEmoticonPack.chunked(3)
+                items(chunkedPopularItems) { chunk ->
                     Column(
                         modifier = Modifier
                             .padding(horizontal = 0.dp)
                             .width(350.dp)
                     ) {
-                        (1..3).forEach { innerIndex ->
-                            val rank = outerIndex * 3 + innerIndex
+                        chunk.forEachIndexed { index, item ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .padding(vertical = 2.dp)
                                     .fillMaxWidth()
+                                    .clickable { navController.navigate("emoticonPack/${item.id}") } // Handle click event
                             ) {
                                 Image(
-                                    painter = rememberImagePainter(data = R.drawable.otter), // 실제 이미지 리소스로 대체하세요
+                                    painter = rememberImagePainter(data = item.thumbnail), // Use the item's thumbnail
                                     contentDescription = "인기 이모티콘 이미지",
                                     modifier = Modifier.size(60.dp)
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Text(
-                                    text = "$rank",
+                                    text = "${(chunkedPopularItems.indexOf(chunk) * 3) + (index + 1)}", // Calculate rank
                                     color = Color(0xFF7B82FF),
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 30.sp,
@@ -201,12 +220,12 @@ fun StoreScreen() {
 
                                 Column {
                                     Text(
-                                        text = "이모티콘 제목 $rank",
+                                        text = item.title, // Use the item's title
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Text(
-                                        text = "작성자 이름",
+                                        text = item.author, // Use the item's author
                                         color = Color.Gray,
                                         style = MaterialTheme.typography.bodySmall
                                     )
@@ -217,6 +236,8 @@ fun StoreScreen() {
                 }
             }
         }
+
+
 
         // 태그 섹션
         item {
@@ -230,12 +251,8 @@ fun StoreScreen() {
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        val tags = listOf("#귀여운", "#고양이", "#강아지")
-        val images = listOf(
-            listOf(R.drawable.google, R.drawable.kakao, R.drawable.naver, R.drawable.google, R.drawable.kakao, R.drawable.naver),
-            listOf(R.drawable.google, R.drawable.kakao, R.drawable.naver, R.drawable.google, R.drawable.kakao, R.drawable.naver),
-            listOf(R.drawable.google, R.drawable.kakao, R.drawable.naver, R.drawable.google, R.drawable.kakao, R.drawable.naver)
-        )
+        val tags = listOf("#"+tagQuery1, "#"+tagQuery2, "#"+tagQuery3)
+        val emoticonPacks = listOf(tag1EmoticonPack, tag2EmoticonPack, tag3EmoticonPack)
 
         tags.forEachIndexed { index, tag ->
             item {
@@ -256,19 +273,20 @@ fun StoreScreen() {
                             .padding(vertical = 8.dp)
                             .heightIn(max = 100.dp)
                     ) {
-                        items(images[index].size) { imgIndex ->
+                        items(emoticonPacks[index]) { item -> // Use the corresponding emoticon pack
                             Image(
-                                painter = rememberImagePainter(data = images[index][imgIndex]),
+                                painter = rememberImagePainter(data = item.thumbnail), // Use the item's thumbnail
                                 contentDescription = "태그 이모티콘 이미지",
                                 modifier = Modifier
                                     .size(80.dp)
                                     .padding(end = 8.dp)
+                                    .clickable { navController.navigate("emoticonPack/${item.id}") } // Navigate on click
                             )
-                            Spacer(modifier = Modifier.width(20.dp))
                         }
                     }
                 }
             }
         }
+
     }
 }

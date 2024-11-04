@@ -29,8 +29,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        val token = runBlocking { TokenDataSource.token.firstOrNull() }
-        Log.d("use token", "Access Token: $token")
 
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -39,10 +37,12 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor { chain: Interceptor.Chain ->
                 val originalRequest: Request = chain.request()
+                val token = runBlocking { TokenDataSource.token.firstOrNull() }
                 val newRequest = originalRequest.newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
                 chain.proceed(newRequest)
+
             }
             .addInterceptor(loggingInterceptor)
             .build()
@@ -79,7 +79,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providePointApi(retrofit: Retrofit): PointsApi {
+    fun providePointsApi(retrofit: Retrofit): PointsApi {
         return retrofit.create(PointsApi::class.java)
     }
 
