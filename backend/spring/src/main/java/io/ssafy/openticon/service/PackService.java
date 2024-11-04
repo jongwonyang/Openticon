@@ -206,7 +206,8 @@ public class PackService {
 
     public Page<EmoticonPackResponseDto> search(String query, String type, Pageable pageable) {
         if (query == null || query.isEmpty()) {
-            return packRepository.findAllContent(pageable).map(EmoticonPackResponseDto::new); // 검색어가 없으면 전체 조회
+            System.out.println("쿼리가 비어있어요.");
+            return packRepository.findAllByIsPublicTrueAndIsBlacklistFalse(pageable).map(EmoticonPackResponseDto::new); // 검색어가 없으면 전체 조회
         }
 
         // TODO: type 기준
