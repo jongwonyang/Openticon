@@ -46,6 +46,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.rememberImagePainter
 import io.ssafy.openticon.KeyboardAccessibilityService
 import io.ssafy.openticon.R
+import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
+import io.ssafy.openticon.data.model.LikeEmoticonPack
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.component.UnAuthModal
 import io.ssafy.openticon.ui.viewmodel.EmoticonViewModel
@@ -214,7 +216,7 @@ private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean 
 
 private val json = Json { encodeDefaults = true } // Json 설정
 
-private fun saveDataToPreferences(packs: List<SampleEmoticonPack>, context: Context) {
+private fun saveDataToPreferences(packs: List<EmoticonPackWithEmotions>, context: Context) {
     val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
     val jsonString = json.encodeToString(packs)
@@ -223,7 +225,7 @@ private fun saveDataToPreferences(packs: List<SampleEmoticonPack>, context: Cont
     editor.apply()
 }
 
-private fun saveLikeDataToPreferences(pack: SampleEmoticonPack, context: Context) {
+private fun saveLikeDataToPreferences(pack: LikeEmoticonPack, context: Context) {
     val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
     val jsonString = json.encodeToString(pack)

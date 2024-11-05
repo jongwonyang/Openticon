@@ -5,8 +5,9 @@ import io.ssafy.openticon.data.repository.EmoticonPacksRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class GetEmoticonPacksWithEmotionsUseCase(
+class GetEmoticonPacksWithEmotionsUseCase @Inject constructor(
     private val emoticonRepository: EmoticonPacksRepository
 ) {
     suspend fun execute(): Flow<List<EmoticonPackWithEmotions>> = flow {
