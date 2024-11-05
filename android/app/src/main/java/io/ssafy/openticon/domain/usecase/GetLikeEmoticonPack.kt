@@ -1,7 +1,6 @@
 package io.ssafy.openticon.domain.usecase
 
 import io.ssafy.openticon.R
-import io.ssafy.openticon.data.model.EmoticonPack
 import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.LikeEmoticonPack
 import io.ssafy.openticon.data.repository.EmoticonPacksRepository
