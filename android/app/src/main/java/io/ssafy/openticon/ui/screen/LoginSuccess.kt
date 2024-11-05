@@ -1,13 +1,22 @@
 package io.ssafy.openticon.ui.screen
 
-import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,16 +25,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.EditDeviceTokenRequestDto
-import io.ssafy.openticon.data.remote.MemberApiService
-import kotlinx.coroutines.delay
+import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginSuccessScreen(accessToken: String, navController: NavController,viewModel: MemberViewModel = hiltViewModel()) {
+fun LoginSuccessScreen(
+    accessToken: String,
+    navController: NavController,
+    viewModel: MemberViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -74,8 +85,14 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
     ) {
         when (uiState) {
             is MemberViewModel.UiState.Loading -> {
-                Text(text = "로딩 중...", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text(
+                    text = "로딩 중...",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
             }
+
             is MemberViewModel.UiState.Success -> {
 //                val memberEntity = (uiState as MemberViewModel.UiState.Success).data
 //                Text(text = "로그인 성공!", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50))
@@ -90,6 +107,7 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
                     navController.popBackStack()
                 }
             }
+
             is MemberViewModel.UiState.Error -> {
                 Log.d("login error", "로그인 실패")
                 // 에러 다이얼로그를 띄움
@@ -99,6 +117,7 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
                     }
                 }
             }
+
             is MemberViewModel.UiState.UnAuth -> {
                 Log.d("login unauth", "로그인 실패")
                 if (showErrorDialog) {
@@ -119,6 +138,7 @@ fun LoginSuccessScreen(accessToken: String, navController: NavController,viewMod
 //        }
     }
 }
+
 @Composable
 fun ErrorDialog(onDismiss: () -> Unit) {
 
@@ -133,8 +153,14 @@ fun ErrorDialog(onDismiss: () -> Unit) {
         }
     )
 }
+
 // 디바이스 토큰 저장 함수
-suspend fun saveDeviceToken(accessToken: String, deviceToken: String, isMobile: Boolean, context: Context) {
+suspend fun saveDeviceToken(
+    accessToken: String,
+    deviceToken: String,
+    isMobile: Boolean,
+    context: Context
+) {
     val tokenDataSource = TokenDataSource
     val request = EditDeviceTokenRequestDto(deviceToken, isMobile)
     tokenDataSource.saveToken(accessToken)

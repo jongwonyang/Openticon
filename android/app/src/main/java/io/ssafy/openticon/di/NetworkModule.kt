@@ -1,6 +1,5 @@
 package io.ssafy.openticon.di
 
-import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -9,6 +8,7 @@ import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import io.ssafy.openticon.data.remote.MemberApi
 import io.ssafy.openticon.data.remote.PointsApi
+import io.ssafy.openticon.data.remote.PurchaseApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -83,4 +83,9 @@ object NetworkModule {
         return retrofit.create(PointsApi::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun providePurchaseApi(retrofit: Retrofit): PurchaseApi {
+        return retrofit.create(PurchaseApi::class.java)
+    }
 }
