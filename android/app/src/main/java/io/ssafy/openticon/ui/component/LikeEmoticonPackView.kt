@@ -64,6 +64,7 @@ class LikeEmoticonPackView @JvmOverloads constructor(
                 crossfade(true) // 크로스페이드 효과 (선택 사항)
                 placeholder(R.drawable.icon_1) // 로딩 중일 때 사용할 이미지 (선택 사항)
                 error(R.drawable.icon_2) // 에러 발생 시 사용할 이미지 (선택 사항)
+                allowHardware(false)
             }
 
             // 이미지 크기를 박스보다 작게 설정하여 중앙에 배치
