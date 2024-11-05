@@ -30,6 +30,7 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -40,20 +41,53 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.rememberImagePainter
 import io.ssafy.openticon.KeyboardAccessibilityService
 import io.ssafy.openticon.R
+import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
+import io.ssafy.openticon.data.model.LikeEmoticonPack
+import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.component.UnAuthModal
+import io.ssafy.openticon.ui.viewmodel.EmoticonViewModel
+import io.ssafy.openticon.ui.viewmodel.LikeEmoticonViewModel
 import io.ssafy.openticon.ui.viewmodel.MainViewModel
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
+import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(
+    navController: NavController,
+    myViewModel: EmoticonViewModel = hiltViewModel() ,
+    likeEmoticonViewModel: LikeEmoticonViewModel = hiltViewModel()) {
+
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val mainViewModel: MainViewModel = hiltViewModel()
     val isLoggedIn by mainViewModel.isLoggedIn.collectAsState()
+
+
+    myViewModel.sampleEmoticonPacks.observe(lifecycleOwner) { packs ->
+        saveDataToPreferences(packs, context)
+    }
+
+    likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(lifecycleOwner) { pack ->
+        if (pack != null) {
+            saveLikeDataToPreferences(pack, context)
+        }
+    }
+
     Log.d("isLoggedIn", isLoggedIn.toString());
     Scaffold(
         bottomBar = {
@@ -78,10 +112,10 @@ fun MainScreen(navController: NavController) {
                 onClick = {
                     if (allPermissionsGranted(context)) {
                         Log.d("mainScreen","allPermission")
-                        startFloatingService(context)
+                        startFloatingService(context, myViewModel, likeEmoticonViewModel, lifecycleOwner)
                     } else {
                         Log.d("mainScreen","notAllPermission")
-                        requestPermissionsAndStartService(context)
+                        requestPermissionsAndStartService(context, myViewModel, likeEmoticonViewModel, lifecycleOwner)
                     }
                 }
             ) {
@@ -103,7 +137,9 @@ fun MainScreen(navController: NavController) {
         }
     }
 }
-fun requestPermissionsAndStartService(context: Context) {
+fun requestPermissionsAndStartService(context: Context, myViewModel:EmoticonViewModel,
+                                      likeEmoticonViewModel: LikeEmoticonViewModel,
+                                      lifecycleOwner: LifecycleOwner) {
     // 1. 알림 권한 요청
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ActivityCompat.requestPermissions(
@@ -133,27 +169,9 @@ fun requestPermissionsAndStartService(context: Context) {
 
     // 모든 권한이 부여되었는지 확인 후 서비스 시작
     if (allPermissionsGranted(context)) {
-        startFloatingService(context)
+        startFloatingService(context, myViewModel, likeEmoticonViewModel, lifecycleOwner)
     }
 }
-
-//fun isAccessibilityServiceEnabled(context: Context, serviceClass: Class<*>): Boolean {
-//    val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-//    val enabledServices: List<AccessibilityServiceInfo> =
-//        accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
-//
-//    for (serviceInfo in enabledServices) {
-//        val enabledServiceInfo = serviceInfo.resolveInfo?.serviceInfo
-//        if (enabledServiceInfo != null) {
-//            val enabledPackageName = enabledServiceInfo.packageName
-//            val enabledServiceName = enabledServiceInfo.name
-//            if (enabledPackageName == context.packageName && enabledServiceName == serviceClass.name) {
-//                return true
-//            }
-//        }
-//    }
-//    return false
-//}
 
 fun allPermissionsGranted(context: Context): Boolean {
     val notificationPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -166,16 +184,18 @@ fun allPermissionsGranted(context: Context): Boolean {
     if(Settings.canDrawOverlays(context)){
         Log.d("mainScreen","Draw Permission")
     }
-//    if(isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)){
-//        Log.d("mainScreen","KeyboardAccessibilityService Permission")
-//    }
 
     return notificationPermissionGranted &&
             Settings.canDrawOverlays(context)
             //&& isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)
 }
 
-private fun startFloatingService(context: Context) {
+private fun startFloatingService(
+    context: Context,
+    myViewModel: EmoticonViewModel,
+    likeEmoticonViewModel: LikeEmoticonViewModel,
+    lifecycleOwner: LifecycleOwner
+) {
     val intent = Intent(context, FloatingService::class.java)
 
     // 서비스 실행 여부 확인
@@ -183,14 +203,25 @@ private fun startFloatingService(context: Context) {
         // 이미 실행 중인 경우 종료
         context.stopService(intent)
     } else {
-        // 서비스가 실행 중이 아니면 시작
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
+
+
+        // LiveData를 한 번만 관찰하여 데이터 저장 후 완료 알림
+
+        CoroutineScope(Dispatchers.Main).launch {
+            myViewModel.loadEmoticonPacks() // suspend 함수로 비동기 처리
+            likeEmoticonViewModel.initEmoticonDataFromPreferences() // 이 함수가 완료된 후 실행
+
+            delay(100L)
+            // 데이터 저장이 모두 완료된 후에 서비스 시작
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
         }
     }
 }
+
 
 // 서비스 실행 여부를 확인하는 함수
 private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
@@ -203,6 +234,39 @@ private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean 
     return false
 }
 
+private val json = Json { encodeDefaults = true } // Json 설정
+
+private fun saveDataToPreferences(packs: List<EmoticonPackWithEmotions>, context: Context) {
+    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    val jsonString = json.encodeToString(packs)
+    Log.d("MainJson", jsonString)
+
+    // commit을 사용하여 동기적으로 저장
+    val success = editor.putString("emoticon_data", jsonString).commit()
+
+    if (success) {
+        Log.d("MainJson", "Data saved successfully.")
+    } else {
+        Log.e("MainJson", "Failed to save data.")
+    }
+}
+
+private fun saveLikeDataToPreferences(pack: LikeEmoticonPack, context: Context) {
+    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    val jsonString = json.encodeToString(pack)
+    Log.d("MainJson", jsonString)
+
+    // commit을 사용하여 동기적으로 저장
+    val success = editor.putString("like_emoticon_data", jsonString).commit()
+
+    if (success) {
+        Log.d("MainJson", "Like data saved successfully.")
+    } else {
+        Log.e("MainJson", "Failed to save like data.")
+    }
+}
 
 
 // Constants for permission requests
