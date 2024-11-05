@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.ssafy.openticon.data.model.SampleEmoticonPack
+import io.ssafy.openticon.data.model.EmoticonPackEntity
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
 import kotlin.math.roundToInt
 
@@ -64,7 +64,7 @@ fun MyEmoticonsScreen(viewModel: MyEmoticonViewModel = hiltViewModel()) {
 
     var isVisible by remember { mutableStateOf(true) }
 
-    val emoticonPacksState = remember { mutableStateListOf<SampleEmoticonPack>() }
+    val emoticonPacksState = remember { mutableStateListOf<EmoticonPackEntity>() }
 
     LaunchedEffect(visibleEmoticonPacks, invisibleEmoticonPacks, isVisible) {
         emoticonPacksState.clear()
@@ -212,7 +212,7 @@ private fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
 
 @Composable
 fun EmoticonItem(
-    sampleEmoticonPack: SampleEmoticonPack,
+    sampleEmoticonPack: EmoticonPackEntity,
     viewModel: MyEmoticonViewModel,
     isDragging: Boolean,
     offsetY: Float,
@@ -231,7 +231,7 @@ fun EmoticonItem(
     ) {
         // 이모티콘 이미지
         Image(
-            painter = painterResource(id = sampleEmoticonPack.mainImageResource),
+            painter = painterResource(id = sampleEmoticonPack.thumbnail),
             contentDescription = null,
             modifier = Modifier.size(50.dp)
         )
@@ -240,7 +240,7 @@ fun EmoticonItem(
 
         // 이모티콘 이름 및 공개 여부
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = sampleEmoticonPack.name)
+            Text(text = sampleEmoticonPack.title)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
