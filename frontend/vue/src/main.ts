@@ -6,7 +6,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './assets/tailwind.css'
-import '@mdi/font/css/materialdesignicons.css'
+import 'material-symbols';
 
 const app = createApp(App)
 
