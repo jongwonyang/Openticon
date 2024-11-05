@@ -23,4 +23,8 @@ class GetEmoticonPacksUseCase @Inject constructor(
     suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity){
         emoticonRepository.updateEmoticonPack(emoticonPack)
     }
+
+    suspend fun deleteEmoticons(id: Int){
+        emoticonRepository.deleteEmoticonsByPackId(id)
+    }
 }

@@ -1,7 +1,9 @@
 package io.ssafy.openticon.ui.screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import io.ssafy.openticon.data.model.EmoticonPackEntity
@@ -59,8 +62,12 @@ import kotlin.math.roundToInt
 val itemHeight = 66.dp.value // EmoticonItem의 높이 (50.dp + 패딩 등)
 val itemSpacing = 16.dp.value // 아이템 간의 간격
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MyEmoticonsScreen(viewModel: MyEmoticonViewModel = hiltViewModel()) {
+fun MyEmoticonsScreen(
+    navController: NavController,
+    viewModel: MyEmoticonViewModel = hiltViewModel()
+) {
     val visibleEmoticonPacks by viewModel.visibleSampleEmoticonPacks.observeAsState(emptyList())
     val invisibleEmoticonPacks by viewModel.invisibleSampleEmoticonPacks.observeAsState(emptyList())
 
@@ -189,8 +196,6 @@ fun MyEmoticonsScreen(viewModel: MyEmoticonViewModel = hiltViewModel()) {
                 EmoticonItem(
                     sampleEmoticonPack = emoticonPack,
                     viewModel = viewModel,
-                    isDragging = isDragging,
-                    offsetY = if (isDragging) offsetY else 0f,
                     isVisible = isVisible,
                     onDragStart = { onDragStart(index) },
                     onDrag = onDrag,
@@ -199,6 +204,10 @@ fun MyEmoticonsScreen(viewModel: MyEmoticonViewModel = hiltViewModel()) {
                     modifier = Modifier
                         .zIndex(if (isDragging) 1f else 0f)
                         .offset { IntOffset(x = 0, y = if (isDragging) offsetY.roundToInt() else 0) }
+                        .combinedClickable(
+                            onClick = { navController.navigate("emoticonPack/${emoticonPack.id}") },
+                            onLongClick = { onDragStart(index) }
+                        )
                 )
             }
         }
@@ -216,8 +225,6 @@ private fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
 fun EmoticonItem(
     sampleEmoticonPack: EmoticonPackEntity,
     viewModel: MyEmoticonViewModel,
-    isDragging: Boolean,
-    offsetY: Float,
     onDragStart: () -> Unit,
     onDrag: (PointerInputChange, Offset) -> Unit,
     onDragEnd: () -> Unit,

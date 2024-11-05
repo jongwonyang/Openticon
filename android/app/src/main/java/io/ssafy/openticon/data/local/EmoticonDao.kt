@@ -30,11 +30,17 @@ interface EmoticonDao {
     @Query("SELECT * FROM emoticon_packs")
     fun getAllEmoticonPacks(): Flow<List<EmoticonPackEntity>>
 
+    @Query("SELECT * FROM emoticon_packs WHERE downloaded = 1")
+    fun getAllDownloadedEmoticonPacks(): Flow<List<EmoticonPackEntity>>
+
     @Query("UPDATE emoticon_packs SET downloaded = :b WHERE id = :packId")
     fun updateEmoticonPackDownloaded(packId: Int, b: Boolean)
 
     @Query("SELECT * FROM like_emoticons")
     fun getLikeEmoticonPack(): Flow<List<LikeEmoticon>>
+
+    @Query("Delete From emoticons where packId = :packId")
+    fun deleteEmoticonsByPackId(packId: Int)
 
     @Update
     suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity)

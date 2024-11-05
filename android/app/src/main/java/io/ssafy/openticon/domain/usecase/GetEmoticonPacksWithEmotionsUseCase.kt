@@ -12,7 +12,7 @@ class GetEmoticonPacksWithEmotionsUseCase @Inject constructor(
 ) {
     suspend fun execute(): Flow<List<EmoticonPackWithEmotions>> = flow {
         // 모든 EmoticonPack을 가져옴
-        val emoticonPacks = emoticonRepository.getLocalEmoticonPacks().first()
+        val emoticonPacks = emoticonRepository.getDownloadedEmoticonPacks().first()
 
         // 각 EmoticonPack에 대해 해당 Emoticon 리스트를 가져와서 새로운 데이터 모델에 매핑
         val emoticonPacksWithEmotions = emoticonPacks.map { pack ->
