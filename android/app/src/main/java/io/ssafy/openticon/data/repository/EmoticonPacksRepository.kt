@@ -118,4 +118,8 @@ class EmoticonPacksRepository @Inject constructor(
     fun getPurchasedPackInfo(packId: Int): Flow<EmoticonPackEntity?> {
         return emoticonDao.getEmoticonPack(packId)
     }
+
+    suspend fun updateEmoticonPack(emoticonPackEntity: EmoticonPackEntity){
+        emoticonDao.updateEmoticonPack(emoticonPackEntity)
+    }
 }
