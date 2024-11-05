@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hamcrest.core.Is;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -96,6 +97,14 @@ public class EmoticonPackEntity {
         this.member=member;
         this.thumbnailImg=thumbnailImg;
         this.listImg=listImg;
+    }
+
+    public boolean getBlacklist() {
+        return this.isBlacklist;
+    }
+
+    public void setBlacklist(boolean blacklist) {
+        isBlacklist = blacklist;
     }
 
 }

@@ -6,6 +6,7 @@ import io.ssafy.openticon.controller.response.PurchaseHistoryResponseDto;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.PurchaseHistoryEntity;
+import io.ssafy.openticon.repository.EmoticonRepository;
 import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.PurchaseHistoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +26,7 @@ public class PurchaseHistoryService {
     private final PurchaseHistoryRepository purchaseHistoryRepository;
     private final MemberService memberService;
     private final PackRepository packRepository;
+    private final EmoticonService emoticonService;
 
     public Optional<PurchaseHistoryResponseDto> isPurchaseHisotry(MemberEntity member, Long emoticonPackId){
         Optional<EmoticonPackEntity> emoticonPack = packRepository.findById(emoticonPackId);
@@ -60,9 +62,11 @@ public class PurchaseHistoryService {
                             .packId(emoticonPackEntity.getId())
                             .packName(emoticonPackEntity.getTitle())
                             .thumbnailImg(emoticonPackEntity.getThumbnailImg())
+                            .listImage(emoticonPackEntity.getListImg())
+                            .isPublic(emoticonPackEntity.isPublic())
                             .isHide(purchaseHistoryEntity.isHide())
+                            .emoticons(emoticonService.getEmoticons(emoticonPackEntity.getId()))
                             .build();
-
                     result.add(purchaseEmoticonResponseDto);
                 }
             }
@@ -74,7 +78,10 @@ public class PurchaseHistoryService {
                         .packId(emoticonPackEntity.getId())
                         .packName(emoticonPackEntity.getTitle())
                         .thumbnailImg(emoticonPackEntity.getThumbnailImg())
+                        .listImage(emoticonPackEntity.getListImg())
+                        .isPublic(emoticonPackEntity.isPublic())
                         .isHide(purchaseHistoryEntity.isHide())
+                        .emoticons(emoticonService.getEmoticons(emoticonPackEntity.getId()))
                         .build();
 
                 result.add(purchaseEmoticonResponseDto);

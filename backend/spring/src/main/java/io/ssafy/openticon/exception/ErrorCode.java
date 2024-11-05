@@ -20,6 +20,9 @@ public enum ErrorCode {
     PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다."),
     DUPLICATE_THUMBNAIL(HttpStatus.BAD_REQUEST, "중복된 썸네일 이미지"),
     DUPLICATE_LIST_IMG(HttpStatus.BAD_REQUEST, "중복된 리스트 이미지");
+    PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다."),
+    BLACKLIST_PACK(HttpStatus.FORBIDDEN, "차단된 이모티콘 팩입니다.");
+
 
 
 

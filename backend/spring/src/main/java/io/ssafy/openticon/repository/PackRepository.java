@@ -15,6 +15,8 @@ public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
     @Query("SELECT ep FROM EmoticonPackEntity ep WHERE ep.title LIKE %:title% AND ep.isBlacklist = false AND ep.isPublic = true")
     Page<EmoticonPackEntity> findByTitleContaining(String title, Pageable pageable);
 
+    Page<EmoticonPackEntity> findAllByIsPublicTrueAndIsBlacklistFalse(Pageable pageable);
+
     @Query("SELECT ep FROM EmoticonPackEntity ep JOIN ep.tagLists tl JOIN tl.tag t WHERE t.tagName = :query AND ep.isBlacklist = false AND ep.isPublic = true")
     Page<EmoticonPackEntity> findByTag(@Param("query") String query, Pageable pageable);
 
@@ -23,5 +25,6 @@ public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
 
     @Query("SELECT ep FROM EmoticonPackEntity ep WHERE ep.member = :member AND ep.isBlacklist = true")
     Page<EmoticonPackEntity> findByMemberAndIsBlacklist(@Param("member") MemberEntity member, Pageable pageable);
+
 
 }

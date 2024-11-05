@@ -1,8 +1,8 @@
 package io.ssafy.openticon.dto;
 
 public enum ReportType {
-    REPORT("신고"),
-    EXAMINE("심사");
+    EXAMINE("심사"),
+    REPORT("신고");
 
     private final String name;
 
