@@ -14,13 +14,13 @@ import io.ssafy.openticon.ui.screen.EmoticonPackDetailScreen
 import io.ssafy.openticon.ui.screen.LoginScreen
 import io.ssafy.openticon.ui.screen.MainScreen
 import io.ssafy.openticon.ui.screen.LoginSuccessScreen
+import io.ssafy.openticon.ui.screen.SettingsScreen
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
     val context = LocalContext.current as Activity
-
 
     NavHost(
         navController = navController,
@@ -35,6 +35,9 @@ fun AppNavHost() {
         }
         composable("edit_profile"){
             EditProfileScreen(navController)
+        }
+        composable("settings"){
+            SettingsScreen()
         }
 
         composable(

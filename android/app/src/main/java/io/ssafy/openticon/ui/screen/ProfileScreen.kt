@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +36,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@Preview
 @Composable
 fun ProfileScreen(
     navController: NavController,
@@ -167,11 +169,44 @@ fun ProfileScreen(
         ) {
             Text("포인트 충전", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
-        Button(onClick = {
-            navController.navigate("login")
-        }) {
-            Text("임시 로그인 버튼")
+        Spacer(modifier = Modifier.height(300.dp))
+        Row(
+            modifier = Modifier
+                .width(IntrinsicSize.Max) // 너비를 자식 요소에 맞춤
+                .padding(horizontal = 14.dp), // 좌우 여백 설정
+            horizontalArrangement = Arrangement.spacedBy(8.dp) // 버튼 간 간격 조정
+        ) {
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.logout()
+                        navController.navigate("login")
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB22222)), // 어두운 빨간색 버튼
+                modifier = Modifier
+                    .weight(1f) // 버튼 크기 균일하게 설정
+                    .height(40.dp) // 버튼 높이 설정
+            ) {
+                Text("로그아웃", color = Color.White)
+            }
+
+            Button(
+                onClick = {
+                    navController.navigate("settings")
+                },
+                modifier = Modifier
+                    .weight(1f) // 버튼 크기 균일하게 설정
+                    .height(40.dp) // 버튼 높이 설정
+            ) {
+                Text("설정")
+            }
         }
+
+
+
+
+
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
