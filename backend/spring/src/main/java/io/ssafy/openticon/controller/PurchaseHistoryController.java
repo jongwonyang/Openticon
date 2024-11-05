@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class PurchaseHistoryController {
             @RequestParam(required = true) Long emoticonPackId
     ){
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
         Optional<PurchaseHistoryResponseDto> purchaseHistoryResponseDto = purchaseHistoryService.isPurchaseHisotry(member, emoticonPackId);
         if(purchaseHistoryResponseDto.isEmpty()){
             PurchaseHistoryResponseDto emptyResponseDto = PurchaseHistoryResponseDto.builder()
