@@ -1,6 +1,7 @@
 package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EditDeviceTokenRequestDto;
+import io.ssafy.openticon.controller.response.MemberResponseDto;
 import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.service.MemberService;
 import io.ssafy.openticon.service.PackService;
@@ -70,10 +71,10 @@ public class MemberController {
     }
 
     @GetMapping()
-    public ResponseEntity<MemberEntity> getMember(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<MemberResponseDto> getMember(@AuthenticationPrincipal UserDetails userDetails) {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
-        return ResponseEntity.ok(member);
+        return ResponseEntity.ok(new MemberResponseDto(member));
     }
 
     @PostMapping("deviceToken")

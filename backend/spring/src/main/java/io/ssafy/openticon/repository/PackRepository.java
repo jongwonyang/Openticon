@@ -26,4 +26,5 @@ public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
     @Query("SELECT ep FROM EmoticonPackEntity ep WHERE ep.member = :member AND ep.isBlacklist = true")
     Page<EmoticonPackEntity> findByMemberAndIsBlacklist(@Param("member") MemberEntity member, Pageable pageable);
 
+
 }
