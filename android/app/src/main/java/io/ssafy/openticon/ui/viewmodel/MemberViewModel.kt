@@ -56,10 +56,13 @@ class MemberViewModel @Inject constructor(
             Result.failure(e)
         }
     }
-
+    suspend fun logout() {
+        userSession.logout()
+        val tokenDataSource = TokenDataSource
+        tokenDataSource.clearToken()
+    }
     // 회원 정보 수정하는 함수
     fun fetchMemberInfo() {
-
         _uiState.value = UiState.Loading
         viewModelScope.launch {
             try {
