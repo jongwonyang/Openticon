@@ -6,6 +6,7 @@ import io.ssafy.openticon.controller.response.PurchaseHistoryResponseDto;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.PurchaseHistoryEntity;
+import io.ssafy.openticon.repository.EmoticonRepository;
 import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.PurchaseHistoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -60,6 +61,8 @@ public class PurchaseHistoryService {
                             .packId(emoticonPackEntity.getId())
                             .packName(emoticonPackEntity.getTitle())
                             .thumbnailImg(emoticonPackEntity.getThumbnailImg())
+                            .listImage(emoticonPackEntity.getListImg())
+                            .isPublic(emoticonPackEntity.isPublic())
                             .isHide(purchaseHistoryEntity.isHide())
                             .build();
 

@@ -1,5 +1,6 @@
 package io.ssafy.openticon.exception;
 
+import com.google.api.Http;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,8 @@ public enum ErrorCode {
     MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰 없음"),
     INVALID_REQUEST_PARAMS(HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러"),
-    PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다.");
+    PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다."),
+    BLACKLIST_PACK(HttpStatus.FORBIDDEN, "차단된 이모티콘 팩입니다.");
 
 
 
