@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.ssafy.openticon.entity.MemberEntity;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.io.IOException;
+
 @RestController
 @RequestMapping("member")
 @AllArgsConstructor
@@ -31,32 +35,44 @@ public class MemberController {
     private final PackService packService;
     private final MemberService memberService;
 
-    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(description = "개인정보 수정")
-    public ResponseEntity<String> editMember(@AuthenticationPrincipal UserDetails userDetails,
-                                             @Parameter(description = "프로필 이미지", required = false)
-                                             @RequestPart("profile_img") MultipartFile profile_img,
-                                             @Parameter(description = "닉네임", required = true) @RequestPart("nickname") String nickname){
+    public ResponseEntity<String> editMember(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(description = "프로필 이미지", required = false)
+            @RequestPart(value = "profile_img", required = false) MultipartFile profile_img,
+            @Parameter(description = "닉네임", required = true)
+            @RequestParam("nickname") String nickname) {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
         member.setNickname(nickname);
-        try{
-            if (profile_img != null) {
-                member.setProfile_image(memberService.saveProfile(profile_img));
+        try {
+            if (profile_img != null && !profile_img.isEmpty()) {
+                String profileImageUrl = memberService.saveProfile(profile_img);
+                member.setProfile_image(profileImageUrl);
             }
             memberRepository.save(member);
-        }catch (Exception e){
-            return ResponseEntity.internalServerError().body("이미지 저장 실패");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("오류 발생: " + e.getMessage());
         }
 
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
     }
 
+    @DeleteMapping("")
+    @Operation(description = "회원탈퇴")
+    public  ResponseEntity<String> deleteMember(@AuthenticationPrincipal UserDetails userDetails){
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        member.setIsResigned(true);
+        memberRepository.save(member);
+        return ResponseEntity.ok().body("회원 탈퇴 성공");
+    }
 
     @GetMapping()
     public ResponseEntity<MemberEntity> getMember(@AuthenticationPrincipal UserDetails userDetails) {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("사용자가 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
         return ResponseEntity.ok(member);
     }
 
