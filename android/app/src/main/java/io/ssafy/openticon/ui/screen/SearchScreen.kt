@@ -114,7 +114,9 @@ fun SearchScreen(
                         AsyncImage(
                             model = item.thumbnail,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(RoundedCornerShape(8.dp)),
                             contentScale = ContentScale.Crop
                         )
                     },
