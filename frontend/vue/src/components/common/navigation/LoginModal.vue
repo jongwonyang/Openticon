@@ -50,7 +50,8 @@ const REDIRECT_URI = `${PAGE_BASE_URL}/processLogin`;
 function handleMessage(event: MessageEvent) {
     const userStore = useUserStore();
     userStore.login(event.data);
-    makeSuccessAlert('로그인이 완료되었습니다. access_token: ' + event.data);
+    makeSuccessAlert('로그인이 완료되었습니다. 콘솔 로그에서 액세스 토큰을 확인해주세요.');
+    console.log(event.data);
     closeModal();
     window.removeEventListener('message', handleMessage);
 }

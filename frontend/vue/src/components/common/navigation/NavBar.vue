@@ -13,13 +13,13 @@
         v-if="userStore.isLogined" 
         :src="userStore.userInfo?.profile_image" 
         alt="프로필 사진" 
-        class="w-12 h-12 relative z-20 rounded-full cursor-pointer hover:scale-110  hover:shadow-lg hover:shadow-gray-300 transition-all duration-300" 
+        class="w-12 h-12 relative z-20 rounded-full border bg-white cursor-pointer hover:scale-110  hover:shadow-lg hover:shadow-gray-300 transition-all duration-300" 
         @click="toggleUserMenu"
         :class="{'scale-110 shadow-lg shadow-gray-300': isUserMenuOpen}"
         ref="profileImage"
       />
       <button v-else @click="openLoginModal" class="w-12 h-12">로그인</button>
-      <UserMenu :is-open="isUserMenuOpen" :profile-image="profileImage" @close="isUserMenuOpen = false" />
+      <UserMenu :is-open="isUserMenuOpen" :profile-image-element="profileImageElement" @close="isUserMenuOpen = false" />
     </div>
   </div>
   <nav class="pt-4 border-b-2 border-gray-200">
@@ -58,7 +58,7 @@ const userStore = useUserStore();
 
 const isLoginModalOpen = ref(false);
 const isUserMenuOpen = ref(false);
-const profileImage = ref(null);
+const profileImageElement = ref(null);
 
 function openLoginModal() {
   isLoginModalOpen.value = true;

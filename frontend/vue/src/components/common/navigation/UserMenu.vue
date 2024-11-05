@@ -35,9 +35,8 @@ const props = defineProps({
         type: Boolean,
         required: true
     },
-    profileImage: {
-        type: Object,
-        required: true
+    profileImageElement: {
+        type: Object as () => Record<string, any> | null,
     }
 });
 
@@ -59,7 +58,7 @@ function goToMypage() {
 const menuTarget = ref(null)
 
 onClickOutside(menuTarget, (e: MouseEvent) => {
-    if (e.target === props.profileImage) return;
+    if (e.target === props.profileImageElement) return;
     emit('close');
 });
 </script>
