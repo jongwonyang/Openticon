@@ -55,6 +55,11 @@ import io.ssafy.openticon.ui.viewmodel.LikeEmoticonViewModel
 import io.ssafy.openticon.ui.viewmodel.MainViewModel
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -71,6 +76,18 @@ fun MainScreen(
 
     val mainViewModel: MainViewModel = hiltViewModel()
     val isLoggedIn by mainViewModel.isLoggedIn.collectAsState()
+
+
+    myViewModel.sampleEmoticonPacks.observe(lifecycleOwner) { packs ->
+        saveDataToPreferences(packs, context)
+    }
+
+    likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(lifecycleOwner) { pack ->
+        if (pack != null) {
+            saveLikeDataToPreferences(pack, context)
+        }
+    }
+
     Log.d("isLoggedIn", isLoggedIn.toString());
     Scaffold(
         bottomBar = {
@@ -173,9 +190,11 @@ fun allPermissionsGranted(context: Context): Boolean {
             //&& isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)
 }
 
-private fun startFloatingService(context: Context, myViewModel:EmoticonViewModel,
-                                 likeEmoticonViewModel: LikeEmoticonViewModel,
-                                 lifecycleOwner: LifecycleOwner
+private fun startFloatingService(
+    context: Context,
+    myViewModel: EmoticonViewModel,
+    likeEmoticonViewModel: LikeEmoticonViewModel,
+    lifecycleOwner: LifecycleOwner
 ) {
     val intent = Intent(context, FloatingService::class.java)
 
@@ -184,24 +203,25 @@ private fun startFloatingService(context: Context, myViewModel:EmoticonViewModel
         // 이미 실행 중인 경우 종료
         context.stopService(intent)
     } else {
-        myViewModel.sampleEmoticonPacks.observe(lifecycleOwner) { packs ->
-            saveDataToPreferences(packs, context)
-        }
 
-        likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(lifecycleOwner) { pack ->
-            if (pack != null) {
-                saveLikeDataToPreferences(pack, context)
+
+        // LiveData를 한 번만 관찰하여 데이터 저장 후 완료 알림
+
+        CoroutineScope(Dispatchers.Main).launch {
+            myViewModel.loadEmoticonPacks() // suspend 함수로 비동기 처리
+            likeEmoticonViewModel.initEmoticonDataFromPreferences() // 이 함수가 완료된 후 실행
+
+            delay(100L)
+            // 데이터 저장이 모두 완료된 후에 서비스 시작
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
             }
-        }
-
-        // 서비스가 실행 중이 아니면 시작
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
         }
     }
 }
+
 
 // 서비스 실행 여부를 확인하는 함수
 private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
@@ -220,18 +240,32 @@ private fun saveDataToPreferences(packs: List<EmoticonPackWithEmotions>, context
     val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
     val jsonString = json.encodeToString(packs)
-    Log.d("MainJson",jsonString)
-    editor.putString("emoticon_data", jsonString)
-    editor.apply()
+    Log.d("MainJson", jsonString)
+
+    // commit을 사용하여 동기적으로 저장
+    val success = editor.putString("emoticon_data", jsonString).commit()
+
+    if (success) {
+        Log.d("MainJson", "Data saved successfully.")
+    } else {
+        Log.e("MainJson", "Failed to save data.")
+    }
 }
 
 private fun saveLikeDataToPreferences(pack: LikeEmoticonPack, context: Context) {
     val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
     val jsonString = json.encodeToString(pack)
-    Log.d("MainJson",jsonString)
-    editor.putString("like_emoticon_data", jsonString)
-    editor.apply()
+    Log.d("MainJson", jsonString)
+
+    // commit을 사용하여 동기적으로 저장
+    val success = editor.putString("like_emoticon_data", jsonString).commit()
+
+    if (success) {
+        Log.d("MainJson", "Like data saved successfully.")
+    } else {
+        Log.e("MainJson", "Failed to save like data.")
+    }
 }
 
 
