@@ -16,7 +16,7 @@
         class="w-12 h-12 relative z-20 rounded-full border bg-white cursor-pointer hover:scale-110  hover:shadow-lg hover:shadow-gray-300 transition-all duration-300" 
         @click="toggleUserMenu"
         :class="{'scale-110 shadow-lg shadow-gray-300': isUserMenuOpen}"
-        ref="profileImage"
+        ref="profileImageElement"
       />
       <button v-else @click="openLoginModal" class="w-12 h-12">로그인</button>
       <UserMenu :is-open="isUserMenuOpen" :profile-image-element="profileImageElement" @close="isUserMenuOpen = false" />
