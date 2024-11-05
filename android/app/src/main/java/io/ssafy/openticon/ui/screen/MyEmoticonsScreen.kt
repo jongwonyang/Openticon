@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import io.ssafy.openticon.data.model.EmoticonPackEntity
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
 import kotlin.math.roundToInt
@@ -231,7 +233,7 @@ fun EmoticonItem(
     ) {
         // 이모티콘 이미지
         Image(
-            painter = painterResource(id = sampleEmoticonPack.thumbnail),
+            painter = rememberAsyncImagePainter(model = sampleEmoticonPack.thumbnail),
             contentDescription = null,
             modifier = Modifier.size(50.dp)
         )
