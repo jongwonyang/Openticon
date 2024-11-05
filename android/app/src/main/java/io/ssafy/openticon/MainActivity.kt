@@ -19,8 +19,8 @@ import kotlinx.serialization.json.Json
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val myViewModel: EmoticonViewModel by viewModels()
-    private val likeEmoticonViewModel: LikeEmoticonViewModel by viewModels()
+   // private val myViewModel: EmoticonViewModel by viewModels()
+//private val likeEmoticonViewModel: LikeEmoticonViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,15 +28,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.new_compose_activity_layout)
 
-        myViewModel.sampleEmoticonPacks.observe(this) { packs ->
-            saveDataToPreferences(packs)
-        }
-
-        likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(this) { pack ->
-            if (pack != null) {
-                saveLikeDataToPreferences(pack)
-            }
-        }
+//        myViewModel.sampleEmoticonPacks.observe(this) { packs ->
+//            saveDataToPreferences(packs)
+//        }
+//
+//        likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(this) { pack ->
+//            if (pack != null) {
+//                saveLikeDataToPreferences(pack)
+//            }
+//        }
 
         setContent {
             OpenticonTheme {
@@ -45,23 +45,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val json = Json { encodeDefaults = true } // Json 설정
-
-    private fun saveDataToPreferences(packs: List<SampleEmoticonPack>) {
-        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val jsonString = json.encodeToString(packs)
-        Log.d("MainJson",jsonString)
-        editor.putString("emoticon_data", jsonString)
-        editor.apply()
-    }
-
-    private fun saveLikeDataToPreferences(pack: SampleEmoticonPack) {
-        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val jsonString = json.encodeToString(pack)
-        Log.d("MainJson",jsonString)
-        editor.putString("like_emoticon_data", jsonString)
-        editor.apply()
-    }
+//    private val json = Json { encodeDefaults = true } // Json 설정
+//
+//    private fun saveDataToPreferences(packs: List<SampleEmoticonPack>) {
+//        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+//        val editor = sharedPreferences.edit()
+//        val jsonString = json.encodeToString(packs)
+//        Log.d("MainJson",jsonString)
+//        editor.putString("emoticon_data", jsonString)
+//        editor.apply()
+//    }
+//
+//    private fun saveLikeDataToPreferences(pack: SampleEmoticonPack) {
+//        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+//        val editor = sharedPreferences.edit()
+//        val jsonString = json.encodeToString(pack)
+//        Log.d("MainJson",jsonString)
+//        editor.putString("like_emoticon_data", jsonString)
+//        editor.apply()
+//    }
 }
