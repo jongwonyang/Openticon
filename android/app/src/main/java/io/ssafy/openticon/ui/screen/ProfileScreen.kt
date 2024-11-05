@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -59,7 +60,6 @@ fun ProfileScreen(
         }
     }
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,12 +67,13 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
         // 프로필 이미지
         AsyncImage(
-            model = if (memberEntity?.profileImage.isNullOrEmpty()) {
+            model = if (memberEntity?.profile_image.isNullOrEmpty()) {
                 "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
             } else {
-                memberEntity?.profileImage
+                memberEntity?.profile_image
             },
             contentDescription = "Profile Image",
             contentScale = ContentScale.Crop, // 잘리지 않게 조정

@@ -1,9 +1,13 @@
 package io.ssafy.openticon.ui.screen
 
+import android.Manifest
+import android.content.ContentResolver
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -24,34 +28,53 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(navController: NavController,
-                      searchViewModel: SearchScreenViewModel = hiltViewModel(),
+fun EditProfileScreen(
+    navController: NavController,
                       ) {
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver
     val viewModel: EditProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val memberEntity by viewModel.memberEntity.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
     var nickname by remember { mutableStateOf(TextFieldValue("")) }
-    // 이미지 선택 런처 (GetContent 사용)
+    val selectedImageUri by viewModel.selectedImageUri.collectAsState()
 
+
+    // 이미지 선택 런처 (GetContent 사용)
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            searchViewModel.setImageUri(uri)
+            viewModel.setImageUri(uri)
         } else {
             Log.e("ImageSearch", "Error: Selected file URI is null.")
         }
     }
+
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            imagePickerLauncher.launch("image/*")
+        } else {
+            Log.e("ImageSearch", "Storage permission not granted.")
+        }
+    }
+
+
 
     Scaffold(
         topBar = {
@@ -86,25 +109,41 @@ fun EditProfileScreen(navController: NavController,
                             .size(80.dp)
                             .clip(CircleShape)
                     ) {
-                        AsyncImage(
-                            model = if (memberEntity?.profileImage.isNullOrEmpty()) {
-                                "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
-                            } else {
-                                memberEntity?.profileImage
-                            },
-                            contentDescription = "Profile Image",
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .align(Alignment.Center)
-                        )
+                        if (selectedImageUri != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(model = selectedImageUri),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            memberEntity?.profile_image?.let { Log.d("EditProfileScreen", it) }
+                            AsyncImage(
+                                model = if (memberEntity?.profile_image.isNullOrEmpty()) {
+                                    "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
+                                } else {
+                                    memberEntity?.profile_image
+                                },
+                                contentDescription = "Profile Image",
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                                    .align(Alignment.Center)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.width(16.dp))
 
                     // Edit Profile Button
                     Button(
-                        onClick = { /* TODO: Handle profile edit */ },
+                        onClick = {
+                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                                storagePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                            } else {
+                                imagePickerLauncher.launch("image/*")
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF42A5F5) // Blue color
                         )
@@ -135,7 +174,7 @@ fun EditProfileScreen(navController: NavController,
                 ) {
                     Button(
                         onClick = {
-                            viewModel.editProfile()
+                                viewModel.editProfile(contentResolver,nickname.text)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF42A5F5) // Confirm button color
@@ -159,14 +198,17 @@ fun EditProfileScreen(navController: NavController,
                 // UI 상태에 따른 네비게이션 처리
                 when (uiState) {
                     is EditProfileViewModel.UiState.Success -> {
+                        Log.d("EditProfileScreen", "프로필 수정 성공")
+                        viewModel.updateMemberEntity()
                         LaunchedEffect(Unit) {
-                            navController.navigate("profile")
+                            navController.popBackStack()
                         }
                     }
                     is EditProfileViewModel.UiState.Error -> {
-                        LaunchedEffect(Unit) {
-                            navController.navigate("error_screen") // 오류 페이지로 이동
-                        }
+                        Log.d("EditProfileScreen", "프로필 수정 실패")
+//                        LaunchedEffect(Unit) {
+//                            navController.navigate("error_screen") // 오류 페이지로 이동
+//                        }
                     }
                     else -> {}
                 }
