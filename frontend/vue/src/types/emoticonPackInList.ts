@@ -1,7 +1,7 @@
-export type EmoticonPack = {
+export type EmoticonPackInList = {
   id: number;
   title: string;
-  author: {
+  member: {
     id: number;
     nickname: string;
     profile: string;

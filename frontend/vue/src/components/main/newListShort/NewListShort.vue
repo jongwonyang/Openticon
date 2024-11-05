@@ -18,8 +18,8 @@
           v-for="emoticon in newEmoticonList"
           :key="emoticon.id"
         >
-          <img :src="emoticon.image" alt="이모티콘" class="w-full" />
-          <p class="text-md text-center">{{ emoticon.name }}</p>
+          <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-32 h-32" />
+          <p class="text-md text-center mt-2 truncate">{{ emoticon.title }}</p>
         </RouterLink>
       </div>
       <!-- md 크기 이상일 때는 그리드 -->
@@ -29,72 +29,25 @@
         v-for="emoticon in newEmoticonList"
         :key="emoticon.id"
       >
-        <img :src="emoticon.image" alt="이모티콘" class="w-full" />
-        <p class="text-md text-center">{{ emoticon.name }}</p>
+        <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full" />
+        <p class="text-md text-center mt-2 truncate">{{ emoticon.title }}</p>
       </RouterLink>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { useEmoticonPackStore } from "@/stores/emoticonPack";
+import type { EmoticonPackInList } from "@/types/emoticonPackInList";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
+const newEmoticonList = ref<EmoticonPackInList[]>([]);
 
-const newEmoticonList = ref([]);
-
+const emoticonPackStore = useEmoticonPackStore();
 onMounted(() => {
-  newEmoticonList.value = [
-    {
-      id: 1,
-      name: "이모티콘1",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 2,
-      name: "이모티콘2",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 3,
-      name: "이모티콘3",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 4,
-      name: "이모티콘4",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 5,
-      name: "이모티콘5",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 6,
-      name: "이모티콘6",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 7,
-      name: "이모티콘7",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 8,
-      name: "이모티콘8",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 9,
-      name: "이모티콘9",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-    {
-      id: 10,
-      name: "이모티콘10",
-      image: "https://public.sgr.cspark.kr/OPENTICON/molu.gif",
-    },
-  ];
+  emoticonPackStore.getNewEmoticonPackList(0, 10).then((res) => {
+    newEmoticonList.value = res;
+  });
 });
 </script>
 
