@@ -35,7 +35,7 @@
         android:background="#F8F5F5">
 
         <!-- 이미지 아이콘 -->
-        <io.ssafy.openticon.ui.component.EmoticonPackView
+        <io.ssafy.openticon.ui.component.LikeEmoticonPackView
             android:id="@+id/imageLike"
             android:layout_width="0dp"
             android:layout_height="match_parent"

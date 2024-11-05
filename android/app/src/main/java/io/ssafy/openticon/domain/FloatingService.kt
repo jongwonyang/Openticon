@@ -12,7 +12,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.drawable.AnimatedImageDrawable
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -29,16 +31,30 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
+import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
+import io.ssafy.openticon.data.model.LikeEmoticon
+import io.ssafy.openticon.data.model.LikeEmoticonPack
 import io.ssafy.openticon.data.model.SampleEmoticon
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
+import io.ssafy.openticon.ui.component.LikeEmoticonPackView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URL
 
 class FloatingService : Service() {
 
@@ -72,7 +88,7 @@ class FloatingService : Service() {
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
         val data = jsonString?.let {
-            Json.decodeFromString<List<SampleEmoticonPack>>(it)
+            Json.decodeFromString<List<EmoticonPackWithEmotions>>(it)
         } ?: emptyList()
 
         updateFloatingView(data)
@@ -84,17 +100,19 @@ class FloatingService : Service() {
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
         val data = jsonString?.let {
-            Json.decodeFromString<SampleEmoticonPack>(it)
+            Json.decodeFromString<LikeEmoticonPack>(it)
         }
 
-        val likeView = secondFloatingView.findViewById<EmoticonPackView>(R.id.imageLike)
+        val likeView = secondFloatingView.findViewById<LikeEmoticonPackView>(R.id.imageLike)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
         data?.let {
             likeView.removeAllViews() // 이미 존재하는 이미지 삭제
             likeView.setupEmoticonPack(it) { images ->
                 likeView.displayImagesInTable(tableLayout, images,
-                    onImageClick = { sampleEmoticon: SampleEmoticon ->
-                        insertEmoticonIntoFocusedEditText(sampleEmoticon.imageResource)
+                    onImageClick = { emoticon: LikeEmoticon ->
+                        CoroutineScope(Dispatchers.Main).launch {
+                            insertEmoticonIntoFocusedEditText(emoticon.filePath)
+                        }
                     }
                 )
             }
@@ -103,7 +121,7 @@ class FloatingService : Service() {
 
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun updateFloatingView(data: List<SampleEmoticonPack>) {
+    private fun updateFloatingView(data: List<EmoticonPackWithEmotions>) {
         // WindowManager를 사용하여 floatingView 설정
         secondLayoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,  // 화면 너비에 맞춤
@@ -151,11 +169,13 @@ class FloatingService : Service() {
             val emoticonPackView = EmoticonPackView(this)
             emoticonPackView.setupEmoticonPack(pack) { images ->
                 emoticonPackView.displayImagesInTable(tableLayout, images,
-                    onImageClick = { sampleEmoticon: SampleEmoticon ->
-                        insertEmoticonIntoFocusedEditText(sampleEmoticon.imageResource) },
+                    onImageClick = { emoticon: Emoticon ->
+                        CoroutineScope(Dispatchers.Main).launch {
+                            insertEmoticonIntoFocusedEditText(emoticon.filePath)
+                        } },
                     onImageLongClick = {
-                            sampleEmoticon: SampleEmoticon ->
-                        lkeEmoticon(sampleEmoticon)
+                            emoticon: Emoticon ->
+                        lkeEmoticon(emoticon)
                     }
                 )
                 if (::selectedEmoticonPackView.isInitialized) {
@@ -184,7 +204,7 @@ class FloatingService : Service() {
         )
         pendingIntent.send()
     }
-    private fun lkeEmoticon(sampleEmoticon: SampleEmoticon){
+    private fun lkeEmoticon(emoticon: Emoticon){
 //        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
 //        val params = WindowManager.LayoutParams(
 //            WindowManager.LayoutParams.WRAP_CONTENT,
@@ -199,113 +219,101 @@ class FloatingService : Service() {
         val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
-        val sampleEmoticonPack = past_jsonString?.let {
-            Json.decodeFromString<SampleEmoticonPack>(it)
+        val likeEmoticonPack = past_jsonString?.let {
+            Json.decodeFromString<LikeEmoticonPack>(it)
         }
 
 
-        sampleEmoticonPack?.let {
-            val mutableImages = it.images.toMutableList()  // MutableList로 변환
-            mutableImages.add(sampleEmoticon.copy())
-            it.images = mutableImages.toList()  // 다시 List로 변환하여 할당
+        likeEmoticonPack?.let {
+            val mutableImages = it.emoticons.toMutableList()  // MutableList로 변환
+            mutableImages.add(LikeEmoticon(filePath = emoticon.filePath))
+            it.emoticons = mutableImages.toList()  // 다시 List로 변환하여 할당
         }
 
         val editor = sharedPreferences.edit()
-        val jsonString = Json.encodeToString(sampleEmoticonPack)
+        val jsonString = Json.encodeToString(likeEmoticonPack)
         editor.putString("like_emoticon_data", jsonString)
         editor.apply()
         loadLikeDate()
         Log.d("floating", "Maybe.... success,..?")
     }
 
-    /**
-    fun insertEmoticonIntoFocusedEditText(resourceId: Int) {
-        Log.d("AccessInsert", resourceId.toString())
-        val drawable = ContextCompat.getDrawable(applicationContext, resourceId) ?: return
-        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
+    suspend fun insertEmoticonIntoFocusedEditText(resourceUri: String) {
+        val drawable = loadImageFromUrl(resourceUri)
 
-        // 클립보드에 비트맵 복사
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newUri(contentResolver, "Emoticon", getImageUri(bitmap))
-        clipboard.setPrimaryClip(clip)
+        if (drawable != null) {
+            if (!resourceUri.endsWith(".gif")) {
+                // 리소스가 정적 이미지일 경우
+                val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
 
-        Toast.makeText(this, "이모티콘이 클립보드에 복사되었습니다. 붙여넣기를 시도해보세요.", Toast.LENGTH_SHORT).show()
-    }
-
-    fun getImageUri(bitmap: Bitmap): Uri? {
-        val file = File(cacheDir, "emoticon.png")
-        try {
-            val stream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            stream.flush()
-            stream.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return null
-        }
-        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
-    }
-**/
-
-    fun insertEmoticonIntoFocusedEditText(resourceId: Int) {
-        val drawable = ContextCompat.getDrawable(applicationContext, resourceId)
-        if (drawable !is BitmapDrawable) {
-            // 리소스가 GIF일 경우
-            val gifUri = getGifUri(resourceId)
-            if (gifUri != null) {
-                copyToClipboard(gifUri)
-                Toast.makeText(this, "GIF가 클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                val uri = getImageUri(bitmap)
+                if (uri != null) {
+                    copyToClipboard(uri)
+                    Toast.makeText(this, "이미지가 클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "이미지 복사 실패", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(this, "GIF 복사 실패", Toast.LENGTH_SHORT).show()
+                // 리소스가 GIF일 경우
+                val gifUri = getGifUri(resourceUri)
+                if (gifUri != null) {
+                    copyToClipboard(gifUri)
+                    Toast.makeText(this, "GIF가 클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "GIF 복사 실패", Toast.LENGTH_SHORT).show()
+                }
             }
         } else {
-            // 리소스가 정적 이미지일 경우
-            val bitmap = Bitmap.createBitmap(drawable!!.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
-            drawable.draw(canvas)
+            Toast.makeText(this, "이미지를 로드할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-            val uri = getImageUri(bitmap)
-            if (uri != null) {
-                copyToClipboard(uri)
-                Toast.makeText(this, "이미지가 클립보드에 복사되었습니다.", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "이미지 복사 실패", Toast.LENGTH_SHORT).show()
+    suspend fun loadImageFromUrl(resourceUri: String): Drawable? {
+        return withContext(Dispatchers.IO) {
+            val request = ImageRequest.Builder(this@FloatingService) // 서비스에서는 applicationContext를 사용
+                .data(resourceUri)
+                .allowHardware(false)
+                .build()
+
+            val result = (applicationContext.imageLoader.execute(request) as? SuccessResult)?.drawable
+            result
+        }
+    }
+
+    suspend fun getGifUri(resourceUri: String): Uri? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = File(resourceUri) // 로컬 파일 경로
+                if (!file.exists()) return@withContext null
+
+                // FileProvider를 사용하여 URI 생성
+                FileProvider.getUriForFile(this@FloatingService, "${packageName}.provider", file)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext null
             }
         }
     }
 
-    fun getGifUri(resourceId: Int): Uri? {
-        val inputStream = resources.openRawResource(resourceId)
-        val file = File(cacheDir, "emoticon.gif")
-        try {
-            val outputStream = FileOutputStream(file)
-            inputStream.copyTo(outputStream)
-            outputStream.flush()
-            outputStream.close()
-            inputStream.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return null
-        }
-        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
-    }
 
-    fun getImageUri(bitmap: Bitmap): Uri? {
-        val file = File(cacheDir, "emoticon.png")
-        try {
-            val stream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            stream.flush()
-            stream.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return null
+
+    suspend fun getImageUri(bitmap: Bitmap): Uri? {
+        return withContext(Dispatchers.IO) {
+            val file = File(cacheDir, "emoticon.png")
+            try {
+                val stream = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                stream.flush()
+                stream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+                return@withContext null
+            }
+            FileProvider.getUriForFile(this@FloatingService, "${packageName}.provider", file)
         }
-        return FileProvider.getUriForFile(this, "${packageName}.provider", file)
     }
 
     fun copyToClipboard(uri: Uri) {
@@ -313,6 +321,7 @@ class FloatingService : Service() {
         val clip = ClipData.newUri(contentResolver, "Emoticon", uri)
         clipboard.setPrimaryClip(clip)
     }
+
 
 
     private fun startForegroundServiceWithNotification() {
@@ -391,42 +400,7 @@ class FloatingService : Service() {
         val density = resources.displayMetrics.density
         return (dp * density).toInt()
     }
-/**
-    private fun setupSecondFloatingView() {
-        // dp 값을 px로 변환하여 고정된 크기 설정
-        secondLayoutParams = WindowManager.LayoutParams(
-            dpToPx(380),  // 380dp를 px로 변환하여 넓이 설정
-            dpToPx(300),  // 300dp를 px로 변환하여 높이 설정
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
-        secondLayoutParams.gravity = Gravity.CENTER
 
-        // 두 번째 플로팅 뷰 설정
-        secondFloatingView = LayoutInflater.from(this).inflate(R.layout.new_compose_activity_layout, null)
-
-        // 터치 리스너 설정
-        secondFloatingView.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    initialTouchX = event.rawX.toInt()
-                    initialTouchY = event.rawY.toInt()
-                    initialX = secondLayoutParams.x
-                    initialY = secondLayoutParams.y
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    secondLayoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
-                    secondLayoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
-                    windowManager.updateViewLayout(secondFloatingView, secondLayoutParams)
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-**/
     private fun toggleSecondFloatingView() {
         if (isSecondViewVisible) {
             windowManager.removeView(secondFloatingView)

@@ -14,6 +14,9 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.load
 import io.ssafy.openticon.R
+import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.EmoticonPackEntity
+import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.SampleEmoticon
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 
@@ -41,7 +44,7 @@ class EmoticonPackView @JvmOverloads constructor(
         }
     }
 
-    fun setupEmoticonPack(pack: SampleEmoticonPack, onPackClick: (List<SampleEmoticon>) -> Unit) {
+    fun setupEmoticonPack(pack: EmoticonPackWithEmotions, onPackClick: (List<Emoticon>) -> Unit) {
 // 네모 박스를 만들기 위한 FrameLayout 생성
         val frameLayout = FrameLayout(context).apply {
             layoutParams = LayoutParams(
@@ -51,12 +54,17 @@ class EmoticonPackView @JvmOverloads constructor(
             setBackgroundColor(Color.parseColor("#F8F5F5")) // 박스의 배경색 설정 (선택 사항)
 
             // 박스 전체에 onClick 이벤트 설정
-            setOnClickListener { onPackClick(pack.images) }
+            setOnClickListener { onPackClick(pack.emotions) }
         }
 
 // ImageView를 FrameLayout 중앙에 작게 배치
         val imageView = ImageView(context).apply {
-            setImageResource(pack.mainImageResource)
+            load(pack.emoticonPackEntity.listImg) {
+                crossfade(true) // 크로스페이드 효과 (선택 사항)
+                placeholder(R.drawable.icon_2) // 로딩 중일 때 사용할 이미지 (선택 사항)
+                error(R.drawable.icon_1) // 에러 발생 시 사용할 이미지 (선택 사항)
+                allowHardware(false)
+            }
 
             // 이미지 크기를 박스보다 작게 설정하여 중앙에 배치
             layoutParams = FrameLayout.LayoutParams(
@@ -77,10 +85,10 @@ class EmoticonPackView @JvmOverloads constructor(
         return (dp * density).toInt()
     }
 
-    fun displayImagesInTable(tableLayout: TableLayout, images: List<SampleEmoticon>, onImageClick: (SampleEmoticon) -> Unit, onImageLongClick: (SampleEmoticon) -> Unit = {}) {
+    fun displayImagesInTable(tableLayout: TableLayout, images: List<Emoticon>, onImageClick: (Emoticon) -> Unit, onImageLongClick: (Emoticon) -> Unit = {}) {
         tableLayout.removeAllViews()
         var currentRow: TableRow? = null
-        var width_size: Int = (tableLayout.width - dpToPx(10))/4
+        val width_size: Int = (tableLayout.width - dpToPx(10))/4
         images.forEachIndexed { index, emoticon ->
             if (index % 4 == 0) {
                 currentRow = TableRow(context).apply {
@@ -113,7 +121,7 @@ class EmoticonPackView @JvmOverloads constructor(
                 }
             }
 
-            imageView.load(emoticon.imageResource) {
+            imageView.load(emoticon.filePath) {
                 crossfade(false) // 페이드 애니메이션 비활성화
                 allowHardware(false) // 하드웨어 가속 비활성화로 GIF 애니메이션 멈춤
                 placeholder(R.drawable.icon_1) // 로딩 중 기본 이미지
