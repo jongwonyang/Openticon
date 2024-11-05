@@ -35,4 +35,8 @@ public class EmoticonService {
         }
         return result;
     }
+
+    public String getEmoticon(EmoticonPackEntity emoticonPack, Integer order){
+        return emoticonRepository.getEmoticonEntityByEmoticonPackAndEmoticonOrder(emoticonPack,order).getImagePath();
+    }
 }
