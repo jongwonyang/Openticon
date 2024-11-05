@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
@@ -113,68 +114,67 @@ fun EmoticonPackDetailScreen(
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
+            BottomAppBar {
                 when (purchaseState) {
                     is UiState.Loading -> {
-                        CircularProgressIndicator()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
+
                     is UiState.Success -> {
                         val purchaseInfo = (purchaseState as UiState.Success).data
 
                         if (!purchaseInfo.purchased) {
-                            // 테이블에 없음
+                            // 테이블에 없음 (구매 안됨)
                             // 구매 버튼 표시
-                            Button(onClick = {
-                                if (!isLoggedIn) {
-                                    // 로그인 안됨
-                                    // 로그인 화면으로
-                                    navController.navigate("login")
-                                } else {
-                                    // 로그인 됨
-                                    // 구매 처리
-                                    showDialog = true
-                                }
-                            }) {
-                                Text("구매")
-                            }
+                            PrimaryActionButton(
+                                onClick = {
+                                    if (!isLoggedIn) {
+                                        // 로그인 안됨
+                                        // 로그인 화면으로
+                                        navController.navigate("login")
+                                    } else {
+                                        // 로그인 됨
+                                        // 구매 처리
+                                        showDialog = true
+                                    }
+                                },
+                                text = "구매"
+                            )
                         } else {
-                            // 테이블에 있음
+                            // 테이블에 있음 (구매함)
                             if (!purchaseInfo.downloaded) {
                                 // 다운로드 안됨
                                 // 다운로드 버튼 표시
-                                Button(
+                                PrimaryActionButton(
                                     onClick = {
-                                        // 다운로드 처리
                                         if (!isDownloading)
                                             viewModel.downloadEmoticonPack(packId = emoticonPackId)
                                     },
+                                    text = if (isDownloading) "다운로드 중" else "다운로드",
                                     enabled = !isDownloading
-                                ) {
-                                    Text(if (isDownloading) "다운로드 중..." else "다운로드")
-                                }
+                                )
                             } else {
                                 // 다운로드 됨
                                 // 다운로드 완료 표시
-                                Button(
+                                PrimaryActionButton(
                                     onClick = {},
+                                    text = "다운로드 완료",
                                     enabled = false
-                                ) {
-                                    Text("다운로드 완료")
-                                }
+                                )
                             }
                         }
                     }
+
                     is UiState.Error -> {
                         Text("구매 정보를 불러오는데 실패했습니다.")
                     }
                 }
             }
-
         }
     ) { innerPadding ->
         when (uiState) {
@@ -364,7 +364,6 @@ fun EmoticonPackDetailScreen(
                 }
             }
         }
-
     }
 
     if (showDialog) {
@@ -413,11 +412,48 @@ fun EmoticonPackDetailScreen(
     }
 }
 
+@Composable
+fun PrimaryActionButton(
+    onClick: () -> Unit,
+    text: String,
+    enabled: Boolean = true
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(16.dp)
+    ) {
+        Text(text = text)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun EmoticonPackDetailScreenPreview() {
-    EmoticonPackDetailScreen(
-        emoticonPackId = 1,
-        navController = rememberNavController()
-    )
+fun ScaffoldPreview() {
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Preview") }) },
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            Text("body")
+        }
+    }
 }

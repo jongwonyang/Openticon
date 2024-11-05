@@ -15,7 +15,6 @@ class GetPurchaseInfoUseCase @Inject constructor(
             Result.success(PurchaseInfo(packId, true, purchaseInfo.downloaded))
         } else {
             Result.success(PurchaseInfo(packId, false, false))
-
         }
     }
 }

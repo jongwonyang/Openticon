@@ -3,8 +3,8 @@ package io.ssafy.openticon.domain.model
 data class EmoticonPack(
     val id: Int,
     val title: String,
-    val author: String,
     val thumbnail: String,
-    val price: Int = 0,
-    val description: String = ""
+    val listImg: String,
+    val isPublic: Boolean,
+    val emoticonUrls: List<String>
 )
