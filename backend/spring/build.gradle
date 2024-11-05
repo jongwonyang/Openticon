@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'org.flywaydb.flyway' version '8.5.0'
+	id 'org.openjfx.javafxplugin' version '0.0.14'
+
 }
 
 group = 'io.ssafy'
@@ -58,6 +60,14 @@ dependencies {
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 
 	implementation 'com.google.cloud:google-cloud-vision:3.46.0'
+
+	implementation group: 'dev.brachtendorf', name: 'JImageHash', version: '1.0.0'
+	implementation group: 'org.openjfx', name: 'javafx', version: '20.0.2', ext: 'pom'
+}
+
+javafx {
+	version = "20"
+	modules = [ 'javafx.base', 'javafx.graphics' ]
 }
 
 tasks.named('test') {
