@@ -5,6 +5,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPackEntity
+import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
@@ -117,5 +118,13 @@ class EmoticonPacksRepository @Inject constructor(
 
     fun getPurchasedPackInfo(packId: Int): Flow<EmoticonPackEntity?> {
         return emoticonDao.getEmoticonPack(packId)
+    }
+
+    suspend fun updateEmoticonPack(emoticonPackEntity: EmoticonPackEntity){
+        emoticonDao.updateEmoticonPack(emoticonPackEntity)
+    }
+
+    suspend fun getLikeEmoticonPack(): Flow<List<LikeEmoticon>> {
+        return emoticonDao.getLikeEmoticonPack()
     }
 }

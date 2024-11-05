@@ -4,8 +4,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPackEntity
+import io.ssafy.openticon.data.model.LikeEmoticon
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -30,4 +32,10 @@ interface EmoticonDao {
 
     @Query("UPDATE emoticon_packs SET downloaded = :b WHERE id = :packId")
     fun updateEmoticonPackDownloaded(packId: Int, b: Boolean)
+
+    @Query("SELECT * FROM like_emoticons")
+    fun getLikeEmoticonPack(): Flow<List<LikeEmoticon>>
+
+    @Update
+    suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity)
 }
