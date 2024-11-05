@@ -25,7 +25,7 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
     private val getPurchaseInfoUseCase: GetPurchaseInfoUseCase,
     private val purchaseEmoticonPackUseCase: PurchaseEmoticonPackUseCase,
     private val downloadEmoticonPackUseCase: DownloadEmoticonPackUseCase,
-    private val userSession: UserSession
+    userSession: UserSession
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<EmoticonPackDetail>>(UiState.Loading)
     val uiState: StateFlow<UiState<EmoticonPackDetail>> = _uiState
@@ -95,6 +95,7 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
                     _isDownloading.value = false
                     _toastEvent.emit("다운로드 실패")
                 }
+            fetchPurchaseInfo(packId)
         }
     }
 

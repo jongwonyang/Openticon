@@ -5,5 +5,6 @@ data class EmoticonPack(
     val title: String,
     val thumbnail: String,
     val listImg: String,
-    val isPublic: Boolean
+    val isPublic: Boolean,
+    val emoticonUrls: List<String>
 )
