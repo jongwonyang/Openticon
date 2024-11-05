@@ -46,7 +46,7 @@ public class ImageHashResponseDto {
         this.price = emoticonPackEntity.getPrice();
         this.view = emoticonPackEntity.getView();
         this.isPublic = emoticonPackEntity.isPublic();
-        this.isBlacklist = emoticonPackEntity.isBlacklist();
+        this.isBlacklist = emoticonPackEntity.getBlacklist();
         this.category = emoticonPackEntity.getCategory();
         this.thumbnailImg = emoticonPackEntity.getThumbnailImg();
         this.listImg = emoticonPackEntity.getListImg();
