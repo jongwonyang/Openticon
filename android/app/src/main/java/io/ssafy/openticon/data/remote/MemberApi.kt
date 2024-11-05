@@ -5,6 +5,7 @@ import retrofit2.http.GET
 import io.ssafy.openticon.data.model.MemberEntity;
 import okhttp3.ResponseBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.POST
 
 interface MemberApi {
@@ -20,4 +21,6 @@ interface MemberApi {
     @POST("/api/v1/member")
     suspend fun editProfile(): Response<String>
 
+    @DELETE("/api/v1/member")
+    suspend fun deleteMember(): Response<Unit>
 }

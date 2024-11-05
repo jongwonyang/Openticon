@@ -1,5 +1,9 @@
 package io.ssafy.openticon.ui.screen
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -24,16 +28,30 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(navController: NavController) {
+fun EditProfileScreen(navController: NavController,
+                      searchViewModel: SearchScreenViewModel = hiltViewModel(),
+                      ) {
     val viewModel: EditProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val memberEntity by viewModel.memberEntity.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
     var nickname by remember { mutableStateOf(TextFieldValue("")) }
+    // 이미지 선택 런처 (GetContent 사용)
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            searchViewModel.setImageUri(uri)
+        } else {
+            Log.e("ImageSearch", "Error: Selected file URI is null.")
+        }
+    }
 
     Scaffold(
         topBar = {

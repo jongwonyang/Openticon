@@ -9,6 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +27,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import io.ssafy.openticon.R
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -34,6 +40,8 @@ fun ProfileScreen(
 ) {
     val viewModel: MemberViewModel = hiltViewModel()
     val memberEntity by viewModel.memberEntity.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     fun getFormattedDate(timestamp: String): String {
         return try {
@@ -97,9 +105,8 @@ fun ProfileScreen(
 
         // 가입 날짜
         memberEntity?.createdAt?.let {
-            val createdAtFormatted = getFormattedDate(it)
             Text(
-                text = createdAtFormatted,
+                text = it.slice(0..9),
                 fontSize = 14.sp,
                 color = Color.LightGray
             )
@@ -128,7 +135,17 @@ fun ProfileScreen(
                 Text("회원 수정", color = Color.Black)
             }
             Button(
-                onClick = { /* 회원 탈퇴 기능 */ },
+                onClick = {
+                    coroutineScope.launch {
+                        val result = viewModel.deleteMember()
+                        if (result.isSuccess) {
+                            // 회원 삭제 성공 시 모달 창 띄우기
+                            showDeleteDialog = true
+                        } else {
+                            println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
+                        }
+                    }
+                },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
@@ -154,6 +171,22 @@ fun ProfileScreen(
         }) {
             Text("임시 로그인 버튼")
         }
-
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("회원 탈퇴") },
+                text = { Text("회원 탈퇴가 성공적으로 완료되었습니다.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            navController.navigate("main") // 메인 페이지로 이동
+                        }
+                    ) {
+                        Text("확인")
+                    }
+                }
+            )
+        }
     }
 }
