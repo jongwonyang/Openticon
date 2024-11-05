@@ -16,7 +16,7 @@ export const useAlertStore = defineStore("alert", () => {
   const addAlert = (
     message: string,
     type: "normal" | "special" | "error" | "success" | "warning" = "normal",
-    title: string = "알림",
+    title: string = "알림"
   ) => {
     // 기본값 'normal'
     const id = lastId.value++; // 고유 ID 생성
@@ -35,7 +35,7 @@ export const useAlertStore = defineStore("alert", () => {
     alerts.value = alerts.value.filter((alert) => alert.id !== id);
   };
 
-  const clearAlerts = () => { 
+  const clearAlerts = () => {
     alerts.value = [];
   };
 

@@ -30,7 +30,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response, // 응답이 성공적일 때 처리
   async (error) => {
-    makeErrorAlert(`HTTP ${error.response?.status} 에러 : 콘솔을 확인해주세요.`);
+    makeErrorAlert(
+      `HTTP ${error.response?.status} 에러 : 콘솔을 확인해주세요.`
+    );
     console.error(error);
     return Promise.reject(error);
   }

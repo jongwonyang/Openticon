@@ -1,7 +1,3 @@
-<script setup lang="ts">
+<script setup lang="ts"></script>
 
-</script>
-
-<template>
-  인기 이모티콘 뷰
-</template>
+<template>인기 이모티콘 뷰</template>
