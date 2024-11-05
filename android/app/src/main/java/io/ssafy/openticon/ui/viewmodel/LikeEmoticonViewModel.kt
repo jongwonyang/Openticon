@@ -34,7 +34,7 @@ class LikeEmoticonViewModel @Inject constructor(
         initEmoticonDataFromPreferences()
     }
 
-    private fun initEmoticonDataFromPreferences(){
+    fun initEmoticonDataFromPreferences(){
 
         viewModelScope.launch {
             getLikeEmoticonPack.execute().collect { emoticonPacks ->

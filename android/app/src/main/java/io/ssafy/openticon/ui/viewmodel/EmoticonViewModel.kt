@@ -24,7 +24,7 @@ class EmoticonViewModel @Inject constructor(
         loadEmoticonPacks()
     }
 
-    private fun loadEmoticonPacks() {
+    fun loadEmoticonPacks() {
         viewModelScope.launch {
             getEmoticonPacksWithEmotionsUseCase.execute().collect { emoticonPacks ->
                 _Sample_emoticonPacks.value = emoticonPacks
