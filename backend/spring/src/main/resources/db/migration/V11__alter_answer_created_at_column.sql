@@ -1,0 +1,5 @@
+ALTER TABLE "answer"
+ADD COLUMN "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE "answer"
+ADD CONSTRAINT "FK_Objection_TO_answer" FOREIGN KEY ("objection_id") REFERENCES "objection" ("id");

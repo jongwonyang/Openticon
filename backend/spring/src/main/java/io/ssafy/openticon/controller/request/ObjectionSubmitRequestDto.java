@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ObjectionSubmitRequestDto {
-    private Long emoticonPackId;
-
+    private Long objectionId;
+    private String content;
 }
