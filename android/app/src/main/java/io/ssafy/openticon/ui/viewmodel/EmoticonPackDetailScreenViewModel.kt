@@ -9,7 +9,7 @@ import io.ssafy.openticon.domain.model.PurchaseInfo
 import io.ssafy.openticon.domain.usecase.DownloadEmoticonPackUseCase
 import io.ssafy.openticon.domain.usecase.GetPublicPackDetailUseCase
 import io.ssafy.openticon.domain.usecase.GetPurchaseInfoUseCase
-import io.ssafy.openticon.domain.usecase.PurchaseEmoticonUseCase
+import io.ssafy.openticon.domain.usecase.PurchaseEmoticonPackUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class EmoticonPackDetailScreenViewModel @Inject constructor(
     private val getPublicPackDetailUseCase: GetPublicPackDetailUseCase,
     private val getPurchaseInfoUseCase: GetPurchaseInfoUseCase,
-    private val purchaseEmoticonUseCase: PurchaseEmoticonUseCase,
+    private val purchaseEmoticonPackUseCase: PurchaseEmoticonPackUseCase,
     private val downloadEmoticonPackUseCase: DownloadEmoticonPackUseCase,
     private val userSession: UserSession
 ) : ViewModel() {
@@ -71,13 +71,13 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
     fun purchaseEmoticonPack(packId: Int) {
         viewModelScope.launch {
             _purchaseState.value = UiState.Loading
-            val result = purchaseEmoticonUseCase(packId)
+            val result = purchaseEmoticonPackUseCase(packId)
             result.onSuccess {
                 _toastEvent.emit(it)
-                _purchaseState.value = UiState.Success(PurchaseInfo(packId, true, false))
+                fetchPurchaseInfo(packId)
             }.onFailure {
                 _toastEvent.emit(it.message ?: "Unknown error")
-                _purchaseState.value = UiState.Success(PurchaseInfo(packId, false, false))
+                fetchPurchaseInfo(packId)
             }
         }
     }

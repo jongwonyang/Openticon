@@ -1,10 +1,10 @@
 package io.ssafy.openticon.ui.sample
 
-import io.ssafy.openticon.domain.model.EmoticonPack
+import io.ssafy.openticon.domain.model.SampleEmoticonPack
 
 object EmoticonPackSampleData {
     val latestPacks = (1..50).map { id ->
-        EmoticonPack(
+        SampleEmoticonPack(
             id = id,
             title = "레니콘 슈퍼디럭스 $id",
             author = "무치 $id",
@@ -13,7 +13,7 @@ object EmoticonPackSampleData {
         )
     }
 
-    val samplePack = EmoticonPack(
+    val samplePack = SampleEmoticonPack(
         id = 1,
         title = "레니콘 슈퍼디럭스",
         author = "무치",

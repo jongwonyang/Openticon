@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -113,12 +115,7 @@ fun EmoticonPackDetailScreen(
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
+            BottomAppBar {
                 when (purchaseState) {
                     is UiState.Loading -> {
                         CircularProgressIndicator()
@@ -127,45 +124,43 @@ fun EmoticonPackDetailScreen(
                         val purchaseInfo = (purchaseState as UiState.Success).data
 
                         if (!purchaseInfo.purchased) {
-                            // 테이블에 없음
+                            // 테이블에 없음 (구매 안됨)
                             // 구매 버튼 표시
-                            Button(onClick = {
-                                if (!isLoggedIn) {
-                                    // 로그인 안됨
-                                    // 로그인 화면으로
-                                    navController.navigate("login")
-                                } else {
-                                    // 로그인 됨
-                                    // 구매 처리
-                                    showDialog = true
-                                }
-                            }) {
-                                Text("구매")
-                            }
+                            PrimaryActionButton(
+                                onClick = {
+                                    if (!isLoggedIn) {
+                                        // 로그인 안됨
+                                        // 로그인 화면으로
+                                        navController.navigate("login")
+                                    } else {
+                                        // 로그인 됨
+                                        // 구매 처리
+                                        showDialog = true
+                                    }
+                                },
+                                text = "구매"
+                            )
                         } else {
-                            // 테이블에 있음
+                            // 테이블에 있음 (구매함)
                             if (!purchaseInfo.downloaded) {
                                 // 다운로드 안됨
                                 // 다운로드 버튼 표시
-                                Button(
+                                PrimaryActionButton(
                                     onClick = {
-                                        // 다운로드 처리
-                                        if (!isDownloading)
+                                        if (isDownloading)
                                             viewModel.downloadEmoticonPack(packId = emoticonPackId)
                                     },
+                                    text = if (isDownloading) "다운로드 중" else "다운로드",
                                     enabled = !isDownloading
-                                ) {
-                                    Text(if (isDownloading) "다운로드 중..." else "다운로드")
-                                }
+                                )
                             } else {
                                 // 다운로드 됨
                                 // 다운로드 완료 표시
-                                Button(
+                                PrimaryActionButton(
                                     onClick = {},
+                                    text = "다운로드 완료",
                                     enabled = false
-                                ) {
-                                    Text("다운로드 완료")
-                                }
+                                )
                             }
                         }
                     }
@@ -174,7 +169,6 @@ fun EmoticonPackDetailScreen(
                     }
                 }
             }
-
         }
     ) { innerPadding ->
         when (uiState) {
@@ -364,7 +358,6 @@ fun EmoticonPackDetailScreen(
                 }
             }
         }
-
     }
 
     if (showDialog) {
@@ -420,4 +413,22 @@ fun EmoticonPackDetailScreenPreview() {
         emoticonPackId = 1,
         navController = rememberNavController()
     )
+}
+
+@Composable
+fun PrimaryActionButton(
+    onClick: () -> Unit,
+    text: String,
+    enabled: Boolean = true
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(16.dp)
+    ) {
+        Text(text = text)
+    }
 }
