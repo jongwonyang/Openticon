@@ -55,7 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
@@ -118,8 +117,14 @@ fun EmoticonPackDetailScreen(
             BottomAppBar {
                 when (purchaseState) {
                     is UiState.Loading -> {
-                        CircularProgressIndicator()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
+
                     is UiState.Success -> {
                         val purchaseInfo = (purchaseState as UiState.Success).data
 
@@ -164,6 +169,7 @@ fun EmoticonPackDetailScreen(
                             }
                         }
                     }
+
                     is UiState.Error -> {
                         Text("구매 정보를 불러오는데 실패했습니다.")
                     }
@@ -406,15 +412,6 @@ fun EmoticonPackDetailScreen(
     }
 }
 
-@Preview
-@Composable
-fun EmoticonPackDetailScreenPreview() {
-    EmoticonPackDetailScreen(
-        emoticonPackId = 1,
-        navController = rememberNavController()
-    )
-}
-
 @Composable
 fun PrimaryActionButton(
     onClick: () -> Unit,
@@ -430,5 +427,33 @@ fun PrimaryActionButton(
             .padding(16.dp)
     ) {
         Text(text = text)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun ScaffoldPreview() {
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Preview") }) },
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            Text("body")
+        }
     }
 }
