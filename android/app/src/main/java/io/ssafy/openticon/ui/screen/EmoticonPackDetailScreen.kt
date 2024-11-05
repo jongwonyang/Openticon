@@ -152,7 +152,7 @@ fun EmoticonPackDetailScreen(
                                 // 다운로드 버튼 표시
                                 PrimaryActionButton(
                                     onClick = {
-                                        if (isDownloading)
+                                        if (!isDownloading)
                                             viewModel.downloadEmoticonPack(packId = emoticonPackId)
                                     },
                                     text = if (isDownloading) "다운로드 중" else "다운로드",
