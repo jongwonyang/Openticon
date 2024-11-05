@@ -36,7 +36,7 @@ public class ImageHashEntity {
     private int algorithmId;
 
     @Column(name = "hash_value")
-    private String hashValue;
+    private BigInteger hashValue;
 
     @Column(name = "hash_length")
     private int hashLength;
@@ -48,7 +48,7 @@ public class ImageHashEntity {
         this.isListImg=isListImg;
         this.emoticonOrder=emoticonOrder;
         this.algorithmId=hash.getAlgorithmId();
-        this.hashValue=hash.getHashValue().toString();
+        this.hashValue=hash.getHashValue();
         this.hashLength=hash.getBitResolution();
     }
 

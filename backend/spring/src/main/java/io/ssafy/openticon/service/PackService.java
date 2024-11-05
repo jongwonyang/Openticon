@@ -90,9 +90,6 @@ public class PackService {
             MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
             EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
 
-            imageHashService.saveThumbnailHash(thumbnailImgFile,emoticonPackEntity);
-            imageHashService.saveListImgHash(listImgFile,emoticonPackEntity);
-
 
             boolean problematicImage = false;
             for (int i = 0; i < emoticonList.size(); i += 16) {
@@ -106,11 +103,14 @@ public class PackService {
 
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
             packRepository.save(emoticonPackEntity);
+
+            imageHashService.saveThumbnailHash(thumbnailImgFile,emoticonPackEntity);
+            imageHashService.saveListImgHash(listImgFile,emoticonPackEntity);
             // 여기 부분
             int cnt=0;
             for(MultipartFile emoticon: emoticonList){
                 File emoticonFile=makeFile(emoticon);
-                emoticonsUrls.add(saveImage(emoticon, makeFile(emoticon)));
+                emoticonsUrls.add(saveImage(emoticon, emoticonFile));
                 imageHashService.saveEmoticonHash(emoticonFile,emoticonPackEntity,cnt);
                 cnt++;
             }
