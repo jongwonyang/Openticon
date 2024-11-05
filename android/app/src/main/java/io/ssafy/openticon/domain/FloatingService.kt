@@ -12,6 +12,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.drawable.AnimatedImageDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -33,6 +34,7 @@ import androidx.core.content.FileProvider
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
 import io.ssafy.openticon.data.model.Emoticon
@@ -240,7 +242,7 @@ class FloatingService : Service() {
         val drawable = loadImageFromUrl(resourceUri)
 
         if (drawable != null) {
-            if (drawable is BitmapDrawable) {
+            if (!resourceUri.endsWith(".gif")) {
                 // 리소스가 정적 이미지일 경우
                 val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(bitmap)
@@ -283,21 +285,20 @@ class FloatingService : Service() {
 
     suspend fun getGifUri(resourceUri: String): Uri? {
         return withContext(Dispatchers.IO) {
-            val inputStream = URL(resourceUri).openStream()
-            val file = File(cacheDir, "emoticon.gif")
             try {
-                val outputStream = FileOutputStream(file)
-                inputStream.copyTo(outputStream)
-                outputStream.flush()
-                outputStream.close()
-                inputStream.close()
-            } catch (e: IOException) {
+                val file = File(resourceUri) // 로컬 파일 경로
+                if (!file.exists()) return@withContext null
+
+                // FileProvider를 사용하여 URI 생성
+                FileProvider.getUriForFile(this@FloatingService, "${packageName}.provider", file)
+            } catch (e: Exception) {
                 e.printStackTrace()
                 return@withContext null
             }
-            FileProvider.getUriForFile(this@FloatingService, "${packageName}.provider", file)
         }
     }
+
+
 
     suspend fun getImageUri(bitmap: Bitmap): Uri? {
         return withContext(Dispatchers.IO) {
