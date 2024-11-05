@@ -10,17 +10,20 @@ data class EmoticonPackEntity(
     val title: String,
     val thumbnail: String,
     val listImg: String,
-    val isPrivate: Boolean,
+    val isPublic: Boolean,
     val downloaded: Boolean
 )
 
-fun EmoticonPack.toEmoticonPackEntity(): EmoticonPackEntity {
+fun EmoticonPack.toEmoticonPackEntity(
+    thumbnailFilePath: String,
+    listImgFilePath: String
+): EmoticonPackEntity {
     return EmoticonPackEntity(
         id = id,
         title = title,
-        thumbnail = thumbnail,
-        listImg = listImg,
-        isPrivate = isPublic,
+        thumbnail = thumbnailFilePath,
+        listImg = listImgFilePath,
+        isPublic = isPublic,
         downloaded = false
     )
 }
