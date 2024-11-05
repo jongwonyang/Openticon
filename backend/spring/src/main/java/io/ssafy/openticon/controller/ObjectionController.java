@@ -63,7 +63,11 @@ public class ObjectionController {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
 
+        try{
+            return ResponseEntity.ok().body(objectionService.testSubmitObjection(member, request));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
 
-        return ResponseEntity.ok().body(objectionService.testSubmitObjection(member, request));
     }
 }
