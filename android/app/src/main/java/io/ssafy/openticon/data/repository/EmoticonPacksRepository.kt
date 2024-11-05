@@ -111,6 +111,10 @@ class EmoticonPacksRepository @Inject constructor(
         return emoticonDao.getAllEmoticonPacks()
     }
 
+    suspend fun getDownloadedEmoticonPacks(): Flow<List<EmoticonPackEntity>> {
+        return emoticonDao.getAllDownloadedEmoticonPacks()
+    }
+
     suspend fun getEmotionsByPackId(packId: Int): Flow<List<Emoticon>>{
         return emoticonDao.getEmoticonsByPack(packId)
     }
@@ -126,5 +130,11 @@ class EmoticonPacksRepository @Inject constructor(
 
     suspend fun getLikeEmoticonPack(): Flow<List<LikeEmoticon>> {
         return emoticonDao.getLikeEmoticonPack()
+    }
+
+    suspend fun deleteEmoticonsByPackId(packId: Int) {
+        withContext(Dispatchers.IO) {
+            emoticonDao.deleteEmoticonsByPackId(packId)
+        }
     }
 }
