@@ -16,4 +16,8 @@ public class PurchaseEmoticonResponseDto {
     private String thumbnailImg;
 
     private Boolean isHide;
+
+    private Boolean isPublic;
+
+    private String listImage;
 }

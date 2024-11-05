@@ -165,6 +165,10 @@ public class PackService {
             throw new OpenticonException(ErrorCode.PRIVATE_PACK);
         }
 
+        if(emoticonPackEntity.getBlacklist()){
+            throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
+        }
+
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
 
         return new PackInfoResponseDto(emoticonPackEntity,emoticons);
@@ -197,6 +201,10 @@ public class PackService {
 
         if(!emoticonPackEntity.isPublic()){
             throw new OpenticonException(ErrorCode.PRIVATE_PACK);
+        }
+
+        if(emoticonPackEntity.getBlacklist()){
+            throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
         }
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
