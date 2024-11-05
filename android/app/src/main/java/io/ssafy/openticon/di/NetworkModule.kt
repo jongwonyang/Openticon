@@ -19,12 +19,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
+import okhttp3.MultipartBody
+
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     private const val BASE_URL = "https://apitest.openticon.store"
+//    private const val BASE_URL = "http://10.0.2.2:8080"
 
     @Provides
     @Singleton
@@ -42,7 +45,6 @@ object NetworkModule {
                     .addHeader("Authorization", "Bearer $token")
                     .build()
                 chain.proceed(newRequest)
-
             }
             .addInterceptor(loggingInterceptor)
             .build()

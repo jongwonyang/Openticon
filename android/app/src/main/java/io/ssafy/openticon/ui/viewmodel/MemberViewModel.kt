@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.MemberEntity
 import io.ssafy.openticon.di.UserSession
+import io.ssafy.openticon.domain.usecase.DeleteMemberUseCase
 import io.ssafy.openticon.domain.usecase.GetMemberInfoUseCase
 import io.ssafy.openticon.domain.usecase.SyncPurchasedPacksUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ class MemberViewModel @Inject constructor(
     private val getMemberInfoUseCase: GetMemberInfoUseCase,
     val baseUrl: String,
     private val userSession: UserSession,
+    private val deleteMemberUseCase: DeleteMemberUseCase,
     private val syncPurchasedPacksUseCase: SyncPurchasedPacksUseCase
 ): ViewModel() {
 
@@ -37,11 +39,26 @@ class MemberViewModel @Inject constructor(
 
     val uiState: StateFlow<UiState<MemberEntity>> = _uiState
 
+    suspend fun deleteMember(): Result<Unit> {
+        return try {
+            val result = deleteMemberUseCase()
+            if (result.isSuccess) {
+                userSession.logout()
+                Log.i("DeleteMember", "회원 삭제 성공")
+                Result.success(Unit)
+            } else {
+                val exception = result.exceptionOrNull()
+                Log.w("DeleteMember", "회원 삭제 실패: ${exception?.message ?: "알 수 없는 오류"}")
+                Result.failure(exception ?: Exception("알 수 없는 오류"))
+            }
+        } catch (e: Exception) {
+            Log.e("DeleteMember", "회원 삭제 중 오류 발생: ${e.message}")
+            Result.failure(e)
+        }
+    }
 
     // 회원 정보 수정하는 함수
-    suspend fun fetchMemberInfo() {
-        val tokenDataSource = TokenDataSource
-        val token = tokenDataSource.token.firstOrNull()
+    fun fetchMemberInfo() {
 
         _uiState.value = UiState.Loading
         viewModelScope.launch {
@@ -64,7 +81,6 @@ class MemberViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e)
-
             }
         }
     }
@@ -80,4 +96,5 @@ class MemberViewModel @Inject constructor(
         data class Error(val exception: Throwable) : UiState<Nothing>()
         data object UnAuth : UiState<Nothing>()
     }
+
 }

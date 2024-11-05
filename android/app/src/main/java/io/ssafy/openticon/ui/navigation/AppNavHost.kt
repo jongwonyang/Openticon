@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.ssafy.openticon.ui.screen.EditProfileScreen
 import io.ssafy.openticon.ui.screen.EmoticonPackDetailScreen
 import io.ssafy.openticon.ui.screen.LoginScreen
 import io.ssafy.openticon.ui.screen.MainScreen
@@ -19,6 +20,7 @@ import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 fun AppNavHost() {
     val navController = rememberNavController()
     val context = LocalContext.current as Activity
+
 
     NavHost(
         navController = navController,
@@ -31,6 +33,9 @@ fun AppNavHost() {
         composable("login") {
             LoginScreen()
         }
+        composable("edit_profile"){
+            EditProfileScreen(navController)
+        }
 
         composable(
             route = "emoticonPack/{id}",
@@ -41,6 +46,7 @@ fun AppNavHost() {
                 EmoticonPackDetailScreen(emoticonPackId = id, navController = navController)
             }
         }
+
 
         composable(
             route = "login_success?accessToken={accessToken}&refreshToken={refreshToken}",
