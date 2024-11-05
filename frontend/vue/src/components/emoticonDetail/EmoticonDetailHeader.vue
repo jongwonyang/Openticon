@@ -30,7 +30,7 @@
           </div>
         </div>
         <p class="text-md text-gray-500 pt-2 px-2 text-center sm:text-left">
-          {{ emoticon?.nickname }}
+          {{ emoticon?.author.nickname }}
         </p>
         <div
           class="relative hover:bg-gray-100 transition duration-200 cursor-pointer rounded p-2"

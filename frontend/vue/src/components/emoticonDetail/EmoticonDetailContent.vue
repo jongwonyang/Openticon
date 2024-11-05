@@ -13,6 +13,7 @@
         class="w-full hover:scale-150 hover:shadow-2xl hover:rounded-lg hover:border hover:border-gray-400 transition-all duration-200 ease-in-out"
         draggable="false"
         style="user-select: none"
+        loading="lazy"
       />
     </div>
   </div>
