@@ -1,5 +1,7 @@
 package io.ssafy.openticon.data.model
 
+import io.ssafy.openticon.domain.model.EmoticonPack
+
 data class PackInfoResponseDto(
     val id: Int,
     val title: String,
@@ -12,5 +14,16 @@ data class PackInfoResponseDto(
     val emoticons: List<String>,
     val description: String,
     val createdAt: String,
+    val public: Boolean,
     val aigenerated: Boolean
 )
+
+fun PackInfoResponseDto.toEmoticonPack(): EmoticonPack {
+    return EmoticonPack(
+        id = id,
+        title = title,
+        thumbnail = thumbnailImg,
+        listImg = listImg,
+        isPublic = public
+    )
+}
