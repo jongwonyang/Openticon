@@ -1,21 +1,7 @@
 import apiClient from "@/util/apiClient";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
-// Start of Selection
-interface UserInfo {
-  id: number;
-  email: string;
-  nickname: string;
-  profile_image: string;
-  createdAt: number;
-  updatedAt: number;
-  isResigned: boolean;
-  manager: boolean;
-  mobile_fcm: string;
-  web_fcm: string;
-  point: number;
-}
+import type { UserInfo } from "@/types/userInfo";
 
 export const useUserStore = defineStore("user", () => {
   const accessToken = ref<string | null>(
@@ -27,7 +13,6 @@ export const useUserStore = defineStore("user", () => {
   const login = (token: string) => {
     localStorage.setItem("accessToken", token);
     apiClient.get("/member").then((res) => {
-      console.log(res.data);
       userInfo.value = res.data;
     });
     accessToken.value = token;

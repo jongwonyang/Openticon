@@ -4,7 +4,7 @@
 
     <div class="mt-4">
       <div class="flex flex-col gap-2">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div
             class="w-full flex flex-col justify-center items-center sm:items-end"
           >

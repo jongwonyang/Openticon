@@ -1,3 +1,9 @@
-<script setup lang="ts"></script>
+<template>
+  <PopularListBanner />
+  <PopularList />
+</template>
 
-<template>인기 이모티콘 뷰</template>
+<script setup lang="ts">
+import PopularList from '../components/popularList/PopularList.vue';
+import PopularListBanner from '../components/popularList/PopularListBanner.vue';
+</script>
