@@ -101,7 +101,7 @@ fun LoginSuccessScreen(
 //                Text(text = "환영합니다, ${memberEntity?.nickname}!", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 //                Text(text = "이메일: ${memberEntity?.email}", fontSize = 16.sp, color = Color.Gray)
 //                Text(text = "포인트: ${memberEntity?.point}", fontSize = 16.sp, color = Color.Gray)
-//                Log.d("login success", "로그인 성공")
+                Log.d("login success", "로그인 성공")
                 if (!isSuccessHandled) {
                     isSuccessHandled = true
                     navController.popBackStack()
