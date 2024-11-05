@@ -8,7 +8,8 @@ data class PurchaseEmoticonResponseDto(
     val thumbnailImg: String,
     val isHide: Boolean,
     val isPublic: Boolean,
-    val listImage: String
+    val listImage: String,
+    val emoticons: List<String>
 )
 
 fun PurchaseEmoticonResponseDto.toEmoticonPack(): EmoticonPack {
@@ -17,6 +18,7 @@ fun PurchaseEmoticonResponseDto.toEmoticonPack(): EmoticonPack {
         title = packName,
         thumbnail = thumbnailImg,
         listImg = listImage,
-        isPublic = isPublic
+        isPublic = isPublic,
+        emoticonUrls = emoticons
     )
 }

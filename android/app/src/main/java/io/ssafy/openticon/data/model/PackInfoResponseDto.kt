@@ -24,6 +24,7 @@ fun PackInfoResponseDto.toEmoticonPack(): EmoticonPack {
         title = title,
         thumbnail = thumbnailImg,
         listImg = listImg,
-        isPublic = public
+        isPublic = public,
+        emoticonUrls = emoticons
     )
 }
