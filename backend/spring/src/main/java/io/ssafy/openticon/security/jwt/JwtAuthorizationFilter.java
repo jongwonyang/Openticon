@@ -26,6 +26,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
     private final TokenProvider tokenProvider;
     private static final Logger log = LoggerFactory.getLogger(JwtAuthorizationFilter.class);
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();

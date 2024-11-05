@@ -43,7 +43,7 @@ public class MemberService {
     }
 
     public String saveProfile(MultipartFile image){
-        String uploadServerUrl = imageServerUrl+ "/upload/profile";
+        String uploadServerUrl = imageServerUrl+ "/upload/image";
         File tempFile = null;
         try {
             tempFile = File.createTempFile("upload", image.getOriginalFilename());
