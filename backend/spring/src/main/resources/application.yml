@@ -69,6 +69,7 @@ spring:
     fail-on-missing-locations: true
     locations: classpath:db/migration
 
+
   sql:
     init:
       mode: always
