@@ -1,6 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
-import androidx.compose.foundation.background
+import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,13 +24,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
-import io.ssafy.openticon.ui.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(navController: NavController) {
     val viewModel: EditProfileViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsState()
     val memberEntity by viewModel.memberEntity.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
@@ -56,8 +55,8 @@ fun EditProfileScreen(navController: NavController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Apply the padding values here
-                    .padding(16.dp), // Additional padding
+                    .padding(paddingValues)
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -68,7 +67,6 @@ fun EditProfileScreen(navController: NavController) {
                         modifier = Modifier
                             .size(80.dp)
                             .clip(CircleShape)
-
                     ) {
                         AsyncImage(
                             model = if (memberEntity?.profileImage.isNullOrEmpty()) {
@@ -84,7 +82,7 @@ fun EditProfileScreen(navController: NavController) {
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp)) // Use width for horizontal spacing in a Row
+                    Spacer(modifier = Modifier.width(16.dp))
 
                     // Edit Profile Button
                     Button(
@@ -97,7 +95,6 @@ fun EditProfileScreen(navController: NavController) {
                     }
                 }
 
-                // Profile Image
                 Spacer(modifier = Modifier.height(50.dp))
 
                 // Nickname Input Field
@@ -106,21 +103,10 @@ fun EditProfileScreen(navController: NavController) {
                     onValueChange = { nickname = it },
                     placeholder = { Text("수정할 닉네임을 입력해 주세요.") },
                     modifier = Modifier
-                        .fillMaxWidth(0.8f), // Set width to 80% of available space
-                    shape = RoundedCornerShape(0.dp), // Square corners
+                        .fillMaxWidth(0.8f),
+                    shape = RoundedCornerShape(0.dp),
                     interactionSource = interactionSource
                 )
-
-                // Draw a custom bottom border if not focused
-//                if (!isFocused) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(horizontal = 8.dp)
-//                            .height(1.dp)
-//                            .background(Color.Gray)
-//                    )
-//                }
 
                 Spacer(modifier = Modifier.height(48.dp))
 
@@ -131,8 +117,7 @@ fun EditProfileScreen(navController: NavController) {
                 ) {
                     Button(
                         onClick = {
-
-                            /* TODO: Confirm action */
+                            viewModel.editProfile()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF42A5F5) // Confirm button color
@@ -151,6 +136,21 @@ fun EditProfileScreen(navController: NavController) {
                     ) {
                         Text(text = "취소", color = Color.White)
                     }
+                }
+
+                // UI 상태에 따른 네비게이션 처리
+                when (uiState) {
+                    is EditProfileViewModel.UiState.Success -> {
+                        LaunchedEffect(Unit) {
+                            navController.navigate("profile")
+                        }
+                    }
+                    is EditProfileViewModel.UiState.Error -> {
+                        LaunchedEffect(Unit) {
+                            navController.navigate("error_screen") // 오류 페이지로 이동
+                        }
+                    }
+                    else -> {}
                 }
             }
         }

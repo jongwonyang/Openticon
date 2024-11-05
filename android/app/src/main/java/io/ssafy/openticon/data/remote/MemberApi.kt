@@ -16,4 +16,8 @@ interface MemberApi {
     suspend fun editDeviceToken(
         @Body requestDto: EditDeviceTokenRequestDto
     ): Response<String>
+
+    @POST("/api/v1/member")
+    suspend fun editProfile(): Response<String>
+
 }

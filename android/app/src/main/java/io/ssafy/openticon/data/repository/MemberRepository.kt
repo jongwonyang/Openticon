@@ -11,4 +11,9 @@ class MemberRepository @Inject constructor(
     suspend fun getMemberInfo() : Response<MemberEntity?> {
         return api.getMemberInfo()
     }
+    suspend fun editProfile() : Response<String> {
+        return api.editProfile()
+    }
+
+
 }

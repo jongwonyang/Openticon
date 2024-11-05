@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,15 +18,40 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import io.ssafy.openticon.R
-import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
+import io.ssafy.openticon.ui.viewmodel.MemberViewModel
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
 ) {
+    val viewModel: MemberViewModel = hiltViewModel()
+    val memberEntity by viewModel.memberEntity.collectAsState()
+
+    fun getFormattedDate(timestamp: String): String {
+        return try {
+            // String 타입의 Unix 타임스탬프를 Long으로 변환
+            val seconds = timestamp.toDouble().toLong()  // 초 단위로 변환
+            val createdAt = Instant.ofEpochSecond(seconds)
+                .atZone(ZoneId.of("Asia/Seoul"))
+                .toOffsetDateTime()
+
+            // 원하는 형식으로 포맷
+            val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+            createdAt.format(formatter)
+        } catch (e: NumberFormatException) {
+            "날짜 형식 오류"
+        }
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,7 +61,11 @@ fun ProfileScreen(
     ) {
         // 프로필 이미지
         AsyncImage(
-            model = "https://cdn.ppomppu.co.kr/zboard/data3/2022/0509/m_20220509173224_d9N4ZGtBVR.jpeg",
+            model = if (memberEntity?.profileImage.isNullOrEmpty()) {
+                "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
+            } else {
+                memberEntity?.profileImage
+            },
             contentDescription = "Profile Image",
             contentScale = ContentScale.Crop, // 잘리지 않게 조정
             modifier = Modifier
@@ -49,11 +80,13 @@ fun ProfileScreen(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "김용원",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
+            memberEntity?.nickname?.let {
+                Text(
+                    text = it,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Spacer(modifier = Modifier.width(4.dp))
             Image(
                 painter = painterResource(id = R.drawable.writer_mark),
@@ -63,17 +96,20 @@ fun ProfileScreen(
         }
 
         // 가입 날짜
-        Text(
-            text = "2024.10.21",
-            fontSize = 14.sp,
-            color = Color.LightGray
-        )
+        memberEntity?.createdAt?.let {
+            val createdAtFormatted = getFormattedDate(it)
+            Text(
+                text = createdAtFormatted,
+                fontSize = 14.sp,
+                color = Color.LightGray
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // 포인트
         Text(
-            text = "50,000 포인트",
+            text = "${memberEntity?.point ?: 0} 포인트",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
