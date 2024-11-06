@@ -225,6 +225,7 @@ class FloatingService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE // FLAG_IMMUTABLE은 Android 12+에서 필요
         )
         pendingIntent.send()
+        stopSelf()
     }
     private fun lkeEmoticon(emoticon: Emoticon){
 //        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)

@@ -71,7 +71,6 @@
         android:id="@+id/floatingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Floating View!"
         android:textSize="18sp" />
 
     <!-- ScrollView와 TableLayout 추가 -->

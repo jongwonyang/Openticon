@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
@@ -65,6 +68,50 @@ fun MainScreen(
     val mainViewModel: MainViewModel = hiltViewModel()
     val isLoggedIn by mainViewModel.isLoggedIn.collectAsState()
 
+    val activity = context as? Activity
+
+    DisposableEffect(lifecycleOwner) {
+        // LifecycleObserver를 통해 포그라운드 상태 전환 감지
+        val observer = LifecycleEventObserver { _, event ->
+            if(allPermissionsGranted(context)) {
+                when (event) {
+
+
+                    Lifecycle.Event.ON_RESUME -> {
+                        // 포그라운드로 전환됨
+                        stopFloatingService(
+                            context,
+                            myViewModel,
+                            likeEmoticonViewModel,
+                            lifecycleOwner
+                        )
+                        Log.d("MainScreen", "MainScreen이 포그라운드로 전환되었습니다.")
+                    }
+
+                    Lifecycle.Event.ON_PAUSE -> {
+                        // 백그라운드로 전환됨
+                        startFloatingService(
+                            context,
+                            myViewModel,
+                            likeEmoticonViewModel,
+                            lifecycleOwner
+                        )
+                        Log.d("MainScreen", "MainScreen이 백그라운드로 전환되었습니다.")
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+
+        // Lifecycle에 observer 추가
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // DisposableEffect에서 LifecycleObserver 제거
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     myViewModel.sampleEmoticonPacks.observe(lifecycleOwner) { packs ->
         saveDataToPreferences(packs, context)
@@ -106,6 +153,7 @@ fun MainScreen(
                             likeEmoticonViewModel,
                             lifecycleOwner
                         )
+                        activity?.moveTaskToBack(true)
                     } else {
                         Log.d("mainScreen", "notAllPermission")
                         requestPermissionsAndStartService(
@@ -201,7 +249,18 @@ fun allPermissionsGranted(context: Context): Boolean {
     //&& isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)
 }
 
-private fun startFloatingService(
+private fun stopFloatingService(
+    context: Context,
+    myViewModel: EmoticonViewModel,
+    likeEmoticonViewModel: LikeEmoticonViewModel,
+    lifecycleOwner: LifecycleOwner
+) {
+    val intent = Intent(context, FloatingService::class.java)
+    context.stopService(intent)
+
+}
+
+    private fun startFloatingService(
     context: Context,
     myViewModel: EmoticonViewModel,
     likeEmoticonViewModel: LikeEmoticonViewModel,
