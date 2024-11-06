@@ -64,7 +64,7 @@ public class EmoticonPackEntity {
     @Column(name = "share_link", nullable = false)
     private String shareLink="public";
 
-    @OneToMany(mappedBy = "emoticonPack", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "emoticonPack")
     private List<TagListEntity> tagLists;
 
     @Column(name = "created_at", nullable = false, updatable = false)
