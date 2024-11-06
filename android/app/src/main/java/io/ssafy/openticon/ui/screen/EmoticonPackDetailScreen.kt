@@ -89,8 +89,7 @@ fun EmoticonPackDetailScreen(
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray),
+            .fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {},
@@ -270,7 +269,7 @@ fun EmoticonPackDetailScreen(
                         Row(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .background(Color.LightGray),
+                                ,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             if (row.size == 3) {
