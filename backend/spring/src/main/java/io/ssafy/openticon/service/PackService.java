@@ -15,13 +15,14 @@ import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.TagListRepository;
 import io.ssafy.openticon.repository.TagRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +37,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PackService {
@@ -55,6 +57,7 @@ public class PackService {
     private final SafeSearchService safeSearchService;
     private final ObjectionService objectionService;
 
+
     public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService){
         this.webClient=webClient;
         this.packRepository=packRepository;
@@ -70,7 +73,7 @@ public class PackService {
     }
 
     @Transactional
-    public String emoticonPackUpload(EmoticonPack emoticonPack){
+    public EmoticonPackResponseDto emoticonPackUpload(EmoticonPack emoticonPack){
         try{
             List<MultipartFile> infoImages = new ArrayList<>();
             infoImages.add(emoticonPack.getThumbnailImg());
@@ -106,7 +109,11 @@ public class PackService {
             }
 
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
-            packRepository.save(emoticonPackEntity);
+            try{
+                packRepository.save(emoticonPackEntity);
+            }catch(DataAccessException e){
+                throw new OpenticonException(ErrorCode.PACK_DATABASE_SAVE_ERROR);
+            }
 
             if(problematicImage || problematicInfoImage){
                 objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
@@ -133,7 +140,11 @@ public class PackService {
                     TagEntity tagEntity = TagEntity.builder()
                             .tagName(tag)
                             .build();
-                    tagRepository.save(tagEntity);
+                    try{
+                        tagRepository.save(tagEntity);
+                    }catch(DataAccessException e){
+                        throw new OpenticonException(ErrorCode.TAG_DATABASE_SAVE_ERROR);
+                    }
                     findTagEntity = tagEntity;
                 }else{
                     findTagEntity = getTagEntity.get();
@@ -142,9 +153,13 @@ public class PackService {
                         .emoticonPack(emoticonPackEntity)
                         .tag(findTagEntity)
                         .build();
-                tagListRepository.save(tagListEntity);
+                try{
+                    tagListRepository.save(tagListEntity);
+                }catch(DataAccessException e){
+                    throw new OpenticonException(ErrorCode.TAG_LIST_DATABASE_SAVE_ERROR);
+                }
             }
-            return emoticonPackEntity.getShareLink();
+            return new EmoticonPackResponseDto(emoticonPackEntity);
         }catch (IOException e){
             throw new RuntimeException(e.getMessage());
         }
@@ -283,8 +298,14 @@ public class PackService {
         return packRepository.findById(packId);
     }
 
+    @Transactional
     public void save(EmoticonPackEntity emoticonPackEntity){
         packRepository.save(emoticonPackEntity);
     }
 
+    @Transactional
+    public Page<EmoticonPackResponseDto> myPackList(MemberEntity member, Pageable pageable){
+        return packRepository.findByMyEmoticonPack(member, pageable).map(EmoticonPackResponseDto::new);
+
+    }
 }
