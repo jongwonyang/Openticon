@@ -29,9 +29,17 @@
             </span>
           </div>
         </div>
-        <p class="text-md text-gray-500 pt-2 px-2 text-center sm:text-left">
-          {{ emoticon?.author.nickname }}
-        </p>
+        <div class="flex items-center px-2 pt-2">
+          <RouterLink
+            class="text-md text-gray-500 text-center sm:text-left hover:underline"
+          :to="{
+            name: 'searchResult',
+            query: { type: 'author', query: emoticon?.author.nickname },
+          }"
+          >
+            {{ emoticon?.author.nickname }}
+          </RouterLink>
+        </div>
         <div
           class="relative hover:bg-gray-100 transition duration-200 cursor-pointer rounded p-2"
         >
@@ -74,6 +82,7 @@
 <script setup lang="ts">
 import type { EmoticonPack } from "@/types/emoticonPack";
 import { computed, ref } from "vue";
+import { RouterLink } from "vue-router";
 
 const props = defineProps<{
   emoticon: EmoticonPack | null;
