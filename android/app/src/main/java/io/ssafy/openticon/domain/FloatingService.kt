@@ -215,7 +215,17 @@ class FloatingService : Service() {
 //        )
 //        windowManager.addView(alertView, params)
 
+
+
+
+
         val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        val new_jsonString = Json.encodeToString(LikeEmoticon(filePath = emoticon.filePath, title = emoticon.filePath, packId = emoticon.packId))
+        val first_editor = sharedPreferences.edit()
+        first_editor.putString("new_like_emoticon_data", new_jsonString)
+        first_editor.apply()
+
         val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
 
         // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
@@ -226,7 +236,7 @@ class FloatingService : Service() {
 
         likeEmoticonPack?.let {
             val mutableImages = it.emoticons.toMutableList()  // MutableList로 변환
-            mutableImages.add(LikeEmoticon(filePath = emoticon.filePath))
+            mutableImages.add(LikeEmoticon(filePath = emoticon.filePath, title = emoticon.filePath, packId = emoticon.packId))
             it.emoticons = mutableImages.toList()  // 다시 List로 변환하여 할당
         }
 
