@@ -398,6 +398,13 @@ class FloatingService : Service() {
             .setAllCorners(CornerFamily.ROUNDED, 75f) // 원하는 크기의 반지름 설정
             .build()
 
+        val close = floatingView.findViewById<ImageView>(R.id.close)
+
+        close.setOnTouchListener { _, _ ->
+            stopSelf()
+            true // 이벤트를 소비했음을 나타냅니다.
+        }
+
         floatingView.findViewById<ShapeableImageView>(R.id.imageButton).setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
