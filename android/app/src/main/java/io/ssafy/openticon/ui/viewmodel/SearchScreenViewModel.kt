@@ -25,13 +25,11 @@ class SearchScreenViewModel @Inject constructor(
     private val searchEmoticonPacksUseCase: SearchEmoticonPacksUseCase,
     private val searchEmoticonPacksByImageUseCase: SearchEmoticonPacksByImageUseCase
 ) : ViewModel() {
-
-
-    private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     private val _searchKey = MutableStateFlow(SearchKey.Title)
     private val _searchText = MutableStateFlow("")
     private val _searchResult = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
     private val _isLoading = MutableStateFlow(false)
+    private val _selectedImageUri = MutableStateFlow<Uri?>(null)
 
     val searchKey: StateFlow<SearchKey> = _searchKey
     val searchText: StateFlow<String> = _searchText
@@ -42,6 +40,10 @@ class SearchScreenViewModel @Inject constructor(
     private var page = 0
     private var pageSize = 20
     private var lastPageReached = false
+
+    fun clearSelectedImage() {
+        _selectedImageUri.value = null
+    }
 
     fun onSearchTextChange(value: String) {
         _searchText.value = value
@@ -84,7 +86,6 @@ class SearchScreenViewModel @Inject constructor(
     }
 
     //image Search
-
     fun setImageUri(uri: Uri?) {
         viewModelScope.launch {
             _selectedImageUri.emit(uri)
@@ -137,6 +138,8 @@ class SearchScreenViewModel @Inject constructor(
 
 
                     val (newItems, isLast) = searchEmoticonPacksByImageUseCase(
+                        size = pageSize,
+                        page = page,
                         image = imagePart
                     )
 

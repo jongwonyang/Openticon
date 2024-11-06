@@ -1,6 +1,7 @@
 package io.ssafy.openticon.data.repository
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
@@ -124,6 +125,29 @@ class EmoticonPackRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    override suspend fun deleteFilesFromId(packId: Int, emoticons: List<Emoticon>){
+        emoticons.map { emoticon ->
+            deleteFileFromLocal(emoticon.packId, emoticon.filePath)
+        }
+    }
+
+    private fun deleteFileFromLocal(packId: Int, filePath: String): Boolean {
+        return try {
+            Log.e("deleteFile", filePath)
+//            val packDir = File(context.filesDir, "emoticon_packs/$packId")
+//            val file = File(packDir, fileName)
+            val file = File(filePath)
+            if (file.exists()) {
+                file.delete()  // 파일 삭제
+            } else {
+                false  // 파일이 존재하지 않음
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 }

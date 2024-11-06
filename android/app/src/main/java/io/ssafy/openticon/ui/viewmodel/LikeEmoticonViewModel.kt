@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.R
+import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.LikeEmoticonPack
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.data.repository.LikeEmoticonPackRepository
@@ -65,10 +67,31 @@ class LikeEmoticonViewModel @Inject constructor(
     }
 
 
+    private suspend fun addEmoticonDataFromPreferences() {
+        val jsonString = sharedPreferences.getString("new_like_emoticon_data", null)
+        val data = jsonString?.let {
+            try {
+                Json.decodeFromString<LikeEmoticon>(it)
+            } catch (e: SerializationException) {
+                // JSON 파싱 오류 시 로그를 남기고 기본값 사용
+                Log.e("LikeEmoticonViewModel", "JSON 디코딩 실패: ${e.message}")
+                null
+            }
+        } ?: LikeEmoticon(filePath = "", title = "default", packId = Int.MAX_VALUE) // null일 경우 기본값 설정
+
+        getLikeEmoticonPack.insertLike(data)
+    }
+
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == "like_emoticon_data") {
             Log.d("LikeEmoticonViewModel", "Really Changed")
             loadEmoticonDataFromPreferences()
+        }
+        else if(key == "new_like_emoticon_data"){
+            viewModelScope.launch {
+                addEmoticonDataFromPreferences()
+            }
         }
     }
 

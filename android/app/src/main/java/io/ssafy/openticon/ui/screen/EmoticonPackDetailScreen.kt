@@ -232,7 +232,7 @@ fun EmoticonPackDetailScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
                             textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.height(16.dp))

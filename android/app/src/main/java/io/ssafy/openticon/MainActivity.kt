@@ -1,25 +1,17 @@
 package io.ssafy.openticon
 
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import io.ssafy.openticon.data.local.TokenDataSource
-import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.navigation.AppNavHost
-import io.ssafy.openticon.ui.theme.OpenticonTheme
-import io.ssafy.openticon.ui.viewmodel.EmoticonViewModel
-import io.ssafy.openticon.ui.viewmodel.LikeEmoticonViewModel
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import io.ssafy.openticon.ui.theme.AppTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-   // private val myViewModel: EmoticonViewModel by viewModels()
+    // private val myViewModel: EmoticonViewModel by viewModels()
 //private val likeEmoticonViewModel: LikeEmoticonViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +31,7 @@ class MainActivity : ComponentActivity() {
 //        }
 
         setContent {
-            OpenticonTheme {
+            AppTheme {
                 AppNavHost()
             }
         }

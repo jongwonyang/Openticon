@@ -21,6 +21,9 @@ interface EmoticonDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEmoticon(emoticon: Emoticon)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertLikeEmoticon(likeEmoticon: LikeEmoticon)
+
     @Query("SELECT * FROM emoticon_packs WHERE id = :packId")
     fun getEmoticonPack(packId: Int): Flow<EmoticonPackEntity?>
 
@@ -41,6 +44,9 @@ interface EmoticonDao {
 
     @Query("Delete From emoticons where packId = :packId")
     fun deleteEmoticonsByPackId(packId: Int)
+
+    @Query("Delete From like_emoticons where packId = :packId")
+    fun deleteLikeEmoticonsByPackId(packId: Int)
 
     @Update
     suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity)
