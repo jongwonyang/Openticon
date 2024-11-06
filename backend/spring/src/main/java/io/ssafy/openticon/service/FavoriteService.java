@@ -1,5 +1,6 @@
 package io.ssafy.openticon.service;
 
+import io.ssafy.openticon.controller.response.FavoritesResponseDto;
 import io.ssafy.openticon.entity.FavoritesEntity;
 import io.ssafy.openticon.repository.FavoriteRepository;
 import org.springframework.stereotype.Service;
@@ -30,12 +31,12 @@ public class FavoriteService {
         favoriteRepository.save(favoritesEntity);
     }
 
-    public List<String> view(Long memberId){
+    public List<FavoritesResponseDto> view(Long memberId){
         List<FavoritesEntity> favoritesEntities= favoriteRepository.findByMemberId(memberId);
 
-        List<String> result=new ArrayList<>();
+        List<FavoritesResponseDto> result=new ArrayList<>();
         for(FavoritesEntity favoritesEntity:favoritesEntities){
-            result.add(emoticonService.getEmoticon(favoritesEntity.getEmoticonId()));
+            result.add(new FavoritesResponseDto(favoritesEntity.getId(),emoticonService.getEmoticon(favoritesEntity.getEmoticonId())));
         }
 
         return result;

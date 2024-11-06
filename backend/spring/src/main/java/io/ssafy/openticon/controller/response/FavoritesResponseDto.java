@@ -7,11 +7,14 @@ import java.util.List;
 @Getter
 public class FavoritesResponseDto {
 
-    private List<String> emotions;
+    private Long emoticonId;
+
+    private String url;
 
     public FavoritesResponseDto(){}
 
-    public FavoritesResponseDto(List<String> emotions){
-        this.emotions=emotions;
+    public FavoritesResponseDto(Long emoticonId, String url){
+        this.emoticonId=emoticonId;
+        this.url=url;
     }
 }

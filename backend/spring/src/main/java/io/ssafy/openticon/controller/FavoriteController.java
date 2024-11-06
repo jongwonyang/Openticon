@@ -35,10 +35,15 @@ public class FavoriteController {
     }
 
     @GetMapping("")
-    public ResponseEntity<FavoritesResponseDto> viewFavorite(@AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<List<FavoritesResponseDto>> viewFavorite(@AuthenticationPrincipal UserDetails userDetails){
         MemberEntity member=memberService.getMemberByEmail(userDetails.getUsername()).orElseThrow();
 
-        FavoritesResponseDto favoritesResponseDto=new FavoritesResponseDto(favoriteService.view(member.getId()));
-        return ResponseEntity.status(HttpStatus.OK).body(favoritesResponseDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(favoriteService.view(member.getId()));
+    }
+
+    @DeleteMapping("")
+    public ResponseEntity<Void> deleteFavorite(@AuthenticationPrincipal UserDetails userDetails){
+
     }
 }
