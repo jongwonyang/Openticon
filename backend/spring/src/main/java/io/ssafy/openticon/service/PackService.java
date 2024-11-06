@@ -2,6 +2,7 @@ package io.ssafy.openticon.service;
 
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
+import io.ssafy.openticon.controller.request.ReportPackRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
@@ -275,7 +276,8 @@ public class PackService {
         return packRepository.findById(packId).orElseThrow();
     }
 
-    public List<EmoticonPackEntity> getAllEmoticonPack(){
-        return packRepository.findAll();
+    public void save(EmoticonPackEntity emoticonPackEntity){
+        packRepository.save(emoticonPackEntity);
     }
+
 }

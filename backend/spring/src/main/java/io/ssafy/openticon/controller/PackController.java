@@ -1,12 +1,16 @@
 package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EmoticonUploadRequestDto;
+import io.ssafy.openticon.controller.request.ReportPackRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
+import io.ssafy.openticon.entity.MemberEntity;
+import io.ssafy.openticon.service.MemberService;
 import io.ssafy.openticon.service.PackService;
+import io.ssafy.openticon.service.ReportHistoryService;
 import io.ssafy.openticon.service.SafeSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,13 +42,17 @@ import java.util.concurrent.ExecutionException;
 @Tag(name="이모티콘팩")
 public class PackController {
 
+    private final ReportHistoryService reportHistoryService;
+    private final MemberService memberService;
     @Value("${spring.base-url}")
     private String baseUrl;
 
     private final PackService packService;
 
-    public PackController(PackService packService){
+    public PackController(PackService packService, ReportHistoryService reportHistoryService, MemberService memberService){
         this.packService=packService;
+        this.reportHistoryService = reportHistoryService;
+        this.memberService = memberService;
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -120,5 +128,14 @@ public class PackController {
                                                                 @AuthenticationPrincipal UserDetails userDetails){
         String email=userDetails.getUsername();
         return ResponseEntity.status(HttpStatus.OK).body(packService.downloadPack(email,Long.parseLong(packId)));
+    }
+
+    @PostMapping("reports")
+    public ResponseEntity<Void> reportPack(@AuthenticationPrincipal UserDetails userDetails,
+                                           @RequestBody ReportPackRequestDto reportPackRequestDto){
+        MemberEntity member=memberService.getMemberByEmail(userDetails.getUsername()).orElseThrow();
+        reportHistoryService.report(reportPackRequestDto,member.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
