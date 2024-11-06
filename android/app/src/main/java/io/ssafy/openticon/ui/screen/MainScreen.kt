@@ -35,6 +35,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +69,9 @@ import kotlinx.serialization.json.Json
 fun MainScreen(
     navController: NavController,
     myViewModel: EmoticonViewModel = hiltViewModel() ,
-    likeEmoticonViewModel: LikeEmoticonViewModel = hiltViewModel()) {
+    likeEmoticonViewModel: LikeEmoticonViewModel = hiltViewModel(),
+    myEmoticonViewModel: MyEmoticonViewModel = hiltViewModel()
+) {
 
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     val context = LocalContext.current
@@ -128,10 +131,17 @@ fun MainScreen(
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
+            LaunchedEffect(selectedItem) {
+                if (selectedItem == 2) {
+                    // 특정 함수 호출
+                    myEmoticonViewModel.loadEmoticonPacks()
+                }
+            }
+
             when (selectedItem) {
                 0 -> StoreScreen(navController = navController)
                 1 -> SearchScreen(navController = navController)
-                2 -> MyEmoticonsScreen()
+                2 -> MyEmoticonsScreen(navController = navController)
                 3 -> ProfileScreen(navController = navController)
             }
         }

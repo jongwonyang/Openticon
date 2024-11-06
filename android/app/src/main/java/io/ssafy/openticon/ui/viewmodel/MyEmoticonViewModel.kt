@@ -40,7 +40,7 @@ class MyEmoticonViewModel @Inject constructor(
         loadEmoticonPacks()
     }
 
-    private fun loadEmoticonPacks() {
+    fun loadEmoticonPacks() {
         viewModelScope.launch {
             getEmoticonPacksUseCase.execute().collect { emoticonPacks ->
                 _Sample_emoticonPacks.value = emoticonPacks
@@ -61,6 +61,9 @@ class MyEmoticonViewModel @Inject constructor(
         viewModelScope.launch {
             updatedList.find { it.id == emoticonPackEntity.id }?.let { updatedPack ->
                 getEmoticonPacksUseCase.updateEmoticonPack(updatedPack) // DB 업데이트 호출
+                if(!updatedPack.downloaded){
+                    getEmoticonPacksUseCase.deleteEmoticons(updatedPack.id)
+                }
             }
         }
     }
