@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,9 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -90,12 +92,22 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "LOGO HERE",
-                modifier = Modifier.weight(1f)
-            )
+            Box(
+                modifier = Modifier.clip(RoundedCornerShape(16.dp))
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_background),
+                    contentDescription = null,
+                )
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                )
+            }
 
-            Button(
+            Spacer(Modifier.height(128.dp))
+
+            ElevatedButton(
                 onClick = {
                     val googleLoginUrl =
                         memberViewModel.baseUrl + "/api/v1/oauth2/authorization/kakao?redirect_uri=openticon://successLogin&mode=login"
@@ -106,7 +118,7 @@ fun LoginScreen(
                     .fillMaxWidth(0.8f)
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFEE500)),
-                shape = RoundedCornerShape(0.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
@@ -119,10 +131,10 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Button for Naver Login with Image
-            Button(
+            ElevatedButton(
                 onClick = {
                     val googleLoginUrl =
                         memberViewModel.baseUrl + "/api/v1/oauth2/authorization/naver?redirect_uri=openticon://successLogin&mode=login"
@@ -135,7 +147,7 @@ fun LoginScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF2DB400)
                 ),
-                shape = RoundedCornerShape(0.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -158,10 +170,10 @@ fun LoginScreen(
                     Text("네이버로 시작하기", fontSize = 17.sp, color = Color.White)
                 }
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Button for Google Login with Image
-            Button(
+            ElevatedButton(
                 onClick = {
                     val googleLoginUrl =
                         memberViewModel.baseUrl + "/api/v1/oauth2/authorization/google?redirect_uri=openticon://successLogin&mode=login"
@@ -174,7 +186,7 @@ fun LoginScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White
                 ),
-                shape = RoundedCornerShape(0.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

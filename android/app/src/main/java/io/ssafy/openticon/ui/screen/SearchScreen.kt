@@ -97,15 +97,26 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "( ꩜ ᯅ ꩜;)",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "검색 결과가 없습니다.",
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                if (isLoading) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    Text(
+                        text = "( ꩜ ᯅ ꩜;)",
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "검색 결과가 없습니다.",
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
         } else {
             LazyColumn(state = listState) {
