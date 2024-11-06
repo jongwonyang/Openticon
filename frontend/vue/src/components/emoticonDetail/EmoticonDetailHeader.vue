@@ -50,7 +50,7 @@
             style="user-select: none"
           >
             <p class="whitespace-pre">{{ emoticon?.description }}</p>
-            <p class="text-right text-xs text-gray-500">
+            <p class="text-right text-xs pt-2 text-gray-500">
               등록날짜 : {{ formattedDate }}
             </p>
           </div>

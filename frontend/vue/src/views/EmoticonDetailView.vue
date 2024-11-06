@@ -5,6 +5,8 @@
       <EmoticonDetailHeader :emoticon="emoticon" />
       <hr class="my-4 mx-4" />
       <EmoticonDetailContent :emoticon="emoticon" />
+      <hr class="my-4 mx-4" />
+      <EmoticonDetailFooter :emoticon="emoticon" />
     </div>
   </div>
 </template>
@@ -18,6 +20,7 @@ import { ref, onMounted } from "vue";
 import { useEmoticonPackStore } from "@/stores/emoticonPack";
 import type { EmoticonPack } from "@/types/emoticonPack";
 import { useRoute } from "vue-router";
+import EmoticonDetailFooter from "@/components/emoticonDetail/EmoticonDetailFooter.vue";
 
 const emoticonPackStore = useEmoticonPackStore();
 const emoticon = ref<EmoticonPack | null>(null);
