@@ -8,6 +8,7 @@ import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
+import io.ssafy.openticon.dto.ReportType;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
@@ -52,8 +53,9 @@ public class PackService {
     private final TagListRepository tagListRepository;
     private final PurchaseHistoryService purchaseHistoryService;
     private final SafeSearchService safeSearchService;
+    private final ObjectionService objectionService;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -64,6 +66,7 @@ public class PackService {
         this.purchaseHistoryService = purchaseHistoryService;
         this.safeSearchService = safeSearchService;
         this.imageHashService = imageHashService;
+        this.objectionService = objectionService;
     }
 
     @Transactional
@@ -104,6 +107,10 @@ public class PackService {
 
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
             packRepository.save(emoticonPackEntity);
+
+            if(problematicImage || problematicInfoImage){
+                objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
+            }
 
             imageHashService.saveThumbnailHash(thumbnailImgFile,emoticonPackEntity);
             imageHashService.saveListImgHash(listImgFile,emoticonPackEntity);
