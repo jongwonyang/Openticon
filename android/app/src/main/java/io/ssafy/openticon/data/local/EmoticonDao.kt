@@ -45,6 +45,9 @@ interface EmoticonDao {
     @Query("Delete From emoticons where packId = :packId")
     fun deleteEmoticonsByPackId(packId: Int)
 
+    @Query("Delete From like_emoticons where packId = :packId")
+    fun deleteLikeEmoticonsByPackId(packId: Int)
+
     @Update
     suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity)
 }

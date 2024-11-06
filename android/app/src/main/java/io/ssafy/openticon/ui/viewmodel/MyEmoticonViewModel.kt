@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +12,7 @@ import io.ssafy.openticon.data.model.EmoticonPackEntity
 import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.data.repository.EmoticonPackRepository
+import io.ssafy.openticon.domain.usecase.DeletePackUseCase
 import io.ssafy.openticon.domain.usecase.GetEmoticonPacksUseCase
 import io.ssafy.openticon.domain.usecase.GetEmoticonPacksWithEmotionsUseCase
 import kotlinx.coroutines.launch
@@ -18,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyEmoticonViewModel @Inject constructor(
-    private val getEmoticonPacksUseCase: GetEmoticonPacksUseCase
+    private val getEmoticonPacksUseCase: GetEmoticonPacksUseCase,
+    private val deletePackUseCase: DeletePackUseCase
 ): ViewModel() {
 
     private val _Sample_emoticonPacks = MutableLiveData<List<EmoticonPackEntity>>()
@@ -62,7 +65,10 @@ class MyEmoticonViewModel @Inject constructor(
             updatedList.find { it.id == emoticonPackEntity.id }?.let { updatedPack ->
                 getEmoticonPacksUseCase.updateEmoticonPack(updatedPack) // DB 업데이트 호출
                 if(!updatedPack.downloaded){
-                    getEmoticonPacksUseCase.deleteEmoticons(updatedPack.id)
+                    viewModelScope.launch {
+                        deletePackUseCase.invoke(updatedPack.id)
+                        getEmoticonPacksUseCase.deleteEmoticons(updatedPack.id)
+                    }
                 }
             }
         }
