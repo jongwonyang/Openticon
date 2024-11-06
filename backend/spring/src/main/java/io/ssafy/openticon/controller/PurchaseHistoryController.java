@@ -71,7 +71,7 @@ public class PurchaseHistoryController {
     @PostMapping("/view")
     @Operation(summary = "이모티콘을 숨기거나 보이게 합니다.")
     public ResponseEntity<Void> switchViewState(@AuthenticationPrincipal UserDetails userDetails, @RequestBody SwitchViewRequestDto switchViewRequestDto){
-        purchaseHistoryService.switchIsHide(userDetails.getUsername(),packService.getPackById(switchViewRequestDto.getPackId()));
+        purchaseHistoryService.switchIsHide(userDetails.getUsername(),packService.getPackById(switchViewRequestDto.getPackId()).orElseThrow());
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }

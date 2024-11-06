@@ -272,8 +272,8 @@ public class PackService {
         return new PackDownloadResponseDto(thumbnailImg,listImg,emoticons);
     }
 
-    public EmoticonPackEntity getPackById(Long packId){
-        return packRepository.findById(packId).orElseThrow();
+    public Optional<EmoticonPackEntity> getPackById(Long packId){
+        return packRepository.findById(packId);
     }
 
     public void save(EmoticonPackEntity emoticonPackEntity){

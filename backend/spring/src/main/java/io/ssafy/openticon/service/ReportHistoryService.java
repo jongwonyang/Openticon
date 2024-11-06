@@ -22,9 +22,14 @@ public class ReportHistoryService {
 
     public void report(ReportPackRequestDto reportPackRequestDto, Long memberId) {
 
+        if(packService.getPackById(reportPackRequestDto.getEmoticonPackId()).isEmpty()){
+            throw new IllegalArgumentException("해당하는 이모티콘 팩이 없음");
+        }
+
         if(reportHistoryRepository.findByMemberIdAndEmoticonPackIdAndDeletedAtIsNull(memberId,reportPackRequestDto.getEmoticonPackId()).isPresent()){
             throw new OpenticonException(ErrorCode.DUPLICATE_REPORT);
         }
+
 
         ReportHistoryEntity reportHistoryEntity = ReportHistoryEntity.builder()
                 .emoticonPackId(reportPackRequestDto.getEmoticonPackId())
@@ -33,7 +38,7 @@ public class ReportHistoryService {
                 .build();
 
         if(reportHistoryRepository.findByEmoticonPackIdAndDeletedAtIsNull(reportPackRequestDto.getEmoticonPackId()).size()>=9){
-            EmoticonPackEntity pack = packService.getPackById(reportHistoryEntity.getEmoticonPackId());
+            EmoticonPackEntity pack = packService.getPackById(reportHistoryEntity.getEmoticonPackId()).orElseThrow();
             pack.setBlacklist(true);
             packService.save(pack);
         }
