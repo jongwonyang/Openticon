@@ -6,6 +6,8 @@ import io.ssafy.openticon.controller.response.FavoritesResponseDto;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.service.FavoriteService;
 import io.ssafy.openticon.service.MemberService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/favorites")
+@Tag(name= "즐겨찾기")
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
@@ -27,6 +30,7 @@ public class FavoriteController {
     }
 
     @PostMapping("")
+    @Operation(summary = "이모티콘을 즐겨찾기에 추가합니다.")
     public ResponseEntity<Void> addFavorite(@AuthenticationPrincipal UserDetails userDetails,
                                             @RequestBody FavoriteRequestDto favoriteRequestDto){
         MemberEntity member=memberService.getMemberByEmail(userDetails.getUsername()).orElseThrow();
@@ -37,6 +41,7 @@ public class FavoriteController {
     }
 
     @GetMapping("")
+    @Operation(summary = "즐겨찾기 목록을 조회합니다.")
     public ResponseEntity<List<FavoritesResponseDto>> viewFavorite(@AuthenticationPrincipal UserDetails userDetails){
         MemberEntity member=memberService.getMemberByEmail(userDetails.getUsername()).orElseThrow();
 
@@ -45,6 +50,7 @@ public class FavoriteController {
     }
 
     @DeleteMapping("")
+    @Operation(summary = "즐겨찾기에서 이모티콘을 삭제합니다.")
     public ResponseEntity<Void> deleteFavorite(@AuthenticationPrincipal UserDetails userDetails,
                                                @RequestBody FavoriteDeleteRequestDto favoriteDeleteRequestDto){
         favoriteService.delete(favoriteDeleteRequestDto.getFavoriteId());
