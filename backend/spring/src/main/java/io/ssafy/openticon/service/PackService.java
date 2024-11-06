@@ -24,7 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
+import javax.imageio.ImageIO;
 import javax.security.sasl.AuthenticationException;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +63,7 @@ public class PackService {
     }
 
     @Transactional
-    public String emoticonPackUpload(EmoticonPack emoticonPack){
+    public String emoticonPackUpload(EmoticonPack emoticonPack, boolean applyWhiteBackground){
         try{
             List<MultipartFile> infoImages = new ArrayList<>();
             infoImages.add(emoticonPack.getThumbnailImg());
@@ -71,8 +74,8 @@ public class PackService {
             List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
             MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
             MultipartFile listImg= emoticonPack.getListImg();
-            String thumbnailImgUrl=saveImage(thumbnailImg);
-            String listImgUrl=saveImage(listImg);
+            String thumbnailImgUrl=saveImage(thumbnailImg,applyWhiteBackground);
+            String listImgUrl=saveImage(listImg,applyWhiteBackground);
             List<String> emoticonsUrls=new ArrayList<>();
 
 
@@ -95,7 +98,7 @@ public class PackService {
             packRepository.save(emoticonPackEntity);
             // 여기 부분
             for(MultipartFile emoticon: emoticonList){
-                emoticonsUrls.add(saveImage(emoticon));
+                emoticonsUrls.add(saveImage(emoticon,applyWhiteBackground));
             }
             emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
 
@@ -126,13 +129,19 @@ public class PackService {
     }
 
 
-    private String saveImage(MultipartFile image){
+    private String saveImage(MultipartFile image, boolean applyWhiteBackground){
         String uploadServerUrl = imageServerUrl+ "/upload/image";
 
         File tempFile = null;
         try {
-            tempFile = File.createTempFile("upload", image.getOriginalFilename());
-            image.transferTo(tempFile);
+            BufferedImage originalImage = ImageIO.read(image.getInputStream());
+            BufferedImage processedImage = originalImage;
+            if (applyWhiteBackground && "image/png".equals(image.getContentType())) {
+                processedImage = convertTransparentToWhiteBackground(originalImage);
+            }
+
+            tempFile = File.createTempFile("upload", ".png");
+            ImageIO.write(processedImage, "png", tempFile);
 
             ImageUrl imageUrl = webClient.post()
                     .uri(uploadServerUrl)
@@ -146,6 +155,10 @@ public class PackService {
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to save image",e);
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete(); // 임시 파일 삭제
+            }
         }
 
 
@@ -237,5 +250,22 @@ public class PackService {
 
     public EmoticonPackEntity getPackById(Long packId){
         return packRepository.findById(packId).orElseThrow();
+    }
+
+    // 배경을 흰색으로 설정하는 메서드
+    private BufferedImage convertTransparentToWhiteBackground(BufferedImage originalImage) {
+        BufferedImage newImage = new BufferedImage(
+                originalImage.getWidth(),
+                originalImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+        );
+
+        Graphics2D g2d = newImage.createGraphics();
+        g2d.setPaint(Color.BLUE); // 흰색 배경 설정
+        g2d.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
+        g2d.drawImage(originalImage, 0, 0, null);
+        g2d.dispose();
+
+        return newImage;
     }
 }

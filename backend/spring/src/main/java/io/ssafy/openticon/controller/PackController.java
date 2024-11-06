@@ -59,12 +59,13 @@ public class PackController {
             @RequestPart("list_img") MultipartFile listImg,
             @Parameter(description = "이모티콘 이미지", required = true)
             @RequestPart("emoticons") List<MultipartFile> emoticons
+//            @RequestParam("applyWhiteBackground") boolean applyWhiteBackground // 배경 하얗게 할건지 말건지
     ){
         EmoticonPack emoticonPack=new EmoticonPack(emoticonUploadRequest,userDetails.getUsername());
 
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
 
-        String shareLink=packService.emoticonPackUpload(emoticonPack);
+        String shareLink=packService.emoticonPackUpload(emoticonPack,true);
         String shareUrl=baseUrl+"/api/v1/emoticonpacks/info/"+shareLink;
         UploadEmoticonResponseDto uploadEmoticonResponseDto=new UploadEmoticonResponseDto(shareUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadEmoticonResponseDto);
