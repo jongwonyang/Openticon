@@ -12,4 +12,6 @@ public interface EmoticonRepository extends JpaRepository<EmoticonEntity,Long> {
     List<EmoticonEntity> getEmoticonEntitiesByEmoticonPackId(Long packId);
 
     EmoticonEntity getEmoticonEntityByEmoticonPackAndEmoticonOrder(EmoticonPackEntity emoticonPackEntity, Integer order);
+
+    EmoticonEntity getEmoticonEntityById(Long emoticonId);
 }

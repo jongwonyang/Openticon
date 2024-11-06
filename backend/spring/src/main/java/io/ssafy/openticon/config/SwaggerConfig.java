@@ -92,6 +92,14 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
+    public GroupedOpenApi favoriteApi() {
+        return GroupedOpenApi.builder()
+                .group("즐겨찾기 관련 기능")
+                .pathsToMatch("/favorites/**")
+                .build();
+    }
+
 
 
 }
