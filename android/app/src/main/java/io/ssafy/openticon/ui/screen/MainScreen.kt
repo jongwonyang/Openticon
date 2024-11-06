@@ -10,12 +10,14 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,8 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,7 +61,6 @@ fun MainScreen(
     likeEmoticonViewModel: LikeEmoticonViewModel = hiltViewModel(),
     myEmoticonViewModel: MyEmoticonViewModel = hiltViewModel()
 ) {
-
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -142,7 +141,7 @@ fun MainScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = {
                     if (allPermissionsGranted(context)) {
                         Log.d("mainScreen", "allPermission")
@@ -162,14 +161,10 @@ fun MainScreen(
                             lifecycleOwner
                         )
                     }
-                }
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.sin),
-                    contentDescription = "Start Service Icon",
-                    modifier = Modifier.size(48.dp)
-                )
-            }
+                },
+                icon = { Icon(Icons.Filled.PowerSettingsNew, null) },
+                text = { Text("이모티콘 서랍") }
+            )
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
