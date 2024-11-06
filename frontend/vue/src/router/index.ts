@@ -10,6 +10,7 @@ import ProcessLoginView from "@/views/ProcessLogin.vue";
 import MypageView from "@/views/MypageView.vue";
 import { useUserStore } from "@/stores/user";
 import { makeWarningAlert } from "@/util/alert";
+import SearchResultView from "@/views/SearchResultView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +60,11 @@ const router = createRouter({
           next({ name: "main" }); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
         }
       },
+    },
+    {
+      path: "/search",
+      name: "searchResult",
+      component: SearchResultView,
     },
   ],
 });

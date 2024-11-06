@@ -7,20 +7,9 @@ import SearchBar from "@/components/main/search/SearchBar.vue";
 
 <template>
   <MainBanner />
-  <SearchBar />
+  <SearchBar :query="null" :type="null" />
   <NewListShort />
   <PopularListShort />
-  <div class="container p-4 mx-auto max-w-screen-lg">
-    <div
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-    >
-      <div class="border p-4">하이1</div>
-      <div class="border p-4">하이2</div>
-      <div class="border p-4">하이3</div>
-      <div class="border p-4">하이4</div>
-      <div class="border p-4">하이5</div>
-    </div>
-  </div>
 </template>
 
 <style scoped></style>

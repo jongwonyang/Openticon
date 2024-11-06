@@ -4,7 +4,7 @@
     <transition name="fade">
       <div
         v-show="isFocused"
-        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-200 z-20"
+        class="fixed inset-0 bg-black bg-opacity-40 transition-opacity duration-200 z-20"
         @click="isFocused = false"
       ></div>
     </transition>
@@ -13,9 +13,12 @@
     <div class="max-w-screen-lg mx-auto pt-4 px-4 relative z-30">
       <div
         class="w-full flex flex-row justify-between border rounded-lg shadow-md bg-white transition-all duration-200 overflow-hidden"
-        :class="[isFocused ? 'scale-105' : 'scale-100']"
+        :class="[isFocused ? 'scale-[1.02]' : 'scale-100']"
       >
-        <select class="w-2/12 focus:outline-none text-center hover:bg-gray-200 active:bg-gray-300">
+        <select
+          v-model="searchType"
+          class="w-24 focus:outline-none text-center hover:bg-gray-200 active:bg-gray-300"
+        >
           <option value="title">제목</option>
           <option value="author">게시자</option>
           <option value="tag">태그</option>
@@ -23,11 +26,15 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="검색어를 입력하세요..."
-          class="h-11 focus:outline-none placeholder:text-gray-400 text-gray-700 w-9/12 border-l px-2"
+          placeholder="검색어를 입력하세요."
+          class="h-11 focus:outline-none placeholder:text-gray-400 text-gray-700 border-l px-2 flex-grow"
           @focus="isFocused = true"
+          @keyup.enter="handleSearch"
         />
-        <button class="flex items-center justify-center w-1/12 hover:bg-gray-200 active:bg-gray-300 border-l">
+        <button
+          @click="handleSearch"
+          class="flex items-center justify-center w-20 hover:bg-gray-200 active:bg-gray-300 border-l"
+        >
           <span class="material-symbols-rounded text-xl">search</span>
         </button>
       </div>
@@ -51,16 +58,30 @@
 }
 </style>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const searchQuery = ref("");
+const props = defineProps<{
+  query: string | null;
+  type: string | null;
+}>();
+
+const searchQuery = ref(props.query || "");
+const searchType = ref(props.type || "title");
 const isFocused = ref(false);
+
+const router = useRouter();
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    // 여기에 검색 로직 구현
-    console.log("검색어:", searchQuery.value);
+    router.push({
+      path: "/search",
+      query: { query: searchQuery.value, type: searchType.value },
+    });
+    isFocused.value = false;
+  } else {
+    alert("검색어를 입력하세요.");
   }
 };
 </script>
