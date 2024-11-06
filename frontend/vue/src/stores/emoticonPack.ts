@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import apiClient from "@/util/apiClient";
 import type { EmoticonPackSearchList } from "@/types/emoticonPackSearchList";
 import type { EmoticonPack } from "@/types/emoticonPack";
+import type { EmoticonPackUploadInfo, EmoticonPackUploadFiles } from "@/types/emoticonPackUpload";
+import { ref } from "vue";
 
 export const useEmoticonPackStore = defineStore("emoticonPack", () => {
   const getEmoticonPackData = async (id: number): Promise<EmoticonPack> => {
@@ -47,5 +49,30 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
     return response.data;
   };
 
-  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack };
+  const uploadEmoticonPack = async (
+    packInfo: EmoticonPackUploadInfo,
+    files: EmoticonPackUploadFiles
+  ): Promise<void> => {
+    const formData = new FormData();
+    
+    // packInfo를 JSON 문자열로 변환하여 추가
+    formData.append("packInfo", JSON.stringify(packInfo));
+    
+    // 파일들 추가
+    formData.append("thumbnail_img", files.thumbnailImg);
+    formData.append("list_img", files.listImg);
+    
+    // 여러 이모티콘 파일들 추가
+    files.emoticons.forEach((emoticon) => {
+      formData.append("emoticons", emoticon);
+    });
+
+    return apiClient.post("/emoticonpacks/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  };
+
+  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack, uploadEmoticonPack };
 });
