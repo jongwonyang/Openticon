@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -107,17 +108,19 @@ fun EditProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(80.dp)
-                            .clip(CircleShape)
+                            .clip(CircleShape) // Box에도 CircleShape 적용
+                            .background(Color.Gray) // 기본 배경색 추가 (로딩 중 시각적 확인용)
                     ) {
                         if (selectedImageUri != null) {
                             Image(
                                 painter = rememberAsyncImagePainter(model = selectedImageUri),
                                 contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape), // Image에도 CircleShape 적용
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            memberEntity?.profile_image?.let { Log.d("EditProfileScreen", it) }
                             AsyncImage(
                                 model = if (memberEntity?.profile_image.isNullOrEmpty()) {
                                     "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
@@ -126,9 +129,9 @@ fun EditProfileScreen(
                                 },
                                 contentDescription = "Profile Image",
                                 modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                                    .align(Alignment.Center)
+                                    .fillMaxSize()
+                                    .clip(CircleShape), // AsyncImage에도 CircleShape 적용
+                                contentScale = ContentScale.Crop
                             )
                         }
                     }
