@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ImageHashService {
@@ -118,7 +120,7 @@ public class ImageHashService {
         HashingAlgorithm hasher = new PerceptiveHash(32);
         Hash imageHash=hasher.hash(image);
         List<ImageHashEntity> imageHashEntities=imageHashRepository.findAll();
-
+        Set<Long> alreadyFound=new HashSet<>();
         List<ImageHashResponseDto> result=new ArrayList<>();
         for(ImageHashEntity imageHashEntity: imageHashEntities){
             Hash serverImageHash=new Hash(imageHashEntity.getHashValue(),imageHashEntity.getHashLength(),imageHashEntity.getAlgorithmId());
@@ -132,6 +134,8 @@ public class ImageHashService {
 //                }else{
 //                    target=emoticonService.getEmoticon(imageHashEntity.getEmoticonPackEntity(),imageHashEntity.getEmoticonOrder());
 //                }
+                if(alreadyFound.contains(imageHashEntity.getEmoticonPackEntity().getId()))continue;
+                alreadyFound.add(imageHashEntity.getEmoticonPackEntity().getId());
                 result.add(new ImageHashResponseDto(imageHashEntity.getEmoticonPackEntity()));
             }
         }
