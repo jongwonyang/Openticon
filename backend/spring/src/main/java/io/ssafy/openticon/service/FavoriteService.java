@@ -41,4 +41,12 @@ public class FavoriteService {
 
         return result;
     }
+
+    public void delete(Long favoriteId){
+
+        if(favoriteRepository.findById(favoriteId).isEmpty()){
+            throw new IllegalArgumentException("즐겨찾기 목록에 없습니다.");
+        }
+        favoriteRepository.deleteById(favoriteId);
+    }
 }

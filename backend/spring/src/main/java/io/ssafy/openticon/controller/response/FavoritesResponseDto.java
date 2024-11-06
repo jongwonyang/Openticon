@@ -2,19 +2,17 @@ package io.ssafy.openticon.controller.response;
 
 import lombok.Getter;
 
-import java.util.List;
 
 @Getter
 public class FavoritesResponseDto {
 
-    private Long emoticonId;
+    private Long favoriteId;
 
     private String url;
 
-    public FavoritesResponseDto(){}
 
-    public FavoritesResponseDto(Long emoticonId, String url){
-        this.emoticonId=emoticonId;
+    public FavoritesResponseDto(Long favoriteId, String url){
+        this.favoriteId=favoriteId;
         this.url=url;
     }
 }

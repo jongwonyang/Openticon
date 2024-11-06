@@ -1,4 +1,4 @@
-package io.ssafy.openticon.controller;
+package io.ssafy.openticon.controller.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

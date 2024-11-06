@@ -1,5 +1,7 @@
 package io.ssafy.openticon.controller;
 
+import io.ssafy.openticon.controller.request.FavoriteDeleteRequestDto;
+import io.ssafy.openticon.controller.request.FavoriteRequestDto;
 import io.ssafy.openticon.controller.response.FavoritesResponseDto;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.service.FavoriteService;
@@ -43,7 +45,10 @@ public class FavoriteController {
     }
 
     @DeleteMapping("")
-    public ResponseEntity<Void> deleteFavorite(@AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<Void> deleteFavorite(@AuthenticationPrincipal UserDetails userDetails,
+                                               @RequestBody FavoriteDeleteRequestDto favoriteDeleteRequestDto){
+        favoriteService.delete(favoriteDeleteRequestDto.getFavoriteId());
 
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
