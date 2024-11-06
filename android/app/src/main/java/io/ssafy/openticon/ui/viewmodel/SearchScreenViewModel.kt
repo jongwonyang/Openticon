@@ -1,9 +1,7 @@
 package io.ssafy.openticon.ui.viewmodel
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
-import android.net.http.HttpException
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -136,7 +134,6 @@ class SearchScreenViewModel @Inject constructor(
                 try {
                     val imagePart = currentUri.let { uriToMultipartBody(contentResolver, it) }
 
-
                     val (newItems, isLast) = searchEmoticonPacksByImageUseCase(
                         size = pageSize,
                         page = page,
@@ -149,11 +146,9 @@ class SearchScreenViewModel @Inject constructor(
                     page++
                     _isLoading.value = false
                     Log.d("SEARCH", "searchResult.value: ${searchResult.value}")
-
-                } catch (@SuppressLint("NewApi") e: HttpException) {
-                    Log.e("e", "!!")
                 } catch (e: Exception) {
                     Log.e("ImageUpload", "Error uploading image", e)
+                    _isLoading.value = false
                 }
             } else {
                 Log.e("e", "!!")
