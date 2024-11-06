@@ -2,11 +2,14 @@ package io.ssafy.openticon.controller.response;
 
 import io.ssafy.openticon.dto.Category;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
+import io.ssafy.openticon.entity.TagListEntity;
 import lombok.Getter;
 
+import javax.swing.text.html.HTML;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,9 +59,10 @@ public class EmoticonPackResponseDto {
         this.updatedAt = formatToKST(emoticonPackEntity.getUpdatedAt());
 
         // 태그 이름 목록 설정
-        this.tags = emoticonPackEntity.getTagLists().stream()
-                .map(tagList -> tagList.getTag().getTagName())
-                .collect(Collectors.toList());
+        this.tags = new ArrayList<>();
+        for(TagListEntity tagListEntities : emoticonPackEntity.getTagLists()){
+            tags.add(tagListEntities.getTag().getTagName());
+        }
     }
 
     private String formatToKST(OffsetDateTime dateTime) {

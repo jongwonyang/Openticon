@@ -2,6 +2,7 @@ package io.ssafy.openticon.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -21,7 +22,11 @@ public enum ErrorCode {
     DUPLICATE_LIST_IMG(HttpStatus.BAD_REQUEST, "중복된 리스트 이미지"),
     PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다."),
     BLACKLIST_PACK(HttpStatus.FORBIDDEN, "차단된 이모티콘 팩입니다."),
-    DUPLICATE_REPORT(HttpStatus.FORBIDDEN, "이미 신고한 이모티콘 팩입니다.");
+    DUPLICATE_REPORT(HttpStatus.FORBIDDEN, "이미 신고한 이모티콘 팩입니다."),
+    PACK_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "이모티콘 팩 데이터베이스 에러"),
+    TAG_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "태그 데이터베이스 에러"),
+    TAG_LIST_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "태그 리스트 데이터베이스 에러"),
+    EMOTICON_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "이모티콘 데이터베이스 에러");
 
 
 
