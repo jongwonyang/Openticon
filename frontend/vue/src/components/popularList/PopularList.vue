@@ -1,7 +1,7 @@
 <template>
-  <div class="container mt-4 mx-auto max-w-screen-lg">
+  <div class="container mx-auto max-w-screen-lg">
     <!-- 이모티콘 리스트 -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 md:gap-4 pt-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 px-4">
       <RouterLink
         :to="{ name: 'packDetail', params: { id: emoticon.id } }"
         class="border p-4 emoticon-item flex flex-row"
