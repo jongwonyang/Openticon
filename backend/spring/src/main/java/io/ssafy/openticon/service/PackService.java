@@ -9,6 +9,7 @@ import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
 import io.ssafy.openticon.dto.ReportType;
+import io.ssafy.openticon.dto.TagListId;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
@@ -109,11 +110,7 @@ public class PackService {
             }
 
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
-            try{
-                packRepository.save(emoticonPackEntity);
-            }catch(DataAccessException e){
-                throw new OpenticonException(ErrorCode.PACK_DATABASE_SAVE_ERROR);
-            }
+            packRepository.save(emoticonPackEntity);
 
             if(problematicImage || problematicInfoImage){
                 objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
@@ -133,6 +130,7 @@ public class PackService {
 
             // 태그 정보 추가
             List<String> tagNames = emoticonPack.getTags();
+            List<TagListEntity> tagListEntities = new ArrayList<>();
             for(String tag : tagNames){
                 TagEntity findTagEntity = null;
                 Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
@@ -140,11 +138,7 @@ public class PackService {
                     TagEntity tagEntity = TagEntity.builder()
                             .tagName(tag)
                             .build();
-                    try{
-                        tagRepository.save(tagEntity);
-                    }catch(DataAccessException e){
-                        throw new OpenticonException(ErrorCode.TAG_DATABASE_SAVE_ERROR);
-                    }
+                    tagRepository.save(tagEntity);
                     findTagEntity = tagEntity;
                 }else{
                     findTagEntity = getTagEntity.get();
@@ -153,12 +147,10 @@ public class PackService {
                         .emoticonPack(emoticonPackEntity)
                         .tag(findTagEntity)
                         .build();
-                try{
-                    tagListRepository.save(tagListEntity);
-                }catch(DataAccessException e){
-                    throw new OpenticonException(ErrorCode.TAG_LIST_DATABASE_SAVE_ERROR);
-                }
+                tagListRepository.save(tagListEntity);
+                tagListEntities.add(tagListEntity);
             }
+            emoticonPackEntity.setTagLists(tagListEntities);
             return new EmoticonPackResponseDto(emoticonPackEntity);
         }catch (IOException e){
             throw new RuntimeException(e.getMessage());
