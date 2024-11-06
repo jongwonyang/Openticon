@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import apiClient from "@/util/apiClient";
-import type { EmoticonPackInList } from "@/types/emoticonPackInList";
+import type { EmoticonPackSearchList } from "@/types/emoticonPackSearchList";
 import type { EmoticonPack } from "@/types/emoticonPack";
 
 export const useEmoticonPackStore = defineStore("emoticonPack", () => {
@@ -13,7 +13,7 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
     return response.data;
   };
 
-  const getNewEmoticonPackList = async (page: number, size: number): Promise<EmoticonPackInList[]> => {
+  const getNewEmoticonPackList = async (page: number, size: number): Promise<EmoticonPackSearchList> => {
     const response = await apiClient.get(`/emoticonpacks/search`, {
       params: {
         page: page,
@@ -21,10 +21,10 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
         sort: "new",
       },
     });
-    return response.data.content;
+    return response.data;
   };
 
-  const getPopularEmoticonPackList = async (page: number, size: number): Promise<EmoticonPackInList[]> => {
+  const getPopularEmoticonPackList = async (page: number, size: number): Promise<EmoticonPackSearchList> => {
     const response = await apiClient.get(`/emoticonpacks/search`, {
       params: {
         page: page,
@@ -32,8 +32,20 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
         sort: "most",
       },
     });
-    return response.data.content;
+    return response.data;
   };
 
-  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList };
+  const searchEmoticonPack = async (query: string, type: string, page: number, size: number): Promise<EmoticonPackSearchList> => {
+    const response = await apiClient.get(`/emoticonpacks/search`, {
+      params: {
+        query: query,
+        type: type,
+        page: page,
+        size: size,
+      },
+    });
+    return response.data;
+  };
+
+  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack };
 });

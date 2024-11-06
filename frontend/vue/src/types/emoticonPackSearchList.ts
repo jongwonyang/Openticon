@@ -1,12 +1,12 @@
 import type { EmoticonPackInList } from './emoticonPackInList';
 
-interface Sort {
+type Sort = {
   sorted: boolean;
   empty: boolean;
   unsorted: boolean;
 }
 
-interface Pageable {
+type Pageable = {
   paged: boolean;
   pageNumber: number;
   pageSize: number;
@@ -15,7 +15,7 @@ interface Pageable {
   unpaged: boolean;
 }
 
-interface EmoticonPackSearchList {
+type EmoticonPackSearchList = {
   totalElements: number;
   totalPages: number;
   pageable: Pageable;
