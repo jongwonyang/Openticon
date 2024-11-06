@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap");
 
+#app {
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 120px;
+}
+
 body {
   overflow-y: scroll;
 }

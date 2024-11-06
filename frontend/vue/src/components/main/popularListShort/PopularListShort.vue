@@ -39,6 +39,7 @@
   <script setup lang="ts">
   import { useEmoticonPackStore } from "@/stores/emoticonPack";
   import type { EmoticonPackInList } from "@/types/emoticonPackInList";
+  import type { EmoticonPackSearchList } from "@/types/emoticonPackSearchList";
   import { onMounted, ref } from "vue";
   import { RouterLink } from "vue-router";
   
@@ -46,8 +47,8 @@
   
   const emoticonPackStore = useEmoticonPackStore();
   onMounted(() => {
-    emoticonPackStore.getPopularEmoticonPackList(0, 10).then((res) => {
-      popularEmoticonList.value = res;
+    emoticonPackStore.getPopularEmoticonPackList(0, 10).then((res: EmoticonPackSearchList) => {
+      popularEmoticonList.value = res.content;
     });
   });
   </script>

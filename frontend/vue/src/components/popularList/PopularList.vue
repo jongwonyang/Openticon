@@ -1,7 +1,7 @@
 <template>
-  <div class="container mt-4 mx-auto max-w-screen-lg">
+  <div class="container mx-auto max-w-screen-lg">
     <!-- 이모티콘 리스트 -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 md:gap-4 pt-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 px-4">
       <RouterLink
         :to="{ name: 'packDetail', params: { id: emoticon.id } }"
         class="border p-4 emoticon-item flex flex-row"
@@ -9,11 +9,17 @@
         :key="emoticon.id"
       >
         <div class="flex justify-center items-center">
-          <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-28 aspect-square object-cover" />
+          <img
+            :src="emoticon.thumbnailImg"
+            alt="이모티콘"
+            class="w-28 aspect-square object-cover"
+          />
         </div>
         <div class="flex flex-col justify-center items-start ml-4">
           <p class="text-md text-center line-clamp-2">{{ emoticon.title }}</p>
-          <p class="text-sm text-center text-gray-500">{{ emoticon.member.nickname }}</p>
+          <p class="text-sm text-center text-gray-500">
+            {{ emoticon.member.nickname }}
+          </p>
         </div>
       </RouterLink>
     </div>
@@ -28,7 +34,7 @@ import { useEmoticonPackStore } from "@/stores/emoticonPack";
 import type { EmoticonPackInList } from "@/types/emoticonPackInList";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-import { useWindowScroll, useInfiniteScroll } from '@vueuse/core';
+import { useWindowScroll, useInfiniteScroll } from "@vueuse/core";
 import Loading from "../common/loading/Loading.vue";
 
 const popularEmoticonList = ref<EmoticonPackInList[]>([]);
@@ -40,18 +46,20 @@ const emoticonPackStore = useEmoticonPackStore();
 
 const loadMoreEmoticons = async () => {
   if (loading.value || !hasMore.value) return;
-  
+
   loading.value = true;
   try {
-    const newEmoticons = await emoticonPackStore.getPopularEmoticonPackList(currentPage.value++, 10);
-    if (newEmoticons.length === 0) {
+    const popularEmoticonsResult =
+      await emoticonPackStore.getPopularEmoticonPackList(
+        currentPage.value++,
+        10
+      );
+    if (popularEmoticonsResult.last) {
       hasMore.value = false;
-    } else {
-      popularEmoticonList.value.push(...newEmoticons);
-      currentPage.value++;
     }
+    popularEmoticonList.value.push(...popularEmoticonsResult.content);
   } catch (error) {
-    console.error('이모티콘을 불러오는 중 오류가 발생했습니다:', error);
+    console.error("이모티콘을 불러오는 중 오류가 발생했습니다:", error);
   } finally {
     loading.value = false;
   }
@@ -65,8 +73,9 @@ useInfiniteScroll(
     const scrollHeight = document.documentElement.scrollHeight;
     const scrollTop = y.value;
     const clientHeight = document.documentElement.clientHeight;
-    
-    if (scrollTop + clientHeight >= scrollHeight - 100) { // 하단에서 100px 남았을 때 로드
+
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
+      // 하단에서 100px 남았을 때 로드
       await loadMoreEmoticons();
     }
   },
