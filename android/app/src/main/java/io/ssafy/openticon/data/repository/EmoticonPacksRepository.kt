@@ -137,4 +137,10 @@ class EmoticonPacksRepository @Inject constructor(
             emoticonDao.deleteEmoticonsByPackId(packId)
         }
     }
+
+    suspend fun insertLikeEmoticons(likeEmoticon: LikeEmoticon) {
+        withContext(Dispatchers.IO) {
+            emoticonDao.insertLikeEmoticon(likeEmoticon)
+        }
+    }
 }

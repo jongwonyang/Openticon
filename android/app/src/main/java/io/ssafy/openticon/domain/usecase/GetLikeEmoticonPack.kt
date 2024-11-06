@@ -22,4 +22,8 @@ class GetLikeEmoticonPack @Inject constructor(
         // Flow로 변환된 데이터를 emit
         emit(likeEmoticonPack)
     }
+
+    suspend fun insertLike(likeEmoticon: LikeEmoticon){
+        emoticonRepository.insertLikeEmoticons(likeEmoticon)
+    }
 }
