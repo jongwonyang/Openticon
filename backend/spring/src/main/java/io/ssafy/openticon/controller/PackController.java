@@ -8,6 +8,7 @@ import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.entity.MemberEntity;
+import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.service.MemberService;
 import io.ssafy.openticon.service.PackService;
 import io.ssafy.openticon.service.ReportHistoryService;
@@ -29,6 +30,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
@@ -48,16 +50,18 @@ public class PackController {
     private String baseUrl;
 
     private final PackService packService;
+    private final MemberRepository memberRepository;
 
-    public PackController(PackService packService, ReportHistoryService reportHistoryService, MemberService memberService){
+    public PackController(PackService packService, ReportHistoryService reportHistoryService, MemberService memberService, MemberRepository memberRepository){
         this.packService=packService;
         this.reportHistoryService = reportHistoryService;
         this.memberService = memberService;
+        this.memberRepository = memberRepository;
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "작가가 이모티콘팩을 등록합니다.")
-    public ResponseEntity<UploadEmoticonResponseDto> uploadEmoticon(
+    public ResponseEntity<EmoticonPackResponseDto> uploadEmoticon(
             @AuthenticationPrincipal UserDetails userDetails,
             @Parameter(description = "이모티콘 팩 정보", required = true)
             @RequestPart("packInfo") EmoticonUploadRequestDto emoticonUploadRequest,
@@ -72,10 +76,11 @@ public class PackController {
 
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
 
-        String shareLink=packService.emoticonPackUpload(emoticonPack);
-        String shareUrl=baseUrl+"/api/v1/emoticonpacks/info/"+shareLink;
-        UploadEmoticonResponseDto uploadEmoticonResponseDto=new UploadEmoticonResponseDto(shareUrl);
-        return ResponseEntity.status(HttpStatus.CREATED).body(uploadEmoticonResponseDto);
+        EmoticonPackResponseDto emoticonPackResponseDto = packService.emoticonPackUpload(emoticonPack);
+//        emoticonPackResponseDto
+//        String shareUrl=baseUrl+"/api/v1/emoticonpacks/info/"+shareLink;
+//        UploadEmoticonResponseDto uploadEmoticonResponseDto=new UploadEmoticonResponseDto(shareUrl);
+        return ResponseEntity.status(HttpStatus.CREATED).body(emoticonPackResponseDto);
     }
 
     @GetMapping("/info/{uuid}")
@@ -137,5 +142,18 @@ public class PackController {
         reportHistoryService.report(reportPackRequestDto,member.getId());
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("mylist")
+    @Operation(summary = "내가 만든 이모티콘 팩 조회")
+    public ResponseEntity<Page<EmoticonPackResponseDto>> myListPack(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return ResponseEntity.status(HttpStatus.OK).body(packService.myPackList(member, pageable));
     }
 }
