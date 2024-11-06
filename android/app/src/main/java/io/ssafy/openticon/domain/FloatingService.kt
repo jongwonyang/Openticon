@@ -27,6 +27,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -70,7 +71,7 @@ class FloatingService : Service() {
     private var initialX = 0
     private var initialY = 0
 
-    private lateinit var selectedEmoticonPackView: EmoticonPackView
+    private var selectedEmoticonPackView: EmoticonPackView? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -105,6 +106,8 @@ class FloatingService : Service() {
 
         val likeView = secondFloatingView.findViewById<LikeEmoticonPackView>(R.id.imageLike)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
+        val titleText = secondFloatingView.findViewById<TextView>(R.id.floatingTextView)
+
         data?.let {
             likeView.removeAllViews() // 이미 존재하는 이미지 삭제
             likeView.setupEmoticonPack(it) { images ->
@@ -115,6 +118,17 @@ class FloatingService : Service() {
                         }
                     }
                 )
+
+                titleText.text = it.name
+
+                if (selectedEmoticonPackView != null) {
+                    selectedEmoticonPackView!!.resetColor()
+                    selectedEmoticonPackView = null
+                    likeView.makeGray()
+                } else {
+                    likeView.makeGray()
+                }
+
             }
         }
     }
@@ -156,6 +170,9 @@ class FloatingService : Service() {
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
         val closeButton = secondFloatingView.findViewById<ImageView>(R.id.closeButton)
         val settingButton = secondFloatingView.findViewById<ImageView>(R.id.settingButton)
+        val likeView = secondFloatingView.findViewById<LikeEmoticonPackView>(R.id.imageLike)
+        val titleText = secondFloatingView.findViewById<TextView>(R.id.floatingTextView)
+
         closeButton.setOnClickListener {
             toggleSecondFloatingView()
         }
@@ -178,12 +195,17 @@ class FloatingService : Service() {
                         lkeEmoticon(emoticon)
                     }
                 )
-                if (::selectedEmoticonPackView.isInitialized) {
+
+                titleText.text = pack.emoticonPackEntity.title
+
+                if (selectedEmoticonPackView != null) {
+                    selectedEmoticonPackView!!.resetColor()
+                    likeView.resetColor()
                     emoticonPackView.makeGray()
-                    selectedEmoticonPackView.resetColor()
                     selectedEmoticonPackView = emoticonPackView
                 } else {
                     emoticonPackView.makeGray()
+                    likeView.resetColor()
                     selectedEmoticonPackView = emoticonPackView
                 }
             }
