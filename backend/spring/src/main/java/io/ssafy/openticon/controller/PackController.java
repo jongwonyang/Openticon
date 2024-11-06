@@ -1,12 +1,16 @@
 package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EmoticonUploadRequestDto;
+import io.ssafy.openticon.controller.request.ReportPackRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
+import io.ssafy.openticon.entity.MemberEntity;
+import io.ssafy.openticon.service.MemberService;
 import io.ssafy.openticon.service.PackService;
+import io.ssafy.openticon.service.ReportHistoryService;
 import io.ssafy.openticon.service.SafeSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,13 +42,17 @@ import java.util.concurrent.ExecutionException;
 @Tag(name="이모티콘팩")
 public class PackController {
 
+    private final ReportHistoryService reportHistoryService;
+    private final MemberService memberService;
     @Value("${spring.base-url}")
     private String baseUrl;
 
     private final PackService packService;
 
-    public PackController(PackService packService){
+    public PackController(PackService packService, ReportHistoryService reportHistoryService, MemberService memberService){
         this.packService=packService;
+        this.reportHistoryService = reportHistoryService;
+        this.memberService = memberService;
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -59,17 +67,62 @@ public class PackController {
             @RequestPart("list_img") MultipartFile listImg,
             @Parameter(description = "이모티콘 이미지", required = true)
             @RequestPart("emoticons") List<MultipartFile> emoticons
-//            @RequestParam("applyWhiteBackground") boolean applyWhiteBackground // 배경 하얗게 할건지 말건지
-    ){
-        EmoticonPack emoticonPack=new EmoticonPack(emoticonUploadRequest,userDetails.getUsername());
+    ) {
+        System.out.println("Received request to upload emoticon pack");
 
+        // 로그 추가 - UserDetails
+        System.out.println("UserDetails Username: " + (userDetails != null ? userDetails.getUsername() : "null"));
+
+        // 로그 추가 - EmoticonUploadRequestDto
+        System.out.println("EmoticonUploadRequestDto: " + emoticonUploadRequest);
+
+        // 로그 추가 - Thumbnail Image
+        if (thumbnailImg != null) {
+            System.out.println("Thumbnail Image - Original Filename: " + thumbnailImg.getOriginalFilename());
+            System.out.println("Thumbnail Image - Size: " + thumbnailImg.getSize());
+            System.out.println("Thumbnail Image - Content Type: " + thumbnailImg.getContentType());
+        } else {
+            System.out.println("Thumbnail Image is null");
+        }
+
+        // 로그 추가 - List Image
+        if (listImg != null) {
+            System.out.println("List Image - Original Filename: " + listImg.getOriginalFilename());
+            System.out.println("List Image - Size: " + listImg.getSize());
+            System.out.println("List Image - Content Type: " + listImg.getContentType());
+        } else {
+            System.out.println("List Image is null");
+        }
+
+        // 로그 추가 - Emoticons List
+        System.out.println("Emoticons List Size: " + (emoticons != null ? emoticons.size() : "null"));
+        if (emoticons != null) {
+            for (int i = 0; i < emoticons.size(); i++) {
+                MultipartFile emoticon = emoticons.get(i);
+                System.out.println("Emoticon [" + i + "] - Original Filename: " + emoticon.getOriginalFilename());
+                System.out.println("Emoticon [" + i + "] - Size: " + emoticon.getSize());
+                System.out.println("Emoticon [" + i + "] - Content Type: " + emoticon.getContentType());
+            }
+        }
+
+        EmoticonPack emoticonPack = new EmoticonPack(emoticonUploadRequest, userDetails.getUsername());
         emoticonPack.setImages(thumbnailImg, listImg, emoticons);
 
-        String shareLink=packService.emoticonPackUpload(emoticonPack,true);
-        String shareUrl=baseUrl+"/api/v1/emoticonpacks/info/"+shareLink;
-        UploadEmoticonResponseDto uploadEmoticonResponseDto=new UploadEmoticonResponseDto(shareUrl);
+        // 로그 추가 - EmoticonPack 정보
+        System.out.println("EmoticonPack Info - Username: " + emoticonPack.getUsername());
+        System.out.println("EmoticonPack Info - Thumbnail Image: " + emoticonPack.getThumbnailImg().getOriginalFilename());
+        System.out.println("EmoticonPack Info - List Image: " + emoticonPack.getListImg().getOriginalFilename());
+        System.out.println("EmoticonPack Info - Emoticons Count: " + emoticonPack.getEmoticons().size());
+
+        String shareLink = packService.emoticonPackUpload(emoticonPack);
+        String shareUrl = baseUrl + "/api/v1/emoticonpacks/info/" + shareLink;
+        UploadEmoticonResponseDto uploadEmoticonResponseDto = new UploadEmoticonResponseDto(shareUrl);
+
+        System.out.println("Generated Share URL: " + shareUrl);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadEmoticonResponseDto);
     }
+
 
     @GetMapping("/info/{uuid}")
     @Operation(summary = "비공개 이모티콘팩 경로에 접근합니다.")
@@ -121,5 +174,14 @@ public class PackController {
                                                                 @AuthenticationPrincipal UserDetails userDetails){
         String email=userDetails.getUsername();
         return ResponseEntity.status(HttpStatus.OK).body(packService.downloadPack(email,Long.parseLong(packId)));
+    }
+
+    @PostMapping("reports")
+    public ResponseEntity<Void> reportPack(@AuthenticationPrincipal UserDetails userDetails,
+                                           @RequestBody ReportPackRequestDto reportPackRequestDto){
+        MemberEntity member=memberService.getMemberByEmail(userDetails.getUsername()).orElseThrow();
+        reportHistoryService.report(reportPackRequestDto,member.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

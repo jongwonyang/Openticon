@@ -1,5 +1,7 @@
 package io.ssafy.openticon.controller;
 
+import io.ssafy.openticon.controller.request.ObjectionManswerAnswerRequestDto;
+import io.ssafy.openticon.controller.request.ObjectionSubmitRequestDto;
 import io.ssafy.openticon.controller.request.ObjectionTestRequestDto;
 import io.ssafy.openticon.controller.request.PointRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
@@ -11,6 +13,8 @@ import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.service.ObjectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
@@ -23,6 +27,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import retrofit2.http.GET;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/objection")
@@ -47,14 +54,18 @@ public class ObjectionController {
         return ResponseEntity.ok().body(objectionService.getObjectionList(member, pageable));
     }
 
-    @PostMapping("submit")
+    @PostMapping
     @Operation(summary = "사용자가 이모티콘 팩에 대한 이의제기를 신청합니다.")
-    public ResponseEntity<?> submitObjection(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Long emoticonPackId) {
+    public ResponseEntity<?> submitObjection(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody ObjectionSubmitRequestDto objectionRequest) {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
-
-
-        return ResponseEntity.ok().build();
+        try{
+            return ResponseEntity.ok().body(objectionService.submitObjection(member, objectionRequest));
+        }catch(NoSuchElementException | IllegalStateException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PostMapping("test")
@@ -63,7 +74,57 @@ public class ObjectionController {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
 
+        try{
+            return ResponseEntity.ok().body(objectionService.testSubmitObjection(member, request));
+        }catch(NoSuchElementException | IllegalStateException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
-        return ResponseEntity.ok().body(objectionService.testSubmitObjection(member, request));
+    @GetMapping("answer")
+    @Operation(summary = "이의제기 심사 결과 확인하기")
+    public ResponseEntity<?> answerObjection(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam Long objectionId) {
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        try{
+            return ResponseEntity.ok().body(objectionService.answerObjection(member, objectionId));
+        }catch(NoSuchElementException | IllegalAccessError e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("manager-list")
+    @Operation(summary = "관리자 이의 신청 목록")
+    public ResponseEntity<?> managerListObjection(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        try{
+            return ResponseEntity.ok().body(objectionService.managerObjection(member, pageable));
+        }catch(NoSuchElementException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("manager-answer")
+    @Operation(summary = "관리자의 이의제기 심사")
+    public ResponseEntity<?> managerAnswerObjection(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody ObjectionManswerAnswerRequestDto requestDto
+            ){
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        try{
+            return ResponseEntity.ok().body(objectionService.managerAnswerObjection(member, requestDto));
+        }catch(NoSuchElementException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }

@@ -4,6 +4,7 @@ import io.ssafy.openticon.dto.ReportStateType;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.ObjectionEntity;
+import io.ssafy.openticon.entity.PointHistoryEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +22,8 @@ public interface ObjectionRepository extends JpaRepository<ObjectionEntity, Long
     );
 
     Page<ObjectionEntity> findByMember(MemberEntity member, Pageable pageable);
+
+    @Query("SELECT o FROM ObjectionEntity o WHERE o.state = :state")
+    Page<ObjectionEntity> findByState(@Param("state") ReportStateType state, Pageable pageable);
 
 }

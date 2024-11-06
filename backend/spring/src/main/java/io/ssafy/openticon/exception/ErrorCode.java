@@ -17,8 +17,11 @@ public enum ErrorCode {
     MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰 없음"),
     INVALID_REQUEST_PARAMS(HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러"),
-    PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다.");
-
+    DUPLICATE_THUMBNAIL(HttpStatus.BAD_REQUEST, "중복된 썸네일 이미지"),
+    DUPLICATE_LIST_IMG(HttpStatus.BAD_REQUEST, "중복된 리스트 이미지"),
+    PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다."),
+    BLACKLIST_PACK(HttpStatus.FORBIDDEN, "차단된 이모티콘 팩입니다."),
+    DUPLICATE_REPORT(HttpStatus.FORBIDDEN, "이미 신고한 이모티콘 팩입니다.");
 
 
 

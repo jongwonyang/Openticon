@@ -27,6 +27,10 @@ public class PackInfoResponseDto {
 
     private long view;
 
+    private boolean isPublic;
+
+    private boolean isBlacklist;
+
     private Category category;
 
     private String thumbnailImg;
@@ -58,6 +62,8 @@ public class PackInfoResponseDto {
         this.description=emoticonPackEntity.getDescription();
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
         this.emoticons=emoticons;
+        this.isPublic = emoticonPackEntity.isPublic();
+        this.isBlacklist = emoticonPackEntity.getBlacklist();
     }
 
     private String formatToKST(OffsetDateTime dateTime) {

@@ -1,10 +1,14 @@
 package io.ssafy.openticon.service;
 
+import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
+import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
+import io.ssafy.openticon.controller.request.ReportPackRequestDto;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
+import io.ssafy.openticon.dto.ReportType;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
@@ -30,6 +34,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +43,7 @@ import java.util.Optional;
 @Service
 public class PackService {
 
+    private final ImageHashService imageHashService;
     @Value("${spring.image-server-url}")
     private String imageServerUrl;
 
@@ -49,8 +56,9 @@ public class PackService {
     private final TagListRepository tagListRepository;
     private final PurchaseHistoryService purchaseHistoryService;
     private final SafeSearchService safeSearchService;
+    private final ObjectionService objectionService;
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -60,29 +68,35 @@ public class PackService {
         this.tagListRepository = tagListRepository;
         this.purchaseHistoryService = purchaseHistoryService;
         this.safeSearchService = safeSearchService;
+        this.imageHashService = imageHashService;
+        this.objectionService = objectionService;
     }
 
     @Transactional
-    public String emoticonPackUpload(EmoticonPack emoticonPack, boolean applyWhiteBackground){
+    public String emoticonPackUpload(EmoticonPack emoticonPack){
         try{
             List<MultipartFile> infoImages = new ArrayList<>();
             infoImages.add(emoticonPack.getThumbnailImg());
             infoImages.add(emoticonPack.getListImg());
+
             boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
-
-
             List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
             MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
             MultipartFile listImg= emoticonPack.getListImg();
-            String thumbnailImgUrl=saveImage(thumbnailImg,applyWhiteBackground);
-            String listImgUrl=saveImage(listImg,applyWhiteBackground);
+
+            File thumbnailImgFile=makeFile(thumbnailImg);
+            File listImgFile=makeFile(listImg);
+//            File thumbnailImgFile = null;
+//            File listImgFile = null;
+
+            String thumbnailImgUrl=saveImage(thumbnailImg,thumbnailImgFile);
+            String listImgUrl=saveImage(listImg,listImgFile);
+
+            //checkDuplicateThumbnailAndListImg(thumbnailImg,listImg);
             List<String> emoticonsUrls=new ArrayList<>();
-
-
 
             MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
             EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
-
 
             boolean problematicImage = false;
             for (int i = 0; i < emoticonList.size(); i += 16) {
@@ -93,12 +107,23 @@ public class PackService {
                     problematicImage = true;
                 }
             }
-
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
             packRepository.save(emoticonPackEntity);
+
+            if(problematicImage || problematicInfoImage){
+                objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
+            }
+
+            imageHashService.saveThumbnailHash(thumbnailImgFile,emoticonPackEntity);
+            imageHashService.saveListImgHash(listImgFile,emoticonPackEntity);
             // 여기 부분
+            int cnt=0;
             for(MultipartFile emoticon: emoticonList){
-                emoticonsUrls.add(saveImage(emoticon,applyWhiteBackground));
+//                File emoticonFile=makeFile(emoticon);
+                File emoticonFile=null;
+                emoticonsUrls.add(saveImage(emoticon, emoticonFile));
+                imageHashService.saveEmoticonHash(emoticonFile,emoticonPackEntity,cnt);
+                cnt++;
             }
             emoticonService.saveEmoticons(emoticonsUrls,emoticonPackEntity);
 
@@ -128,21 +153,48 @@ public class PackService {
         }
     }
 
-
-    private String saveImage(MultipartFile image, boolean applyWhiteBackground){
-        String uploadServerUrl = imageServerUrl+ "/upload/image";
-
+    private File makeFile(MultipartFile image){
         File tempFile = null;
         try {
+            tempFile = File.createTempFile("upload", image.getOriginalFilename());
+            image.transferTo(tempFile);
+            return tempFile;
+        }catch (IOException e){
+            throw new RuntimeException("File만들기 실패");
+        }
+
+    }
+
+
+    private String saveImage(MultipartFile image, File tempFile){
+        String uploadServerUrl = imageServerUrl + "/upload/image";
+
+        try {
+            System.out.println("Step 0: Starting image processing.");
+
+            // 입력 스트림에서 BufferedImage 생성
             BufferedImage originalImage = ImageIO.read(image.getInputStream());
+            if (originalImage == null) {
+                System.out.println("Step 0.1: Failed to read image. Image data might be invalid.");
+                throw new RuntimeException("Failed to read image from input stream.");
+            }
+            System.out.println("Step 1: Successfully read image. Width: " + originalImage.getWidth() + ", Height: " + originalImage.getHeight());
+
+            // 배경색 변경 조건 체크
             BufferedImage processedImage = originalImage;
-            if (applyWhiteBackground && "image/png".equals(image.getContentType())) {
+            if ("image/png".equals(image.getContentType())) {
+                System.out.println("Step 2: Converting transparent background to white.");
                 processedImage = convertTransparentToWhiteBackground(originalImage);
+            } else {
+                System.out.println("Step 2: Skipping background conversion as image type is not PNG.");
             }
 
+            // 임시 파일 생성 및 이미지 저장
             tempFile = File.createTempFile("upload", ".png");
             ImageIO.write(processedImage, "png", tempFile);
+            System.out.println("Step 3: Image saved to temporary file: " + tempFile.getAbsolutePath());
 
+            // WebClient를 사용한 이미지 업로드
             ImageUrl imageUrl = webClient.post()
                     .uri(uploadServerUrl)
                     .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -150,19 +202,15 @@ public class PackService {
                     .retrieve()
                     .bodyToMono(ImageUrl.class)
                     .block();
+            System.out.println("Step 4: Image successfully uploaded. URL received: " + (imageUrl != null ? imageUrl.getUrl() : "No URL returned"));
 
             return imageUrl.getUrl();
-
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save image",e);
-        } finally {
-            if (tempFile != null && tempFile.exists()) {
-                tempFile.delete(); // 임시 파일 삭제
-            }
+            System.out.println("Exception occurred during image processing: " + e.getMessage());
+            throw new RuntimeException("Failed to save image", e);
         }
-
-
     }
+
 
     private MultiValueMap<String, Object> createMultipartBody(File file, String fileName) {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -176,6 +224,10 @@ public class PackService {
 
         if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
             throw new OpenticonException(ErrorCode.PRIVATE_PACK);
+        }
+
+        if(emoticonPackEntity.getBlacklist()){
+            throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
         }
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
@@ -210,6 +262,10 @@ public class PackService {
 
         if(!emoticonPackEntity.isPublic()){
             throw new OpenticonException(ErrorCode.PRIVATE_PACK);
+        }
+
+        if(emoticonPackEntity.getBlacklist()){
+            throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
         }
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
@@ -248,11 +304,14 @@ public class PackService {
         return new PackDownloadResponseDto(thumbnailImg,listImg,emoticons);
     }
 
-    public EmoticonPackEntity getPackById(Long packId){
-        return packRepository.findById(packId).orElseThrow();
+    public Optional<EmoticonPackEntity> getPackById(Long packId){
+        return packRepository.findById(packId);
     }
 
-    // 배경을 흰색으로 설정하는 메서드
+    public void save(EmoticonPackEntity emoticonPackEntity){
+        packRepository.save(emoticonPackEntity);
+    }
+
     private BufferedImage convertTransparentToWhiteBackground(BufferedImage originalImage) {
         BufferedImage newImage = new BufferedImage(
                 originalImage.getWidth(),
@@ -261,11 +320,12 @@ public class PackService {
         );
 
         Graphics2D g2d = newImage.createGraphics();
-        g2d.setPaint(Color.BLUE); // 흰색 배경 설정
+        g2d.setPaint(Color.WHITE); // 흰색 배경 설정
         g2d.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
         g2d.drawImage(originalImage, 0, 0, null);
         g2d.dispose();
 
         return newImage;
     }
+
 }

@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 public class ObjectionListResponseDto {
     private Long id;
 
-    private Long emoticonPackId;
+    private EmoticonPackResponseDto emoticonPack;
 
     private ReportType type;
 
@@ -24,7 +24,7 @@ public class ObjectionListResponseDto {
 
     public ObjectionListResponseDto(ObjectionEntity objectionEntity) {
         this.id = objectionEntity.getId();
-        this.emoticonPackId = objectionEntity.getEmoticonPack().getId();
+        this.emoticonPack = new EmoticonPackResponseDto(objectionEntity.getEmoticonPack());
         this.type = objectionEntity.getType();
         this.state = objectionEntity.getState();
         this.createdAt = objectionEntity.getCreatedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul"))
