@@ -2,9 +2,8 @@ package io.ssafy.openticon.ui.navigation
 
 import android.app.Activity
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,10 +11,9 @@ import androidx.navigation.navArgument
 import io.ssafy.openticon.ui.screen.EditProfileScreen
 import io.ssafy.openticon.ui.screen.EmoticonPackDetailScreen
 import io.ssafy.openticon.ui.screen.LoginScreen
-import io.ssafy.openticon.ui.screen.MainScreen
 import io.ssafy.openticon.ui.screen.LoginSuccessScreen
+import io.ssafy.openticon.ui.screen.MainScreen
 import io.ssafy.openticon.ui.screen.SettingsScreen
-import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 
 @Composable
 fun AppNavHost() {
@@ -33,10 +31,10 @@ fun AppNavHost() {
         composable("login") {
             LoginScreen(navController)
         }
-        composable("edit_profile"){
+        composable("edit_profile") {
             EditProfileScreen(navController)
         }
-        composable("settings"){
+        composable("settings") {
             SettingsScreen(navController)
         }
 
@@ -58,7 +56,7 @@ fun AppNavHost() {
             )
         ) { backStackEntry ->
             val accessToken = backStackEntry.arguments?.getString("accessToken") ?: ""
-            LoginSuccessScreen(accessToken,navController)
+            LoginSuccessScreen(accessToken, navController)
         }
     }
 
