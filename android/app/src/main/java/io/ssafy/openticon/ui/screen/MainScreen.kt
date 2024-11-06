@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import io.ssafy.openticon.FloatingService
+import io.ssafy.openticon.MainActivity
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.LikeEmoticonPack
@@ -70,33 +71,31 @@ fun MainScreen(
 
     val activity = context as? Activity
 
-    DisposableEffect(lifecycleOwner) {
-        // LifecycleObserver를 통해 포그라운드 상태 전환 감지
+    val mainActivityLifecycle = (context as? MainActivity)?.lifecycle
+
+    DisposableEffect(mainActivityLifecycle) {
+        // MainActivity의 lifecycle을 감시할 Observer 설정
         val observer = LifecycleEventObserver { _, event ->
-            if(allPermissionsGranted(context)) {
+            if (allPermissionsGranted(context)) {
                 when (event) {
-
-
                     Lifecycle.Event.ON_RESUME -> {
-                        // 포그라운드로 전환됨
                         stopFloatingService(
                             context,
                             myViewModel,
                             likeEmoticonViewModel,
                             lifecycleOwner
                         )
-                        Log.d("MainScreen", "MainScreen이 포그라운드로 전환되었습니다.")
+                        Log.d("MainScreen", "MainActivity가 포그라운드로 전환되었습니다.")
                     }
 
                     Lifecycle.Event.ON_PAUSE -> {
-                        // 백그라운드로 전환됨
                         startFloatingService(
                             context,
                             myViewModel,
                             likeEmoticonViewModel,
                             lifecycleOwner
                         )
-                        Log.d("MainScreen", "MainScreen이 백그라운드로 전환되었습니다.")
+                        Log.d("MainScreen", "MainActivity가 백그라운드로 전환되었습니다.")
                     }
 
                     else -> {}
@@ -104,12 +103,12 @@ fun MainScreen(
             }
         }
 
-        // Lifecycle에 observer 추가
-        lifecycleOwner.lifecycle.addObserver(observer)
+        // MainActivity의 lifecycle에 observer 추가
+        mainActivityLifecycle?.addObserver(observer)
 
         // DisposableEffect에서 LifecycleObserver 제거
         onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+            mainActivityLifecycle?.removeObserver(observer)
         }
     }
 
