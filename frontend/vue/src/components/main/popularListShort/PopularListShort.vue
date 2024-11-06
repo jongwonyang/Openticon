@@ -18,7 +18,7 @@
             v-for="emoticon in popularEmoticonList"
             :key="emoticon.id"
           >
-            <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full" />
+            <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full object-cover aspect-square" />
             <p class="text-md text-center mt-2 line-">{{ emoticon.title }}</p>
           </RouterLink>
         </div>
@@ -29,7 +29,7 @@
           v-for="emoticon in popularEmoticonList"
           :key="emoticon.id"
         >
-          <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full" />
+          <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full object-cover aspect-square" />
           <p class="text-md text-center mt-2 line-clamp-2">{{ emoticon.title }}</p>
         </RouterLink>
       </div>

@@ -11,7 +11,7 @@
       <img
         :src="emoticon"
         alt="이모티콘 개별 이미지"
-        class="w-full hover:scale-150 hover:shadow-2xl hover:rounded-lg hover:border hover:border-gray-400 transition-all duration-200 ease-in-out"
+        class="w-full hover:scale-150 hover:shadow-2xl hover:rounded-lg hover:border hover:border-gray-400 transition-all duration-200 ease-in-out aspect-square object-cover"
         draggable="false"
         style="user-select: none"
         loading="lazy"
