@@ -9,29 +9,28 @@ import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.dto.ImageUrl;
 import io.ssafy.openticon.dto.ReportType;
+import io.ssafy.openticon.dto.TagListId;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.TagListRepository;
 import io.ssafy.openticon.repository.TagRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
-import javax.imageio.ImageIO;
 import javax.security.sasl.AuthenticationException;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PackService {
@@ -58,6 +58,7 @@ public class PackService {
     private final SafeSearchService safeSearchService;
     private final ObjectionService objectionService;
 
+
     public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService){
         this.webClient=webClient;
         this.packRepository=packRepository;
@@ -73,21 +74,20 @@ public class PackService {
     }
 
     @Transactional
-    public String emoticonPackUpload(EmoticonPack emoticonPack){
+    public EmoticonPackResponseDto emoticonPackUpload(EmoticonPack emoticonPack){
         try{
             List<MultipartFile> infoImages = new ArrayList<>();
             infoImages.add(emoticonPack.getThumbnailImg());
             infoImages.add(emoticonPack.getListImg());
-
             boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
+
+
             List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
             MultipartFile thumbnailImg= emoticonPack.getThumbnailImg();
             MultipartFile listImg= emoticonPack.getListImg();
 
             File thumbnailImgFile=makeFile(thumbnailImg);
             File listImgFile=makeFile(listImg);
-//            File thumbnailImgFile = null;
-//            File listImgFile = null;
 
             String thumbnailImgUrl=saveImage(thumbnailImg,thumbnailImgFile);
             String listImgUrl=saveImage(listImg,listImgFile);
@@ -98,6 +98,7 @@ public class PackService {
             MemberEntity member=memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
             EmoticonPackEntity emoticonPackEntity=new EmoticonPackEntity(emoticonPack,member, thumbnailImgUrl,listImgUrl);
 
+
             boolean problematicImage = false;
             for (int i = 0; i < emoticonList.size(); i += 16) {
                 int end = Math.min(i + 16, emoticonList.size());
@@ -107,6 +108,7 @@ public class PackService {
                     problematicImage = true;
                 }
             }
+
             if(problematicImage || problematicInfoImage) emoticonPackEntity.setBlacklist(true);
             packRepository.save(emoticonPackEntity);
 
@@ -119,8 +121,7 @@ public class PackService {
             // 여기 부분
             int cnt=0;
             for(MultipartFile emoticon: emoticonList){
-//                File emoticonFile=makeFile(emoticon);
-                File emoticonFile=null;
+                File emoticonFile=makeFile(emoticon);
                 emoticonsUrls.add(saveImage(emoticon, emoticonFile));
                 imageHashService.saveEmoticonHash(emoticonFile,emoticonPackEntity,cnt);
                 cnt++;
@@ -129,6 +130,7 @@ public class PackService {
 
             // 태그 정보 추가
             List<String> tagNames = emoticonPack.getTags();
+            List<TagListEntity> tagListEntities = new ArrayList<>();
             for(String tag : tagNames){
                 TagEntity findTagEntity = null;
                 Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
@@ -146,8 +148,10 @@ public class PackService {
                         .tag(findTagEntity)
                         .build();
                 tagListRepository.save(tagListEntity);
+                tagListEntities.add(tagListEntity);
             }
-            return emoticonPackEntity.getShareLink();
+            emoticonPackEntity.setTagLists(tagListEntities);
+            return new EmoticonPackResponseDto(emoticonPackEntity);
         }catch (IOException e){
             throw new RuntimeException(e.getMessage());
         }
@@ -167,48 +171,26 @@ public class PackService {
 
 
     private String saveImage(MultipartFile image, File tempFile){
-        String uploadServerUrl = imageServerUrl + "/upload/image";
+        String uploadServerUrl = imageServerUrl+ "/upload/image";
 
-        try {
-            System.out.println("Step 0: Starting image processing.");
+//        File tempFile = null;
 
-            // 입력 스트림에서 BufferedImage 생성
-            BufferedImage originalImage = ImageIO.read(image.getInputStream());
-            if (originalImage == null) {
-                System.out.println("Step 0.1: Failed to read image. Image data might be invalid.");
-                throw new RuntimeException("Failed to read image from input stream.");
-            }
-            System.out.println("Step 1: Successfully read image. Width: " + originalImage.getWidth() + ", Height: " + originalImage.getHeight());
+//            tempFile = File.createTempFile("upload", image.getOriginalFilename());
+//            image.transferTo(tempFile);
 
-            // 배경색 변경 조건 체크
-            BufferedImage processedImage = originalImage;
-            if ("image/png".equals(image.getContentType())) {
-                System.out.println("Step 2: Converting transparent background to white.");
-                processedImage = convertTransparentToWhiteBackground(originalImage);
-            } else {
-                System.out.println("Step 2: Skipping background conversion as image type is not PNG.");
-            }
 
-            // 임시 파일 생성 및 이미지 저장
-            tempFile = File.createTempFile("upload", ".png");
-            ImageIO.write(processedImage, "png", tempFile);
-            System.out.println("Step 3: Image saved to temporary file: " + tempFile.getAbsolutePath());
+        ImageUrl imageUrl = webClient.post()
+                .uri(uploadServerUrl)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .bodyValue(createMultipartBody(tempFile, image.getOriginalFilename()))
+                .retrieve()
+                .bodyToMono(ImageUrl.class)
+                .block();
 
-            // WebClient를 사용한 이미지 업로드
-            ImageUrl imageUrl = webClient.post()
-                    .uri(uploadServerUrl)
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .bodyValue(createMultipartBody(tempFile, image.getOriginalFilename()))
-                    .retrieve()
-                    .bodyToMono(ImageUrl.class)
-                    .block();
-            System.out.println("Step 4: Image successfully uploaded. URL received: " + (imageUrl != null ? imageUrl.getUrl() : "No URL returned"));
+        return imageUrl.getUrl();
 
-            return imageUrl.getUrl();
-        } catch (IOException e) {
-            System.out.println("Exception occurred during image processing: " + e.getMessage());
-            throw new RuntimeException("Failed to save image", e);
-        }
+
+
     }
 
 
@@ -308,24 +290,14 @@ public class PackService {
         return packRepository.findById(packId);
     }
 
+    @Transactional
     public void save(EmoticonPackEntity emoticonPackEntity){
         packRepository.save(emoticonPackEntity);
     }
 
-    private BufferedImage convertTransparentToWhiteBackground(BufferedImage originalImage) {
-        BufferedImage newImage = new BufferedImage(
-                originalImage.getWidth(),
-                originalImage.getHeight(),
-                BufferedImage.TYPE_INT_RGB
-        );
+    @Transactional
+    public Page<EmoticonPackResponseDto> myPackList(MemberEntity member, Pageable pageable){
+        return packRepository.findByMyEmoticonPack(member, pageable).map(EmoticonPackResponseDto::new);
 
-        Graphics2D g2d = newImage.createGraphics();
-        g2d.setPaint(Color.WHITE); // 흰색 배경 설정
-        g2d.fillRect(0, 0, newImage.getWidth(), newImage.getHeight());
-        g2d.drawImage(originalImage, 0, 0, null);
-        g2d.dispose();
-
-        return newImage;
     }
-
 }
