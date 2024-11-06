@@ -6,11 +6,23 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end"
+            android:src="@android:drawable/btn_dialog" />
+    </FrameLayout>
+
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageButton"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:src="@drawable/otter"
         android:scaleType="centerCrop"
-        />
+    />
 </LinearLayout>
