@@ -2,8 +2,10 @@ package io.ssafy.openticon.ui.screen
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,7 +81,7 @@ fun EmoticonPackDetailScreen(
     val purchaseState by viewModel.purchaseState.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isDownloading by viewModel.isDownloading.collectAsState()
-
+    var selectedEmoticonIndex by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(emoticonPackId) {
@@ -265,7 +267,7 @@ fun EmoticonPackDetailScreen(
                         Spacer(Modifier.height(16.dp))
                     }
 
-                    items(emoticonPack.items.chunked(3)) { row ->
+                    items(emoticonPack.items.chunked(3).withIndex().toList()) { (rowIndex,row) ->
                         Row(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -273,7 +275,9 @@ fun EmoticonPackDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             if (row.size == 3) {
-                                for (item in row) {
+                                for ((colIndex,item) in row.withIndex()) {
+                                    val isSelected = selectedEmoticonIndex == Pair(rowIndex, colIndex)
+                                    val size by animateDpAsState(targetValue = if (isSelected) 130.dp else 100.dp)
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(item)
@@ -286,9 +290,13 @@ fun EmoticonPackDetailScreen(
                                             }
                                             .build(),
                                         modifier = Modifier
+//                                            .size(size)
                                             .weight(1f)
                                             .aspectRatio(1f)
-                                            .background(Color.LightGray),
+                                            .clickable {
+                                                // 클릭한 이모티콘이 이미 선택된 경우 해제, 아니면 선택
+                                                selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
+                                            },
                                     )
                                 }
                             } else {
@@ -305,6 +313,7 @@ fun EmoticonPackDetailScreen(
                                             }
                                             .build(),
                                         modifier = Modifier
+//                                            .size(size)
                                             .weight(1f)
                                             .aspectRatio(1f)
                                     )
