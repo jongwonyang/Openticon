@@ -137,6 +137,8 @@ class SearchScreenViewModel @Inject constructor(
 
 
                     val (newItems, isLast) = searchEmoticonPacksByImageUseCase(
+                        size = pageSize,
+                        page = page,
                         image = imagePart
                     )
 

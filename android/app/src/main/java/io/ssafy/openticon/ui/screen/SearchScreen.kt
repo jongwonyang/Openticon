@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -75,6 +76,8 @@ fun SearchScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val listState = rememberLazyListState()
 
+    val imageUrl by viewModel.selectedImageUri.collectAsState()
+
     var isImageSearch by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -89,6 +92,7 @@ fun SearchScreen(
                 onKeyChange = { viewModel.onSearchKeyChange(it) },
                 searchText = searchText,
                 onTextChange = { viewModel.onSearchTextChange(it) },
+                navController = navController,
                 isImageSearch = isImageSearch,  // Pass the state here
                 onImageSearchToggle = { isImageSearch = it }
             )
@@ -137,7 +141,9 @@ fun SearchScreen(
                     if (lastVisibleItemIndex == searchResult.size - 1 && !isLoading) {
                         if (!isImageSearch) {
                             viewModel.loadMoreSearchResult()
-                        } else {
+                        }
+                        else {
+                            Log.d("imageSearchScroll", imageUrl.toString())
                             viewModel.loadMoreImageSearchResult(
                                 contentResolver
                             )
@@ -163,6 +169,7 @@ fun SearchBar(
     searchText: String,
     onTextChange: (String) -> Unit,
     viewModel: SearchScreenViewModel = hiltViewModel(),
+    navController: NavController,
     isImageSearch: Boolean,  // Accept the isImageSearch state
     onImageSearchToggle: (Boolean) -> Unit  // Callback to toggle image search
 ) {
