@@ -9,7 +9,13 @@ import Footer from "./components/common/footer/Footer.vue";
   <AlertList />
   <NavBar />
   <RouterView />
-  <Footer />
+  <Footer class="footer" />
 </template>
 
-<style scoped></style>
+<style scoped>
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+</style>

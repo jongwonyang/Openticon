@@ -178,7 +178,7 @@ function handleTagRemove(tagToRemove: string) {
         등록
       </button>
     </div>
-    <div class="mt-4 mx-4 bg-gray-100 text-gray-600 rounded-md p-4 mb-24">
+    <div class="mt-4 mx-4 bg-gray-100 text-gray-600 rounded-md p-4">
       <p>
         1. 이모티콘 이미지는 폭력, 성희롱, 음란물 등 부적절한 이미지는 등록할 수
         없습니다.
