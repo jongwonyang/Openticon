@@ -36,7 +36,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@Preview
+
 @Composable
 fun ProfileScreen(
     navController: NavController,

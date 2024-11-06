@@ -4,8 +4,10 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,6 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,18 +67,18 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
     val tagQuery2 by viewModel.tagQuery2.collectAsState()
     val tagQuery3 by viewModel.tagQuery3.collectAsState()
 
-    val items = listOf(
-        ItemData(R.drawable.empty, "", ""), // 왼쪽 빈 이미지
-        ItemData(R.drawable.google, "이모티콘 제목 1", "작성자 1"),
-        ItemData(R.drawable.kakao, "이모티콘 제목 2", "작성자 2"),
-        ItemData(R.drawable.naver, "이모티콘 제목 3", "작성자 3"),
-        ItemData(R.drawable.google, "이모티콘 제목 4", "작성자 4"),
-        ItemData(R.drawable.kakao, "이모티콘 제목 5", "작성자 5"),
-        ItemData(R.drawable.naver, "이모티콘 제목 6", "작성자 6"),
-        ItemData(R.drawable.empty, "", "") // 오른쪽 빈 이미지
-    )
+//    val items = listOf(
+//        ItemData(R.drawable.empty, "", ""), // 왼쪽 빈 이미지
+//        ItemData(R.drawable.google, "이모티콘 제목 1", "작성자 1"),
+//        ItemData(R.drawable.kakao, "이모티콘 제목 2", "작성자 2"),
+//        ItemData(R.drawable.naver, "이모티콘 제목 3", "작성자 3"),
+//        ItemData(R.drawable.google, "이모티콘 제목 4", "작성자 4"),
+//        ItemData(R.drawable.kakao, "이모티콘 제목 5", "작성자 5"),
+//        ItemData(R.drawable.naver, "이모티콘 제목 6", "작성자 6"),
+//        ItemData(R.drawable.empty, "", "") // 오른쪽 빈 이미지
+//    )
 
-    var centerIndex by remember { mutableStateOf(items.size / 2) }
+    var centerIndex by remember { mutableStateOf(3) }
     val listState = rememberLazyListState(centerIndex)
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
@@ -83,7 +87,6 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
     LaunchedEffect(listState.isScrollInProgress,Unit) {
         if (!listState.isScrollInProgress) {
             val viewportCenter = listState.layoutInfo.viewportEndOffset / 2
-
             val closestItem = listState.layoutInfo.visibleItemsInfo.minByOrNull { item ->
                 abs((item.offset + item.size / 2) - viewportCenter)
             }
@@ -98,6 +101,14 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
             }
         }
     }
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val viewportCenter = listState.layoutInfo.viewportEndOffset / 2
+            val itemSize = (viewportCenter/1.4).toInt()
+            listState.scrollToItem(centerIndex, scrollOffset = -viewportCenter + itemSize / 2)
+        }
+    }
+
 //    LaunchedEffect(Unit) {
 //        val itemWidth = 150
 //        val viewportWidth = listState.layoutInfo.viewportSize.width
@@ -130,16 +141,19 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 itemsIndexed(newEmoticonPack) { index, item -> // Use itemsIndexed to get the index and item
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Card(
+                        shape = RoundedCornerShape(16.dp), // 둥근 모서리 적용
+                        border = BorderStroke(1.dp, Color.LightGray), // 테두리 색상과 두께 설정
+                        colors = CardDefaults.cardColors(containerColor = Color.White), // 카드 배경색
                         modifier = Modifier
                             .scale(if (index == centerIndex) 1.3f else 0.8f)
                             .alpha(if (index == centerIndex) 1f else 0.5f)
                             .width(150.dp)
-                            .clickable{
-                                if(index == centerIndex){
+                            .padding(bottom = 1.dp)
+                            .clickable {
+                                if (index == centerIndex) {
                                     navController.navigate("emoticonPack/${item.id}")
-                                }else{
+                                } else {
                                     centerIndex = index
                                     coroutineScope.launch {
                                         val viewportCenter = listState.layoutInfo.viewportSize.width / 2
@@ -147,25 +161,31 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
                                         listState.animateScrollToItem(centerIndex, scrollOffset = -viewportCenter + itemSize / 2)
                                     }
                                 }
-
                             }
                     ) {
-                        Image(
-                            painter = rememberImagePainter(data = item.thumbnail),
-                            contentDescription = "New Emoticon Pack Image",
-                            modifier = Modifier.size(150.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = item.title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = item.author,
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(0.dp) // 카드 내부 여백 설정
+                        ) {
+                            Image(
+                                painter = rememberImagePainter(data = item.thumbnail),
+                                contentDescription = "New Emoticon Pack Image",
+                                modifier = Modifier
+                                    .size(150.dp)
+                                    .clip(RoundedCornerShape(16.dp)) // 이미지에 둥근 모서리 추가
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = item.title,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = item.author,
+                                color = Color.Gray,
+                                fontSize = 10.sp
+                            )
+                        }
                     }
                 }
             }
@@ -194,6 +214,8 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
                         modifier = Modifier
                             .padding(horizontal = 0.dp)
                             .width(350.dp)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+
                     ) {
                         chunk.forEachIndexed { index, item ->
                             Row(
@@ -278,11 +300,15 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
                                 painter = rememberImagePainter(data = item.thumbnail), // Use the item's thumbnail
                                 contentDescription = "태그 이모티콘 이미지",
                                 modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp)) // 모든 모서리를 둥글게 설정
+//                                    .border(2.dp, Color.Gray, RoundedCornerShape(16.dp)) // 테두리 추가
                                     .size(80.dp)
-                                    .padding(end = 8.dp)
+//                                    .padding(end = 8.dp)
                                     .clickable { navController.navigate("emoticonPack/${item.id}") } // Navigate on click
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
                         }
+
                     }
                 }
             }

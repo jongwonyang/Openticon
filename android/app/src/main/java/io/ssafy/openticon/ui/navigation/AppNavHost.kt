@@ -37,7 +37,7 @@ fun AppNavHost() {
             EditProfileScreen(navController)
         }
         composable("settings"){
-            SettingsScreen()
+            SettingsScreen(navController)
         }
 
         composable(

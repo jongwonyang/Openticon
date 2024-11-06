@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,12 +29,13 @@ import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,6 +61,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import io.ssafy.openticon.domain.model.SearchEmoticonPacksListItem
 import io.ssafy.openticon.ui.viewmodel.SearchKey
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
@@ -82,7 +86,7 @@ fun SearchScreen(
     Column {
         Spacer(Modifier.height(16.dp))
 
-        if(!isImageSearch){
+        if (!isImageSearch) {
             SearchBar(
                 selectedKey = selectedKey,
                 onKeyChange = { viewModel.onSearchKeyChange(it) },
@@ -92,8 +96,7 @@ fun SearchScreen(
                 isImageSearch = isImageSearch,  // Pass the state here
                 onImageSearchToggle = { isImageSearch = it }
             )
-        }
-        else{
+        } else {
             ImageSearchScreen(
                 isImageSearch = isImageSearch,  // Pass the state here
                 onImageSearchToggle = { isImageSearch = it },
@@ -112,23 +115,9 @@ fun SearchScreen(
                 items = searchResult,
                 key = { it.id }
             ) { item ->
-                ListItem(
-                    leadingContent = {
-                        AsyncImage(
-                            model = item.thumbnail,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    },
-                    headlineContent = { Text(item.title) },
-                    supportingContent = { Text(item.author) },
-                    modifier = Modifier
-                        .clickable {
-                            navController.navigate("emoticonPack/${item.id}")
-                        }
+                SearchResultItem(
+                    item = item,
+                    navController = navController
                 )
             }
 
@@ -150,10 +139,10 @@ fun SearchScreen(
             snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
                 .collect { lastVisibleItemIndex ->
                     if (lastVisibleItemIndex == searchResult.size - 1 && !isLoading) {
-                        if(!isImageSearch) {
+                        if (!isImageSearch) {
                             viewModel.loadMoreSearchResult()
                         }
-                        else{
+                        else {
                             Log.d("imageSearchScroll", imageUrl.toString())
                             viewModel.loadMoreImageSearchResult(
                                 contentResolver
@@ -308,5 +297,57 @@ fun SearchBar(
             }
         }
     }
+}
 
+@Composable
+fun SearchResultItem(
+    item: SearchEmoticonPacksListItem,
+    navController: NavController
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { navController.navigate("emoticonPack/${item.id}") }
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .height(IntrinsicSize.Min)
+            ) {
+                AsyncImage(
+                    model = item.thumbnail,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(Modifier.width(16.dp))
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = item.author,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+    }
 }
