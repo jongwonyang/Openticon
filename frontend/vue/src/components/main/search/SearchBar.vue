@@ -10,19 +10,21 @@
     </transition>
 
     <!-- 검색바 -->
-    <div class="max-w-screen-lg mx-auto pt-4 px-4 relative z-30">
+    <div class="max-w-screen-lg mx-auto pt-6 pb-4 px-4 relative z-30">
       <div
-        class="w-full flex flex-row justify-between border rounded-lg shadow-md bg-white transition-all duration-200 overflow-hidden"
+        class="w-full flex flex-row justify-between border border-gray-300 rounded-lg shadow-md bg-white transition-all duration-200 overflow-hidden"
         :class="[isFocused ? 'scale-[1.02]' : 'scale-100']"
       >
-        <select
-          v-model="searchType"
-          class="w-24 focus:outline-none text-center hover:bg-gray-200 active:bg-gray-300"
-        >
-          <option value="title">제목</option>
+        <div class="flex items-center w-24 hover:bg-gray-200 active:bg-gray-300">
+          <select
+            v-model="searchType"
+            class="focus:outline-none text-center w-full h-full"
+          >
+            <option value="title">제목</option>
           <option value="author">게시자</option>
-          <option value="tag">태그</option>
-        </select>
+            <option value="tag">태그</option>
+          </select>
+        </div>
         <input
           v-model="searchQuery"
           type="text"

@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-4 p-4 mx-auto max-w-screen-lg">
+  <div class="container p-4 mx-auto max-w-screen-lg">
     <h2>
       <span class="text-2xl font-nnsqneo font-bold pr-2">신규 이모티콘</span>
       <RouterLink
