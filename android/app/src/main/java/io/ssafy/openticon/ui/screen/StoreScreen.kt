@@ -1,24 +1,26 @@
 package io.ssafy.openticon.ui.screen
 
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RectShape
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -38,26 +40,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import io.ssafy.openticon.R
-import io.ssafy.openticon.ui.sample.CarouselSample
-import io.ssafy.openticon.ui.sample.EmoticonPackSampleData
-import kotlinx.coroutines.launch
-import kotlin.math.abs
 import coil.compose.rememberImagePainter
 import io.ssafy.openticon.ui.viewmodel.StoreViewModel
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 
 data class ItemData(val imageRes: Int, val title: String, val author: String)
+
 @Composable
-fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
-                navController : NavController) {
+fun StoreScreen(
+    viewModel: StoreViewModel = hiltViewModel(),
+    navController: NavController
+) {
     val newEmoticonPack by viewModel.searchResult.collectAsState()
     val popularEmoticonPack by viewModel.popularEmoticonPack.collectAsState()
     val tag1EmoticonPack by viewModel.tag1EmoticonPack.collectAsState()
@@ -84,7 +84,7 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
-    LaunchedEffect(listState.isScrollInProgress,Unit) {
+    LaunchedEffect(listState.isScrollInProgress, Unit) {
         if (!listState.isScrollInProgress) {
             val viewportCenter = listState.layoutInfo.viewportEndOffset / 2
             val closestItem = listState.layoutInfo.visibleItemsInfo.minByOrNull { item ->
@@ -95,7 +95,10 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
                 if (centerIndex != item.index) {
                     centerIndex = item.index
                     coroutineScope.launch {
-                        listState.animateScrollToItem(centerIndex, scrollOffset = -viewportCenter + item.size / 2)
+                        listState.animateScrollToItem(
+                            centerIndex,
+                            scrollOffset = -viewportCenter + item.size / 2
+                        )
                     }
                 }
             }
@@ -104,7 +107,7 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             val viewportCenter = listState.layoutInfo.viewportEndOffset / 2
-            val itemSize = (viewportCenter/1.4).toInt()
+            val itemSize = (viewportCenter / 1.4).toInt()
             listState.scrollToItem(centerIndex, scrollOffset = -viewportCenter + itemSize / 2)
         }
     }
@@ -125,6 +128,7 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
             .padding(0.dp)
     ) {
         item {
+            Spacer(Modifier.height(16.dp))
             Text(
                 text = "신규",
                 style = MaterialTheme.typography.titleLarge,
@@ -156,9 +160,15 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
                                 } else {
                                     centerIndex = index
                                     coroutineScope.launch {
-                                        val viewportCenter = listState.layoutInfo.viewportSize.width / 2
-                                        val itemSize = listState.layoutInfo.visibleItemsInfo.find { it.index == centerIndex }?.size ?: 0
-                                        listState.animateScrollToItem(centerIndex, scrollOffset = -viewportCenter + itemSize / 2)
+                                        val viewportCenter =
+                                            listState.layoutInfo.viewportSize.width / 2
+                                        val itemSize =
+                                            listState.layoutInfo.visibleItemsInfo.find { it.index == centerIndex }?.size
+                                                ?: 0
+                                        listState.animateScrollToItem(
+                                            centerIndex,
+                                            scrollOffset = -viewportCenter + itemSize / 2
+                                        )
                                     }
                                 }
                             }
@@ -260,7 +270,6 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
         }
 
 
-
         // 태그 섹션
         item {
             Spacer(modifier = Modifier.height(16.dp))
@@ -273,7 +282,7 @@ fun StoreScreen(viewModel: StoreViewModel = hiltViewModel(),
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        val tags = listOf("#"+tagQuery1, "#"+tagQuery2, "#"+tagQuery3)
+        val tags = listOf("#" + tagQuery1, "#" + tagQuery2, "#" + tagQuery3)
         val emoticonPacks = listOf(tag1EmoticonPack, tag2EmoticonPack, tag3EmoticonPack)
 
         tags.forEachIndexed { index, tag ->
