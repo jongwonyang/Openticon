@@ -1,62 +1,47 @@
 package io.ssafy.openticon.ui.screen
 
 import android.Manifest
-import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
-import io.ssafy.openticon.FloatingService
-import io.ssafy.openticon.ui.component.BottomNavigationBar
-import android.net.Uri
-import android.provider.Settings
-import android.text.TextUtils
-import android.util.Log
-import android.view.accessibility.AccessibilityManager
-import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import coil.compose.rememberImagePainter
-import io.ssafy.openticon.KeyboardAccessibilityService
+import androidx.navigation.NavController
+import io.ssafy.openticon.FloatingService
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.LikeEmoticonPack
-import io.ssafy.openticon.data.model.SampleEmoticonPack
-import io.ssafy.openticon.ui.component.UnAuthModal
+import io.ssafy.openticon.ui.component.BottomNavigationBar
 import io.ssafy.openticon.ui.viewmodel.EmoticonViewModel
 import io.ssafy.openticon.ui.viewmodel.LikeEmoticonViewModel
 import io.ssafy.openticon.ui.viewmodel.MainViewModel
-import io.ssafy.openticon.ui.viewmodel.MemberViewModel
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -68,7 +53,7 @@ import kotlinx.serialization.json.Json
 @Composable
 fun MainScreen(
     navController: NavController,
-    myViewModel: EmoticonViewModel = hiltViewModel() ,
+    myViewModel: EmoticonViewModel = hiltViewModel(),
     likeEmoticonViewModel: LikeEmoticonViewModel = hiltViewModel(),
     myEmoticonViewModel: MyEmoticonViewModel = hiltViewModel()
 ) {
@@ -91,12 +76,12 @@ fun MainScreen(
         }
     }
 
-    Log.d("isLoggedIn", isLoggedIn.toString());
+    Log.d("isLoggedIn", isLoggedIn.toString())
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
                 selectedItem = selectedItem,
-                onItemSelected = {index ->
+                onItemSelected = { index ->
                     if (index == 3) {
                         mainViewModel.isLoggedIn
                         if (isLoggedIn) {
@@ -114,11 +99,21 @@ fun MainScreen(
             FloatingActionButton(
                 onClick = {
                     if (allPermissionsGranted(context)) {
-                        Log.d("mainScreen","allPermission")
-                        startFloatingService(context, myViewModel, likeEmoticonViewModel, lifecycleOwner)
+                        Log.d("mainScreen", "allPermission")
+                        startFloatingService(
+                            context,
+                            myViewModel,
+                            likeEmoticonViewModel,
+                            lifecycleOwner
+                        )
                     } else {
-                        Log.d("mainScreen","notAllPermission")
-                        requestPermissionsAndStartService(context, myViewModel, likeEmoticonViewModel, lifecycleOwner)
+                        Log.d("mainScreen", "notAllPermission")
+                        requestPermissionsAndStartService(
+                            context,
+                            myViewModel,
+                            likeEmoticonViewModel,
+                            lifecycleOwner
+                        )
                     }
                 }
             ) {
@@ -147,9 +142,12 @@ fun MainScreen(
         }
     }
 }
-fun requestPermissionsAndStartService(context: Context, myViewModel:EmoticonViewModel,
-                                      likeEmoticonViewModel: LikeEmoticonViewModel,
-                                      lifecycleOwner: LifecycleOwner) {
+
+fun requestPermissionsAndStartService(
+    context: Context, myViewModel: EmoticonViewModel,
+    likeEmoticonViewModel: LikeEmoticonViewModel,
+    lifecycleOwner: LifecycleOwner
+) {
     // 1. 알림 권한 요청
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ActivityCompat.requestPermissions(
@@ -157,7 +155,7 @@ fun requestPermissionsAndStartService(context: Context, myViewModel:EmoticonView
             arrayOf(Manifest.permission.POST_NOTIFICATIONS),
             REQUEST_NOTIFICATION_PERMISSION
         )
-        Log.d("mainScreen","AlertPermission")
+        Log.d("mainScreen", "AlertPermission")
     }
 
     // 2. 다른 앱 위에 표시 권한 요청
@@ -167,7 +165,7 @@ fun requestPermissionsAndStartService(context: Context, myViewModel:EmoticonView
             Uri.parse("package:${context.packageName}")
         )
         (context as Activity).startActivityForResult(intent, REQUEST_OVERLAY_PERMISSION)
-        Log.d("mainScreen","DisplayOnPermission")
+        Log.d("mainScreen", "DisplayOnPermission")
     }
 
     // 3. 접근성 권한 요청
@@ -185,19 +183,22 @@ fun requestPermissionsAndStartService(context: Context, myViewModel:EmoticonView
 
 fun allPermissionsGranted(context: Context): Boolean {
     val notificationPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
     } else true
 
-    if(notificationPermissionGranted){
-        Log.d("mainScreen","alert Permission")
+    if (notificationPermissionGranted) {
+        Log.d("mainScreen", "alert Permission")
     }
-    if(Settings.canDrawOverlays(context)){
-        Log.d("mainScreen","Draw Permission")
+    if (Settings.canDrawOverlays(context)) {
+        Log.d("mainScreen", "Draw Permission")
     }
 
     return notificationPermissionGranted &&
             Settings.canDrawOverlays(context)
-            //&& isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)
+    //&& isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)
 }
 
 private fun startFloatingService(
