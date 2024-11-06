@@ -23,8 +23,10 @@ interface EmoticonPacksApi {
     ): PageEmoticonPackResponseDto
 
     @Multipart
-    @POST("/api/v1/emoticonpacks/imageSearch")
+    @POST("/api/v1/emoticonpacks/search/image")
     suspend fun imageSearchEmoticonPacks(
+        @Query("page") page: Int,
+        @Query("size") size: Int,
         @Part image: MultipartBody.Part
     ): PageEmoticonPackResponseDto  // 서버에서 응답으로 받을 데이터 형식에 맞게 변경
 

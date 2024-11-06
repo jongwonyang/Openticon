@@ -68,7 +68,7 @@ class ImageSearchViewModel @Inject constructor(
                     val imagePart = uriToMultipartBody(contentResolver, currentUri)
 
                     // Retrofit을 사용하여 이미지 업로드 요청
-                    val response = searchEmoticonPacksByImageUseCase.invoke(imagePart)
+                    val response = searchEmoticonPacksByImageUseCase.invoke(size = 20, page = 0, imagePart)
 
                     // 서버 응답 처리
                     _searchResult.emit("검색 성공: $response")

@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +71,8 @@ fun SearchScreen(
     val searchResult by viewModel.searchResult.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val listState = rememberLazyListState()
+
+    val imageUrl by viewModel.selectedImageUri.collectAsState()
 
     var isImageSearch by remember { mutableStateOf(false) }
 
@@ -151,6 +154,7 @@ fun SearchScreen(
                             viewModel.loadMoreSearchResult()
                         }
                         else{
+                            Log.d("imageSearchScroll", imageUrl.toString())
                             viewModel.loadMoreImageSearchResult(
                                 contentResolver
                             )

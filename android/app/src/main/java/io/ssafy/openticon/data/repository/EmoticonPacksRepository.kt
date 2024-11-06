@@ -42,9 +42,11 @@ class EmoticonPacksRepository @Inject constructor(
 
 
     suspend fun searchEmoticonPackByImage(
+        size: Int,
+        page: Int,
         @Part image: MultipartBody.Part
     ): PageEmoticonPackResponseDto {
-        return api.imageSearchEmoticonPacks(image)
+        return api.imageSearchEmoticonPacks(size = size, page = page , image = image)
     }
 
     suspend fun getPublicPackInfo(emoticonPackId: Int): PackInfoResponseDto {

@@ -11,9 +11,11 @@ class SearchEmoticonPacksByImageUseCase  @Inject constructor(
     private val repository: EmoticonPacksRepository)
 {
     suspend operator fun invoke(
+        size: Int,
+        page: Int,
         @Part image: MultipartBody.Part,
     ): Pair<List<SearchEmoticonPacksListItem>, Boolean>{
-        return repository.searchEmoticonPackByImage(image)
+        return repository.searchEmoticonPackByImage(size = size, page = page, image= image)
             .toSearchEmoticonPacksList();
     }
 }
