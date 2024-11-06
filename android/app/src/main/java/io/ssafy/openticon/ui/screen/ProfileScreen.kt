@@ -61,7 +61,7 @@ fun ProfileScreen(
             "날짜 형식 오류"
         }
     }
-
+    Spacer(modifier = Modifier.height(30.dp))
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -169,37 +169,44 @@ fun ProfileScreen(
         ) {
             Text("포인트 충전", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
-        Spacer(modifier = Modifier.height(300.dp))
-        Row(
+        Column(
             modifier = Modifier
-                .width(IntrinsicSize.Max) // 너비를 자식 요소에 맞춤
-                .padding(horizontal = 14.dp), // 좌우 여백 설정
-            horizontalArrangement = Arrangement.spacedBy(8.dp) // 버튼 간 간격 조정
+                .fillMaxSize() // 화면 전체 크기로 설정
+                .padding(bottom = 16.dp) // 하단 여백 설정
         ) {
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        viewModel.logout()
-                        navController.navigate("login")
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB22222)), // 어두운 빨간색 버튼
-                modifier = Modifier
-                    .weight(1f) // 버튼 크기 균일하게 설정
-                    .height(40.dp) // 버튼 높이 설정
-            ) {
-                Text("로그아웃", color = Color.White)
-            }
+            Spacer(modifier = Modifier.weight(1f)) // 남은 공간을 채우기 위한 Spacer
 
-            Button(
-                onClick = {
-                    navController.navigate("settings")
-                },
+            Row(
                 modifier = Modifier
-                    .weight(1f) // 버튼 크기 균일하게 설정
-                    .height(40.dp) // 버튼 높이 설정
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp), // 좌우 여백 설정
+                horizontalArrangement = Arrangement.spacedBy(8.dp) // 버튼 간 간격 조정
             ) {
-                Text("설정")
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            viewModel.logout()
+                            navController.navigate("login")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB22222)), // 어두운 빨간색 버튼
+                    modifier = Modifier
+                        .weight(1f) // 버튼 크기 균일하게 설정
+                        .height(40.dp) // 버튼 높이 설정
+                ) {
+                    Text("로그아웃", color = Color.White)
+                }
+
+                Button(
+                    onClick = {
+                        navController.navigate("settings")
+                    },
+                    modifier = Modifier
+                        .weight(1f) // 버튼 크기 균일하게 설정
+                        .height(40.dp) // 버튼 높이 설정
+                ) {
+                    Text("설정")
+                }
             }
         }
 

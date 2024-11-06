@@ -31,7 +31,7 @@ fun AppNavHost() {
         }
 
         composable("login") {
-            LoginScreen()
+            LoginScreen(navController)
         }
         composable("edit_profile"){
             EditProfileScreen(navController)
