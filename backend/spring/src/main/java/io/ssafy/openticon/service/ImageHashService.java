@@ -10,6 +10,9 @@ import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.ImageHashRepository;
 import io.ssafy.openticon.repository.PackRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -110,7 +113,7 @@ public class ImageHashService {
 
     }
 
-    public List<ImageHashResponseDto> searchImage(MultipartFile findImage) throws IOException {
+    public Page<ImageHashResponseDto> searchImage(MultipartFile findImage, Pageable pageable) throws IOException {
         File image=makeFile(findImage);
         HashingAlgorithm hasher = new PerceptiveHash(32);
         Hash imageHash=hasher.hash(image);
@@ -121,18 +124,23 @@ public class ImageHashService {
             Hash serverImageHash=new Hash(imageHashEntity.getHashValue(),imageHashEntity.getHashLength(),imageHashEntity.getAlgorithmId());
             double similarity=serverImageHash.normalizedHammingDistance(imageHash);
             if(similarity<.1){
-                String target;
-                if(imageHashEntity.getIsThumbnail()){
-                    target=imageHashEntity.getEmoticonPackEntity().getThumbnailImg();
-                }else if(imageHashEntity.getIsListImg()){
-                    target=imageHashEntity.getEmoticonPackEntity().getListImg();
-                }else{
-                    target=emoticonService.getEmoticon(imageHashEntity.getEmoticonPackEntity(),imageHashEntity.getEmoticonOrder());
-                }
-                result.add(new ImageHashResponseDto(imageHashEntity.getEmoticonPackEntity(),target));
+//                String target;
+//                if(imageHashEntity.getIsThumbnail()){
+//                    target=imageHashEntity.getEmoticonPackEntity().getThumbnailImg();
+//                }else if(imageHashEntity.getIsListImg()){
+//                    target=imageHashEntity.getEmoticonPackEntity().getListImg();
+//                }else{
+//                    target=emoticonService.getEmoticon(imageHashEntity.getEmoticonPackEntity(),imageHashEntity.getEmoticonOrder());
+//                }
+                result.add(new ImageHashResponseDto(imageHashEntity.getEmoticonPackEntity()));
             }
         }
 
-        return result;
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), result.size());
+        List<ImageHashResponseDto> paginatedResult = result.subList(start, end);
+
+        // `PageImpl`을 사용하여 페이지네이션된 결과를 생성합니다.
+        return new PageImpl<>(paginatedResult, pageable, result.size());
     }
 }

@@ -29,11 +29,11 @@ public class ImageHashResponseDto {
     private String createdAt;
     private String updatedAt;
     private List<String> tags;
-    private String target;
+//    private String target;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
-    public ImageHashResponseDto(EmoticonPackEntity emoticonPackEntity,String target) {
+    public ImageHashResponseDto(EmoticonPackEntity emoticonPackEntity) {
         PackMemberResponseDto packMemberResponseDto = new PackMemberResponseDto();
         packMemberResponseDto.setId(emoticonPackEntity.getMember().getId());
         packMemberResponseDto.setEmail(emoticonPackEntity.getMember().getEmail());
@@ -62,7 +62,7 @@ public class ImageHashResponseDto {
                 .map(tagList -> tagList.getTag().getTagName())
                 .collect(Collectors.toList());
 
-        this.target=target;
+//        this.target=target;
     }
 
     private String formatToKST(OffsetDateTime dateTime) {
