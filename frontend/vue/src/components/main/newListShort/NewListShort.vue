@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-4 p-4 mx-auto max-w-screen-lg">
+  <div class="container p-4 mx-auto max-w-screen-lg">
     <h2>
       <span class="text-2xl font-nnsqneo font-bold pr-2">신규 이모티콘</span>
       <RouterLink
@@ -18,7 +18,7 @@
           v-for="emoticon in newEmoticonList"
           :key="emoticon.id"
         >
-          <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-32 h-32" />
+          <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full object-cover aspect-square" />
           <p class="text-md text-center mt-2 truncate">{{ emoticon.title }}</p>
         </RouterLink>
       </div>
@@ -29,7 +29,7 @@
         v-for="emoticon in newEmoticonList"
         :key="emoticon.id"
       >
-        <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full" />
+        <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-full object-cover aspect-square" />
         <p class="text-md text-center mt-2 truncate">{{ emoticon.title }}</p>
       </RouterLink>
     </div>

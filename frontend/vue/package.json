@@ -13,6 +13,7 @@
   "dependencies": {
     "@vueuse/core": "^11.2.0",
     "axios": "^1.7.7",
+    "gif.js.optimized": "^1.0.1",
     "material-symbols": "^0.26.0",
     "pinia": "^2.1.7",
     "register-service-worker": "^1.7.2",
