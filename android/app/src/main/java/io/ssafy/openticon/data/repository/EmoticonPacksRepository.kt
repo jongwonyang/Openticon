@@ -53,6 +53,10 @@ class EmoticonPacksRepository @Inject constructor(
         return api.getPublicPackInfo(emoticonPackId)
     }
 
+    suspend fun getPackInfo(uuid: String): PackInfoResponseDto {
+        return api.getPackInfo(uuid)
+    }
+
     suspend fun savedEmoticonPack(emoticonPackEntity: EmoticonPackEntity) {
         emoticonDao.insertEmoticonPack(emoticonPackEntity)
     }

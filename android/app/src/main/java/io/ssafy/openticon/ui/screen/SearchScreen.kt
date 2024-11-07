@@ -189,7 +189,7 @@ fun SearchResultItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .clickable { navController.navigate("emoticonPack/${item.id}") }
+                .clickable { navController.navigate("emoticonPack/${item.uuid}") }
         ) {
             Row(
                 modifier = Modifier

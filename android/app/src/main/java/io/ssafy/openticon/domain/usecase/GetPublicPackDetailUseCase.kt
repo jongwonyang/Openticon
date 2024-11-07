@@ -8,9 +8,9 @@ import javax.inject.Inject
 class GetPublicPackDetailUseCase @Inject constructor(
     private val repository: EmoticonPacksRepository
 ) {
-    suspend operator fun invoke(emoticonPackId: Int): Result<EmoticonPackDetail> {
+    suspend operator fun invoke(emoticonPackUuid: String): Result<EmoticonPackDetail> {
         return try {
-            val data = repository.getPublicPackInfo(emoticonPackId)
+            val data = repository.getPackInfo(emoticonPackUuid)
             Result.success(data.toEmoticonPackDetail())
         } catch (e: Exception) {
             Result.failure(e)

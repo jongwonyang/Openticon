@@ -7,7 +7,8 @@ data class SearchEmoticonPacksListItem(
     val id: Int,
     val title: String,
     val author: String,
-    val thumbnail: String
+    val thumbnail: String,
+    val uuid: String
 )
 
 fun EmoticonPackResponseDto.toSearchEmoticonPacksListItem(): SearchEmoticonPacksListItem {
@@ -15,7 +16,8 @@ fun EmoticonPackResponseDto.toSearchEmoticonPacksListItem(): SearchEmoticonPacks
         id = id,
         title = title,
         author = member.nickname,
-        thumbnail = thumbnailImg
+        thumbnail = thumbnailImg,
+        uuid = shareLink
     )
 }
 
