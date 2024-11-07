@@ -26,7 +26,9 @@ public enum ErrorCode {
     PACK_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "이모티콘 팩 데이터베이스 에러"),
     TAG_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "태그 데이터베이스 에러"),
     TAG_LIST_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "태그 리스트 데이터베이스 에러"),
-    EMOTICON_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "이모티콘 데이터베이스 에러");
+    EMOTICON_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "이모티콘 데이터베이스 에러"),
+    HARMFUL_IMAGES(HttpStatus.BAD_REQUEST,"유해한 이미지"),
+    DUPLICATE_PACK_TITLE(HttpStatus.BAD_REQUEST,"중복된 타이틀");
 
 
 

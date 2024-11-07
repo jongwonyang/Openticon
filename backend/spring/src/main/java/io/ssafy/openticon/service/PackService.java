@@ -47,7 +47,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @Slf4j
@@ -87,117 +89,150 @@ public class PackService {
 
     @Transactional
     public EmoticonPackResponseDto emoticonPackUpload(EmoticonPack emoticonPack) {
-        try {
-            List<MultipartFile> infoImages = new ArrayList<>();
-            infoImages.add(emoticonPack.getThumbnailImg());
-            infoImages.add(emoticonPack.getListImg());
 
-            long beforeTime1 = System.currentTimeMillis();
-            boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
-            long afterTime1 = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
-            log.info("썸네일 검사 시간: {}",afterTime1-beforeTime1);
+        AtomicBoolean detectPass = null;
 
-
-            List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
-            MultipartFile thumbnailImg = emoticonPack.getThumbnailImg();
-            MultipartFile listImg = emoticonPack.getListImg();
-
-            EmoticonFileAndName thumbnamilDto = new EmoticonFileAndName();
-            EmoticonFileAndName listImgDto = new EmoticonFileAndName();
+        if(isDuplicateTitle(emoticonPack.getPackTitle())){
+            throw new OpenticonException(ErrorCode.DUPLICATE_PACK_TITLE);
+        }
+        MemberEntity member = memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
+        CompletableFuture<Void> detectFuture = CompletableFuture.runAsync(() -> detect(emoticonPack, detectPass));
 
 
-            long beforeTime2 = System.currentTimeMillis();
-            saveImage(thumbnailImg, thumbnamilDto);
-            saveImage(listImg, listImgDto);
-//            System.out.println("Step 4 Result: Thumbnail URL - " + thumbnailImgUrl + ", List Image URL - " + listImgUrl);
-            long afterTime2=System.currentTimeMillis();
-            List<String> emoticonsUrls = new ArrayList<>();
-            log.info("썸네일, 리스트이미지 저장 시간: {}",afterTime2-beforeTime2);
-
-            MemberEntity member = memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
-            EmoticonPackEntity emoticonPackEntity = new EmoticonPackEntity(emoticonPack, member, thumbnamilDto.getUrl(), listImgDto.getUrl());
+        List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
+        MultipartFile thumbnailImg = emoticonPack.getThumbnailImg();
+        MultipartFile listImg = emoticonPack.getListImg();
 
 
-            boolean problematicImage = false;
-
-            long beforeTime3 = System.currentTimeMillis();
-
-            for (int i = 0; i < emoticonList.size(); i += 16) {
-                int end = Math.min(i + 16, emoticonList.size());
-                List<MultipartFile> subList = emoticonList.subList(i, end);
-
-                if (safeSearchService.detectSafeSearch(subList)) {
-                    problematicImage = true;
-
-                }
-            }
-            long afterTime3 = System.currentTimeMillis();
-            log.info("이모티콘 구글 시간: {}",afterTime3-beforeTime3);
+        EmoticonFileAndName thumbnamilDto = new EmoticonFileAndName();
+        EmoticonFileAndName listImgDto = new EmoticonFileAndName();
 
 
-            if (problematicImage || problematicInfoImage) {
-                emoticonPackEntity.setBlacklist(true);
+        CompletableFuture<Void> thumbnailSaveFuture = CompletableFuture.runAsync(() -> saveImage(thumbnailImg, thumbnamilDto));
 
-            }
-
-            packRepository.save(emoticonPackEntity);
+        CompletableFuture<Void> listImgSaveFuture = CompletableFuture.runAsync(() -> saveImage(listImg, listImgDto));
 
 
-            if (problematicImage || problematicInfoImage) {
-                objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
+        CompletableFuture<EmoticonPackEntity> allSaveFutures = CompletableFuture.allOf(thumbnailSaveFuture, listImgSaveFuture)
+                .thenApply(v -> {
+                    try {
+                        // EmoticonPackEntity 생성 및 저장
+                        EmoticonPackEntity emoticonPackEntity = new EmoticonPackEntity(emoticonPack, member, thumbnamilDto.getUrl(), listImgDto.getUrl());
+                        packRepository.save(emoticonPackEntity);
 
-            }
+                        // 해시 저장
+                        imageHashService.saveThumbnailHash(thumbnamilDto.getFile(), emoticonPackEntity);
+                        imageHashService.saveListImgHash(listImgDto.getFile(), emoticonPackEntity);
 
-            long beforeTime4 = System.currentTimeMillis();
+                        return emoticonPackEntity;  // 이후 작업에서 사용할 수 있도록 반환
+                    } catch (IOException e) {
+                        throw new RuntimeException("hash 실패", e);
+                    }
+                });
 
-            imageHashService.saveThumbnailHash(thumbnamilDto.getFile(), emoticonPackEntity);
-            imageHashService.saveListImgHash(listImgDto.getFile(), emoticonPackEntity);
+        List<String> emoticonsUrls = new ArrayList<>();
 
+
+
+        // EmoticonPackEntity 생성 후 진행할 emoticons 비동기 저장 및 해시 작업
+        CompletableFuture<Void> allFutures = allSaveFutures.thenCompose(emoticonPackEntity -> {
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             int cnt = 0;
             for (MultipartFile emoticon : emoticonList) {
                 EmoticonFileAndName emoticonDto = new EmoticonFileAndName();
-//                File emoticonFile = makeFile(emoticon);
-                saveImage(emoticon, emoticonDto);
-                emoticonsUrls.add(emoticonDto.getUrl());
-                imageHashService.saveEmoticonHash(emoticonDto.getFile(), emoticonPackEntity, cnt);
+                int finalCnt = cnt; // lambda에서 사용하기 위해 final로 캡처
+
+                // 각 이미지 저장 및 해시 생성 작업을 비동기로 실행
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    try {
+                        // 이미지 저장
+                        saveImage(emoticon, emoticonDto);
+                        emoticonsUrls.add(emoticonDto.getUrl());
+
+                        // 이미지 해시 저장
+                        imageHashService.saveEmoticonHash(emoticonDto.getFile(), emoticonPackEntity, finalCnt);
+                    } catch (IOException e) {
+                        throw new RuntimeException("emoticonHash 실패: " + emoticonDto.getFile(), e);
+                    }
+                });
+
+                futures.add(future);
                 cnt++;
             }
-            emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
-            long afterTime4 = System.currentTimeMillis();
 
-            log.info("이모티콘들 이미지 서버에 저장 시간: {}",afterTime4-beforeTime4);
+            // 모든 futures 작업이 완료될 때까지 대기
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        });
 
-            // 태그 정보 추가
-            List<String> tagNames = emoticonPack.getTags();
-            List<TagListEntity> tagListEntities = new ArrayList<>();
-            for (String tag : tagNames) {
-                TagEntity findTagEntity;
-                Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
-                if (getTagEntity.isEmpty()) {
-                    TagEntity tagEntity = TagEntity.builder()
-                            .tagName(tag)
-                            .build();
-                    tagRepository.save(tagEntity);
-                    findTagEntity = tagEntity;
-                } else {
-                    findTagEntity = getTagEntity.get();
-                }
-                TagListEntity tagListEntity = TagListEntity.builder()
-                        .emoticonPack(emoticonPackEntity)
-                        .tag(findTagEntity)
-                        .build();
-                tagListRepository.save(tagListEntity);
-                tagListEntities.add(tagListEntity);
-            }
-            emoticonPackEntity.setTagLists(tagListEntities);
+// 최종적으로 모든 작업이 완료된 후에 진행할 로직
+        allFutures.join();
+        allSaveFutures.join(); // ensure emoticonPackEntity creation is complete
 
+// 이후 작업: emoticonPackEntity를 사용한 추가 작업
+        EmoticonPackEntity emoticonPackEntity = allSaveFutures.join();
 
-            return new EmoticonPackResponseDto(emoticonPackEntity);
-        } catch (IOException e) {
-            System.err.println("Exception during EmoticonPack upload: " + e.getMessage());
-            throw new RuntimeException(e.getMessage());
+        if (emoticonPackEntity.getBlacklist()) {
+            objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
         }
+
+        emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
+
+
+        // 태그 정보 추가
+        List<String> tagNames = emoticonPack.getTags();
+        List<TagListEntity> tagListEntities = new ArrayList<>();
+        for (String tag : tagNames) {
+            TagEntity findTagEntity;
+            Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
+            if (getTagEntity.isEmpty()) {
+                TagEntity tagEntity = TagEntity.builder()
+                        .tagName(tag)
+                        .build();
+                tagRepository.save(tagEntity);
+                findTagEntity = tagEntity;
+            } else {
+                findTagEntity = getTagEntity.get();
+            }
+            TagListEntity tagListEntity = TagListEntity.builder()
+                    .emoticonPack(emoticonPackEntity)
+                    .tag(findTagEntity)
+                    .build();
+            tagListRepository.save(tagListEntity);
+            tagListEntities.add(tagListEntity);
+        }
+        emoticonPackEntity.setTagLists(tagListEntities);
+        return new EmoticonPackResponseDto(emoticonPackEntity);
+
+    }
+
+    private void detect(EmoticonPack emoticonPack, AtomicBoolean detectPass) {
+        List<MultipartFile> images = new ArrayList<>();
+        images.add(emoticonPack.getThumbnailImg());
+        images.add(emoticonPack.getListImg());
+        images.addAll(emoticonPack.getEmoticons());
+
+        for (int i = 0; i < images.size(); i += 16) {
+            int end = Math.min(i + 16, images.size());
+            List<MultipartFile> subList = images.subList(i, end);
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    if (safeSearchService.detectSafeSearch(subList)) {
+                        detectPass.set(false);  // 유해 이미지 발견 시 detectPass를 false로 설정
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+    }
+
+    private boolean isDuplicateTitle(String title){
+        if(packRepository.findByTitle(title).isPresent()){
+            return true;
+        }
+        return false;
     }
 
 
