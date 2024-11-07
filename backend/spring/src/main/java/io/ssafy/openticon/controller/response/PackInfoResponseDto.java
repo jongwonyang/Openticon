@@ -48,6 +48,8 @@ public class PackInfoResponseDto {
 
     private List<String> tags;
 
+    private String sharedLink;
+
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
     public PackInfoResponseDto(EmoticonPackEntity emoticonPackEntity, List<String> emoticons){
@@ -73,6 +75,7 @@ public class PackInfoResponseDto {
         for(TagListEntity tagListEntity : emoticonPackEntity.getTagLists()){
             tags.add(tagListEntity.getTag().getTagName());
         }
+        this.sharedLink=emoticonPackEntity.getShareLink();
     }
 
     private String formatToKST(OffsetDateTime dateTime) {
