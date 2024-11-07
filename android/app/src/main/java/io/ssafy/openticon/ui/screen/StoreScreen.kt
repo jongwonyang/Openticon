@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,10 +23,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,7 +45,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +55,8 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import io.ssafy.openticon.ui.viewmodel.StoreViewModel
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import kotlin.math.abs
 
 
@@ -161,7 +169,7 @@ fun StoreScreen(
                                     navController.navigate("emoticonAll/new")
                                 }
                                 if (index == centerIndex) {
-                                    navController.navigate("emoticonPack/${item.id}")
+                                    navController.navigate("emoticonPack/${item.uuid}")
                                 } else {
                                     centerIndex = index
                                     coroutineScope.launch {
@@ -209,13 +217,31 @@ fun StoreScreen(
 
         // 인기 섹션
         item {
-            Text(
-                text = "인기",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 16.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "인기",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                TextButton(onClick = {
+                    navController.navigate("emoticonAll/popular")
+                }) {
+                    Text(
+                        text = "Show All"
+                    )
+                }
+
+            }
         }
+
 
         // 인기 항목 리스트
         item {
@@ -238,7 +264,7 @@ fun StoreScreen(
                                 modifier = Modifier
                                     .padding(vertical = 2.dp)
                                     .fillMaxWidth()
-                                    .clickable { navController.navigate("emoticonPack/${item.id}") } // Handle click event
+                                    .clickable { navController.navigate("emoticonPack/${item.uuid}") } // Handle click event
                             ) {
                                 Image(
                                     painter = rememberImagePainter(data = item.thumbnail), // Use the item's thumbnail
@@ -294,15 +320,40 @@ fun StoreScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(modifier = Modifier.padding(start = 16.dp)) {
-                    Text(
-                        text = tag,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
+                    Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(30.dp))
-                            .background(Color.LightGray)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                            .fillMaxWidth()
+                            .padding(end = 16.dp)
+                    ) {
+                        Text(
+                            text = tag,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(30.dp))
+                                .background(Color.LightGray)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+
+                        TextButton(onClick = {
+                            tag?.let { validTag ->
+                                // '#' 문자를 제거하고 URL 인코딩
+                                val cleanedTag = validTag.replace("#", "")
+                                val encodedTag = URLEncoder.encode(cleanedTag, StandardCharsets.UTF_8.toString())
+                                Log.d("StoreScreen", "Navigating to emoticonAlltag/$encodedTag")
+                                navController.navigate("emoticonAlltag/$encodedTag")
+                            } ?: Log.d("StoreScreen", "Tag is null or empty")
+                        }) {
+                            Text(
+                                text = "Show All"
+                            )
+                        }
+                    }
+
+
 
                     LazyRow(
                         modifier = Modifier
@@ -318,7 +369,7 @@ fun StoreScreen(
 //                                    .border(2.dp, Color.Gray, RoundedCornerShape(16.dp)) // 테두리 추가
                                     .size(80.dp)
 //                                    .padding(end = 8.dp)
-                                    .clickable { navController.navigate("emoticonPack/${item.id}") } // Navigate on click
+                                    .clickable { navController.navigate("emoticonPack/${item.uuid}") } // Navigate on click
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                         }
