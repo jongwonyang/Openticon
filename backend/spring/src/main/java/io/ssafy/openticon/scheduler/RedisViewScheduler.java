@@ -2,6 +2,8 @@ package io.ssafy.openticon.scheduler;
 
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.RedisEmoticonPackEntity;
+import io.ssafy.openticon.exception.ErrorCode;
+import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.PackRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,11 +35,12 @@ public class RedisViewScheduler {
                 RedisEmoticonPackEntity redisEmoticonPack = (RedisEmoticonPackEntity) redisEmoticonPackTemplate.opsForValue().get(redisKey);
                 if(redisEmoticonPack != null){
                     Optional<EmoticonPackEntity> emoticonPackEntity = packRepository.findById(redisEmoticonPack.getEmoticonPackId());
-                    if(emoticonPackEntity.isPresent()) {
-                        emoticonPackEntity.get().setView(redisEmoticonPack.getView());
-                        packRepository.save(emoticonPackEntity.get());
-                        redisEmoticonPackTemplate.delete(redisKey);
+                    if(emoticonPackEntity.isEmpty()){
+                        throw new OpenticonException(ErrorCode.EMOTICON_PACK_EMPTY);
                     }
+                    emoticonPackEntity.get().setView(redisEmoticonPack.getView());
+                    packRepository.save(emoticonPackEntity.get());
+                    redisEmoticonPackTemplate.delete(redisKey);
                 }
             }
         }else{
