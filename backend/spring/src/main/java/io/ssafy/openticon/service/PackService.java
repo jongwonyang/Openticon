@@ -25,6 +25,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+import com.madgag.gif.fmsware.AnimatedGifEncoder;
+import com.madgag.gif.fmsware.GifDecoder;
+import com.madgag.gif.fmsware.AnimatedGifEncoder;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 
 import javax.imageio.ImageIO;
@@ -196,20 +203,47 @@ public class PackService {
     }
 
 
-    private void saveImage(MultipartFile image, EmoticonFileAndName dto){
-        String uploadServerUrl = imageServerUrl+ "/upload/image";
+
+
+    private void saveImage(MultipartFile image, EmoticonFileAndName dto) {
+        String uploadServerUrl = imageServerUrl + "/upload/image";
 
         try {
-            // 원본 이미지 BufferedImage로 읽기
-            BufferedImage originalImage = ImageIO.read(image.getInputStream());
+            // 원본 이미지가 GIF인 경우
+            if ("image/gif".equals(image.getContentType())) {
+                GifDecoder gifDecoder = new GifDecoder();
+                gifDecoder.read(image.getInputStream());
 
-            // 배경색 변경 조건: 옵션이 true이고 파일 확장자가 png일 때만 적용
-            BufferedImage processedImage = originalImage;
-            if ("image/png".equals(image.getContentType())) {
-                processedImage = convertTransparentToWhiteBackground(originalImage);
+                AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
+                dto.setFile(File.createTempFile("upload", ".gif"));
+                gifEncoder.start(dto.getFile().getPath());
+                gifEncoder.setRepeat(0);
+
+                for (int i = 0; i < gifDecoder.getFrameCount(); i++) {
+                    BufferedImage frame = gifDecoder.getFrame(i);
+                    BufferedImage processedFrame = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g2d = processedFrame.createGraphics();
+                    g2d.setColor(Color.WHITE); // 배경 흰색으로 채우기
+                    g2d.fillRect(0, 0, frame.getWidth(), frame.getHeight());
+                    g2d.drawImage(frame, 0, 0, null);
+                    g2d.dispose();
+                    gifEncoder.addFrame(processedFrame);
+                    gifEncoder.setDelay(gifDecoder.getDelay(i));
+                }
+                gifEncoder.finish();
+
+            } else {
+                // PNG 및 기타 포맷의 경우
+                BufferedImage originalImage = ImageIO.read(image.getInputStream());
+                BufferedImage processedImage = originalImage;
+
+                if ("image/png".equals(image.getContentType())) {
+                    processedImage = convertTransparentToWhiteBackground(originalImage);
+                }
+
+                dto.setFile(File.createTempFile("upload", ".png"));
+                ImageIO.write(processedImage, "png", dto.getFile());
             }
-            dto.setFile(File.createTempFile("upload", ".png"));
-            ImageIO.write(processedImage, "png", dto.getFile());
 
             ImageUrl imageUrl = webClient.post()
                     .uri(uploadServerUrl)
@@ -218,13 +252,13 @@ public class PackService {
                     .retrieve()
                     .bodyToMono(ImageUrl.class)
                     .block();
+
             dto.setUrl(imageUrl.getUrl());
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             throw new RuntimeException("Failed to save image", e);
         }
-
     }
+
 
 
     private MultiValueMap<String, Object> createMultipartBody(File file, String fileName) {
