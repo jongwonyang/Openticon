@@ -34,6 +34,17 @@ const router = createRouter({
       path: "/upload",
       name: "uploadEmoticon",
       component: UploadEmoticonView,
+      beforeEnter: (to, from, next) => {
+        const isLoggedIn = useUserStore().isLogined; // 로그인 상태 확인
+        if (isLoggedIn) {
+          next(); // 로그인 상태이면 접근 허용
+        } else {
+          makeWarningAlert(
+            "로그인이 필요한 서비스입니다. 메인페이지로 이동합니다."
+          );
+          next({ name: "main" }); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
+        }
+      },
     },
     {
       path: "/packDetail/:id",

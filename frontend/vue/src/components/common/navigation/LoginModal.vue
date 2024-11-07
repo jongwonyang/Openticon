@@ -48,6 +48,7 @@ const PAGE_BASE_URL = import.meta.env.VITE_APP_URL;
 const REDIRECT_URI = `${PAGE_BASE_URL}/processLogin`;
 
 function handleMessage(event: MessageEvent) {
+    if(event.origin !== PAGE_BASE_URL) return;
     const userStore = useUserStore();
     userStore.login(event.data);
     makeSuccessAlert('로그인이 완료되었습니다. 콘솔 로그에서 액세스 토큰을 확인해주세요.');
