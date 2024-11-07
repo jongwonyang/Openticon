@@ -14,13 +14,13 @@
 <script setup lang="ts">
 import EmoticonDetailHeader from "@/components/emoticonDetail/EmoticonDetailHeader.vue";
 import EmoticonDetailContent from "@/components/emoticonDetail/EmoticonDetailContent.vue";
+import EmoticonDetailFooter from "@/components/emoticonDetail/EmoticonDetailFooter.vue";
 import Loading from "@/components/common/loading/Loading.vue";
 
 import { ref, onMounted } from "vue";
 import { useEmoticonPackStore } from "@/stores/emoticonPack";
 import type { EmoticonPack } from "@/types/emoticonPack";
 import { useRoute } from "vue-router";
-import EmoticonDetailFooter from "@/components/emoticonDetail/EmoticonDetailFooter.vue";
 
 const emoticonPackStore = useEmoticonPackStore();
 const emoticon = ref<EmoticonPack | null>(null);

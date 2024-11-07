@@ -17,4 +17,5 @@ export type EmoticonPack = {
   public: boolean;
   blacklist: boolean;
   aigenerated: boolean;
+  tags: string[];
 };
