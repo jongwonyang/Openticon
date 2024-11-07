@@ -5,7 +5,7 @@
   >
     <div class="fixed inset-0 bg-black opacity-50"></div>
     <div
-      class="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] rounded-md"
+      class="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh]"
     >
       <h2
         class="text-2xl font-nnsqneo-heavy sticky top-0 p-6 z-10 whitespace-nowrap"
@@ -127,6 +127,9 @@ function handleConfirm() {
     .then((e) => {
       isUploading.value = false;
       isUploaded.value = true;
+    }).catch((e) => {
+      isUploading.value = false;
+      makeWarningAlert(e.response.data.message);
     });
 
 //     {
