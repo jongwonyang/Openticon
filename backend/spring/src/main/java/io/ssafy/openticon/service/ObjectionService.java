@@ -84,15 +84,10 @@ public class ObjectionService {
             throw new NoSuchElementException("이미 이모티콘 팩이 차단되어 있습니다.");
         }
 
-        // 소유자인가?
-        if(!emoticonPackEntity.getMember().getEmail().equals(member.getEmail())){
-            throw new NoSuchElementException("해당 이모티콘 팩의 작가가 아닙니다.");
-        }
-
         emoticonPackEntity.setBlacklist(true);
         packRepository.save(emoticonPackEntity);
         objectionEmoticonPack(emoticonPackEntity, requestDto.getReportType());
-        return "success";
+        return emoticonPackEntity.getTitle()+" 이모티콘 팩을 차단하였습니다.";
     }
 
     // 이모티콘 팩이 블랙리스트로 만들어야 하는 순간에 불러오는 서비스
