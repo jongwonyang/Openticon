@@ -169,7 +169,7 @@ fun StoreScreen(
                                     navController.navigate("emoticonAll/new")
                                 }
                                 if (index == centerIndex) {
-                                    navController.navigate("emoticonPack/${item.id}")
+                                    navController.navigate("emoticonPack/${item.uuid}")
                                 } else {
                                     centerIndex = index
                                     coroutineScope.launch {
@@ -264,7 +264,7 @@ fun StoreScreen(
                                 modifier = Modifier
                                     .padding(vertical = 2.dp)
                                     .fillMaxWidth()
-                                    .clickable { navController.navigate("emoticonPack/${item.id}") } // Handle click event
+                                    .clickable { navController.navigate("emoticonPack/${item.uuid}") } // Handle click event
                             ) {
                                 Image(
                                     painter = rememberImagePainter(data = item.thumbnail), // Use the item's thumbnail
@@ -369,7 +369,7 @@ fun StoreScreen(
 //                                    .border(2.dp, Color.Gray, RoundedCornerShape(16.dp)) // 테두리 추가
                                     .size(80.dp)
 //                                    .padding(end = 8.dp)
-                                    .clickable { navController.navigate("emoticonPack/${item.id}") } // Navigate on click
+                                    .clickable { navController.navigate("emoticonPack/${item.uuid}") } // Navigate on click
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                         }
