@@ -42,7 +42,8 @@ fun AppNavHost() {
 
         composable(
             route = "emoticonPack/{uuid}",
-            arguments = listOf(navArgument("uuid") { type = NavType.StringType })
+            arguments = listOf(navArgument("uuid") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "openticon://emoticon-pack/{uuid}" })
         ) { backStackEntry ->
             val uuid = backStackEntry.arguments?.getString("uuid")
             if (uuid != null) {
@@ -83,13 +84,6 @@ fun AppNavHost() {
             val tag = backStackEntry.arguments?.getString("tag")
             EmoticonAllScreen(navController, type, tag)
         }
-//
-//        composable(
-//            route = ""
-//            deepLinks = listOf(
-//                navDeepLink { uriPattern = "openticon://emoticon-pack/{uuid}" }
-//            )
-//        ) {  }
 
     }
 }
