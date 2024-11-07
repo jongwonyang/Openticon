@@ -20,6 +20,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -66,9 +67,10 @@ public class PackService {
     private final PurchaseHistoryService purchaseHistoryService;
     private final SafeSearchService safeSearchService;
     private final ObjectionService objectionService;
+    private final RedisViewService redisViewService;
 
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -80,6 +82,7 @@ public class PackService {
         this.safeSearchService = safeSearchService;
         this.imageHashService = imageHashService;
         this.objectionService = objectionService;
+        this.redisViewService = redisViewService;
     }
 
     @Transactional
@@ -306,7 +309,7 @@ public class PackService {
         return false;
     }
 
-    public PackInfoResponseDto getPackInfoByPackId(String emoticonPackId){
+    public PackInfoResponseDto getPackInfoByPackId(String emoticonPackId, UserDetails userDetails, String requestIp){
 
         Long packId=Long.parseLong(emoticonPackId);
         if(packRepository.findById(packId).isEmpty()){
@@ -324,7 +327,7 @@ public class PackService {
         }
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
-
+        redisViewService.incrementView(emoticonPackEntity, userDetails, requestIp);
         return new PackInfoResponseDto(emoticonPackEntity,emoticons);
     }
 

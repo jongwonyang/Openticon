@@ -44,6 +44,12 @@ services:
       - openticon_network
     volumes:
       - image_server_data:/app/static
+    
+  redis:
+    image: redis
+    restart: unless-stopped
+    networks:
+      - openticon_network
 
   postgres:
     image: postgres

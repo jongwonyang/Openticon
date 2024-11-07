@@ -64,10 +64,10 @@ dependencies {
 	implementation group: 'dev.brachtendorf', name: 'JImageHash', version: '1.0.0'
 	implementation group: 'org.openjfx', name: 'javafx', version: '20.0.2', ext: 'pom'
 
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	//gif encoder
 	implementation 'com.madgag:animated-gif-lib:1.4'
-
 }
 
 javafx {
