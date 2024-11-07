@@ -1,6 +1,7 @@
 package io.ssafy.openticon.config;
 
 import io.ssafy.openticon.entity.EmoticonPackEntity;
+import io.ssafy.openticon.entity.RedisEmoticonPackEntity;
 import io.ssafy.openticon.entity.RedisViewEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +20,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, EmoticonPackEntity> redisEmoticonPackTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, EmoticonPackEntity> template = new RedisTemplate<>();
+    public RedisTemplate<String, RedisEmoticonPackEntity> redisEmoticonPackTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, RedisEmoticonPackEntity> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         // Key와 Value의 직렬화 방법을 설정합니다.
