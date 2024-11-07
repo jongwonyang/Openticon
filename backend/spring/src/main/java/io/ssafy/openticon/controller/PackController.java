@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -97,9 +98,10 @@ public class PackController {
     @GetMapping("/info")
     @Operation(summary = "공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfoPublic(@AuthenticationPrincipal UserDetails userDetails,
-                                                                  @RequestParam("emoticonPackId") String packId){
+                                                                  @RequestParam("emoticonPackId") String packId,
+                                                                  HttpServletRequest request){
 
-        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId));
+        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId, userDetails, request.getRemoteAddr()));
 
     }
 
