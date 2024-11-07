@@ -1,21 +1,22 @@
-export type EmoticonPack = {
+export type UploadResult = {
   id: number;
   title: string;
-  author: {
+  member: {
     id: number;
+    email: string;
     nickname: string;
-    profile: string;
   };
   price: number;
   view: number;
   category: "REAL" | "CHARACTER" | "ENTERTAINMENT" | "LETTER";
   thumbnailImg: string;
   listImg: string;
-  emoticons: string[];
   description: string;
-  createdAt: string; // ISO 8601 형식의 날짜 문자열
-  public: boolean;
-  blacklist: boolean;
-  aigenerated: boolean;
+  shareLink: string;
+  createdAt: string;
+  updatedAt: string;
   tags: string[];
+  public: boolean;
+  aiGenerated: boolean;
+  blacklist: boolean;
 };

@@ -1,13 +1,34 @@
 <template>
   <div>
     <h2 class="text-2xl font-nnsqneo-bold">내가 올린 이모티콘</h2>
-    <div class="flex flex-col gap-2" v-if="myEmoticonList.length > 0">
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4"
+      v-if="myEmoticonList.length > 0"
+    >
       <div
         v-for="(emoticon, index) in myEmoticonList"
         :key="index"
-        class="flex flex-col"
+        class="flex flex-row p-4 border gap-2 emoticon-item"
       >
         <img :src="emoticon.thumbnailImg" alt="이모티콘" class="w-16 h-16" />
+        <div class="flex flex-col">
+          <div class="text-xl">{{ emoticon.title }}</div>
+          <div>
+          <span
+            v-if="emoticon.price == 0"
+            class="text-md text-blue-500 font-nnsqneo-bold"
+            >무료</span
+          >
+          <span v-else class="text-md text-red-500 font-nnsqneo-bold"
+            >{{ emoticon.price }} 포인트</span
+          >
+          <span
+              class="text-sm text-white ml-1 px-2 rounded-full w-fit whitespace-nowrap"
+              :class="emoticon.public ? 'bg-green-500' : 'bg-red-500'"
+              >{{ emoticon.public ? "공개" : "비공개" }}</span
+            >
+          </div>
+        </div>
       </div>
     </div>
     <div
@@ -28,10 +49,18 @@
 import { useUserStore } from "@/stores/user";
 import type { EmoticonPack } from "@/types/emoticonPack";
 import { onMounted, ref } from "vue";
+import type { EmoticonPackInList } from "@/types/emoticonPackInList";
 
-const myEmoticonList = ref<EmoticonPack[]>([]);
-
-const userStore = useUserStore();
-
-onMounted(async () => {});
+const props = defineProps<{
+  myEmoticonList: EmoticonPackInList[];
+}>();
 </script>
+
+<style scoped>
+.emoticon-item {
+  transition: transform 0.05s ease, box-shadow 0.05s ease,
+    border-color 0.05s ease, border-radius 0.05s ease;
+  cursor: pointer;
+  @apply hover:rounded-lg hover:shadow-lg hover:scale-105 active:scale-95 active:bg-gray-50;
+}
+</style>

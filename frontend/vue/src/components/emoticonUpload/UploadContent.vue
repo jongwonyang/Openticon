@@ -1,18 +1,18 @@
 <template>
-  <div class="flex flex-col max-w-screen-lg mx-auto mt-10 px-4">
-    <div class="pt-4 px-4">
+  <div class="flex flex-col max-w-screen-lg mx-auto mt-4">
+    <div class="px-4">
       <div class="text-xl text-black font-nnsqneo-bold">이모티콘 이미지</div>
       <VueDraggable
         v-model="emoticonImages"
         :animation="200"
         item-key="id"
-        class="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mt-2"
+        class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mt-2"
         ghost-class="opacity-50"
         handle=".drag-handle"
         style="user-select: none"
       >
         <template #item="{ element }">
-          <div class="drag-handle cursor-move col-span-1">
+          <div class="drag-handle cursor-move col-s pan-1">
             <ImagePreview
               :image="element.file"
               @delete="handleEmoticonImageRemove(element)"

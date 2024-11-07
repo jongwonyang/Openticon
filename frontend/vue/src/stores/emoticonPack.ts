@@ -4,6 +4,7 @@ import type { EmoticonPackSearchList } from "@/types/emoticonPackSearchList";
 import type { EmoticonPack } from "@/types/emoticonPack";
 import type { EmoticonPackUploadInfo, EmoticonPackUploadFiles } from "@/types/emoticonPackUpload";
 import { ref } from "vue";
+import type { UploadResult } from "@/types/uploadResult";
 
 export const useEmoticonPackStore = defineStore("emoticonPack", () => {
   const getEmoticonPackData = async (id: number): Promise<EmoticonPack> => {
@@ -52,7 +53,7 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
   const uploadEmoticonPack = async (
     packInfo: EmoticonPackUploadInfo,
     files: EmoticonPackUploadFiles
-  ): Promise<void> => {
+  ): Promise<UploadResult> => {
     const formData = new FormData();
     
     // packInfo를 JSON 문자열로 변환하여 추가
@@ -71,8 +72,20 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+    }).then((response) => {
+      return response.data;
     });
   };
 
-  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack, uploadEmoticonPack };
+  const getMyEmoticonPackList = async (page: number, size: number): Promise<EmoticonPackSearchList> => {
+    const response = await apiClient.get(`/emoticonpacks/mylist`, {
+      params: {
+        page: page,
+        size: size,
+      },
+    });
+    return response.data;
+  };
+
+  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack, uploadEmoticonPack, getMyEmoticonPackList };
 });

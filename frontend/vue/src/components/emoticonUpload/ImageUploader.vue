@@ -142,14 +142,14 @@ function handleDragOver(event: DragEvent) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center">
+  <div class="flex flex-col items-center justify-center md:items-start">
     <span class="text-lg font-bold font-nnsqneo">{{ label }}</span>
     <div
       @click="$refs.fileInput.click()"
       @drop="handleDrop"
       @dragover="handleDragOver"
       :class="[
-        'w-32 h-32 bg-gray-100 rounded-md border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200',
+        'w-32 h-32 bg-gray-100 rounded-md border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 mt-2',
         imageData.previewUrl
           ? 'border-gray-400 border-solid'
           : 'border-gray-400 border-dashed',

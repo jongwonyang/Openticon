@@ -82,7 +82,7 @@ onMounted(async () => {
   transition: transform 0.05s ease, box-shadow 0.05s ease,
     border-color 0.05s ease, border-radius 0.05s ease;
   cursor: pointer;
-  @apply hover:font-bold hover:underline hover:rounded-lg hover:shadow-lg hover:scale-105;
+  @apply hover:font-bold hover:underline hover:rounded-lg hover:shadow-lg hover:scale-105 active:scale-95 active:bg-gray-50;
 }
 
 .emoticon-item-no-hover {
