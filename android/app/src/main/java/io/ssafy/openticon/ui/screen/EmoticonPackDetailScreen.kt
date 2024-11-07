@@ -3,9 +3,7 @@ package io.ssafy.openticon.ui.screen
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,8 +49,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,6 +61,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.request.ImageRequest
+import io.ssafy.openticon.R
 import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel.UiState
@@ -221,7 +220,9 @@ fun EmoticonPackDetailScreen(
                                     }
                                     .build(),
                                 modifier = Modifier
-                                    .size(128.dp)
+                                    .size(128.dp),
+                                placeholder = painterResource(R.drawable.loading_img),
+                                error = painterResource(R.drawable.ic_broken_image),
                             )
                         }
                     }
@@ -267,16 +268,16 @@ fun EmoticonPackDetailScreen(
                         Spacer(Modifier.height(16.dp))
                     }
 
-                    items(emoticonPack.items.chunked(3).withIndex().toList()) { (rowIndex,row) ->
+                    items(emoticonPack.items.chunked(3).withIndex().toList()) { (rowIndex, row) ->
                         Row(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ,
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             if (row.size == 3) {
-                                for ((colIndex,item) in row.withIndex()) {
-                                    val isSelected = selectedEmoticonIndex == Pair(rowIndex, colIndex)
+                                for ((colIndex, item) in row.withIndex()) {
+                                    val isSelected =
+                                        selectedEmoticonIndex == Pair(rowIndex, colIndex)
                                     val size by animateDpAsState(targetValue = if (isSelected) 130.dp else 100.dp)
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
@@ -295,8 +296,14 @@ fun EmoticonPackDetailScreen(
                                             .aspectRatio(1f)
                                             .clickable {
                                                 // 클릭한 이모티콘이 이미 선택된 경우 해제, 아니면 선택
-                                                selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
+                                                selectedEmoticonIndex =
+                                                    if (isSelected) null else Pair(
+                                                        rowIndex,
+                                                        colIndex
+                                                    )
                                             },
+                                        placeholder = painterResource(R.drawable.loading_img),
+                                        error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 }
                             } else {
@@ -315,7 +322,9 @@ fun EmoticonPackDetailScreen(
                                         modifier = Modifier
 //                                            .size(size)
                                             .weight(1f)
-                                            .aspectRatio(1f)
+                                            .aspectRatio(1f),
+                                        placeholder = painterResource(R.drawable.loading_img),
+                                        error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 }
                                 for (i in row.size until 3) {
@@ -344,7 +353,9 @@ fun EmoticonPackDetailScreen(
                                         contentDescription = null,
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(50))
-                                            .size(40.dp)
+                                            .size(40.dp),
+                                        placeholder = painterResource(R.drawable.loading_img),
+                                        error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 },
                                 headlineContent = { Text(emoticonPack.authorNickname) },
