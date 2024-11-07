@@ -49,7 +49,7 @@
             @click="isExpanded = !isExpanded"
             style="user-select: none"
           >
-            <p class="whitespace-pre">{{ emoticon?.description }}</p>
+            <p class="whitespace-pre-wrap">{{ emoticon?.description }}</p>
             <p class="text-right text-xs pt-2 text-gray-500">
               등록날짜 : {{ formattedDate }}
             </p>

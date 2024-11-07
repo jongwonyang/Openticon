@@ -29,6 +29,8 @@ FROM nginx:alpine
 
 # 빌드된 파일 복사
 COPY --from=build /app/dist /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html/share
+COPY share.html /usr/share/nginx/html/share/share.html
 
 # Nginx 설정 파일 복사 (필요한 경우)
 COPY nginx.conf /etc/nginx/conf.d/default.conf

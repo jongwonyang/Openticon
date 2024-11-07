@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col px-8 py-4">
     <p class="text-xl font-bold font-nnsqneo">이 이모티콘 팩의 태그</p>
-    <div class="flex flex-row gap-2 pt-2">
+    <div class="flex flex-row gap-2 pt-2 flex-wrap">
       <RouterLink
         v-for="tag in props.emoticon?.tags"
         :key="tag"

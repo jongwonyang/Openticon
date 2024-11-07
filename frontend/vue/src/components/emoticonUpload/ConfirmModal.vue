@@ -5,7 +5,7 @@
   >
     <div class="fixed inset-0 bg-black opacity-50"></div>
     <div
-      class="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] rounded-md"
+      class="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh]"
     >
       <h2
         class="text-2xl font-nnsqneo-heavy sticky top-0 p-6 z-10 whitespace-nowrap"
@@ -38,9 +38,16 @@
             'bg-gray-500 border-gray-500 hover:bg-gray-500 active:bg-gray-500':
               isUploading,
           }"
+          v-if="!isFailed"
         >
           <span v-if="!isUploading">업로드</span>
           <span v-else>업로드중...</span>
+        </button>
+        <button
+          class="border border-orange-500 bg-orange-500 text-white rounded-md px-4 py-2 hover:bg-orange-600 transition-all duration-200 ease-in-out active:bg-orange-700"
+          v-if="isFailed"
+        >
+          업로드 실패!
         </button>
       </div>
       <div v-if="isUploaded" class="flex justify-end gap-2 p-6">
@@ -111,7 +118,7 @@ const emoticonPackStore = useEmoticonPackStore();
 
 const isUploading = ref(false);
 const isUploaded = ref(false);
-
+const isFailed = ref(false);
 function closeModal() {
   emit("update:isOpen", false);
 }
@@ -127,6 +134,12 @@ function handleConfirm() {
     .then((e) => {
       isUploading.value = false;
       isUploaded.value = true;
+    }).catch((e) => {
+      isUploading.value = false;
+      isFailed.value = true;
+      setTimeout(() => {
+        isFailed.value = false;
+      }, 3000);
     });
 
 //     {
