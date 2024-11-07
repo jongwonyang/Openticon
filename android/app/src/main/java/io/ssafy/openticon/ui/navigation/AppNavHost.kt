@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.ssafy.openticon.ui.screen.EditProfileScreen
+import io.ssafy.openticon.ui.screen.EmoticonAllScreen
 import io.ssafy.openticon.ui.screen.EmoticonPackDetailScreen
 import io.ssafy.openticon.ui.screen.LoginScreen
 import io.ssafy.openticon.ui.screen.LoginSuccessScreen
@@ -58,6 +59,24 @@ fun AppNavHost() {
             val accessToken = backStackEntry.arguments?.getString("accessToken") ?: ""
             LoginSuccessScreen(accessToken, navController)
         }
+
+        composable("emoticonAll/{type}") { backStackEntry ->
+            val arg1 = backStackEntry.arguments?.getString("type")
+            EmoticonAllScreen(navController, arg1, null)
+        }
+
+        composable(
+            route = "emoticonAll/{type}/{tag}",
+            arguments = listOf(
+                navArgument("type") { type = NavType.StringType },
+                navArgument("tag") { type = NavType.StringType; nullable = true }
+            )
+        ) { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type")
+            val tag = backStackEntry.arguments?.getString("tag")
+            EmoticonAllScreen(navController, type, tag)
+        }
+
     }
 
     context.intent?.data?.let { uri ->

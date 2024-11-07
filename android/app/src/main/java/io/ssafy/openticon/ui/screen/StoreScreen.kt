@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,7 +67,6 @@ fun StoreScreen(
     val tagQuery1 by viewModel.tagQuery1.collectAsState()
     val tagQuery2 by viewModel.tagQuery2.collectAsState()
     val tagQuery3 by viewModel.tagQuery3.collectAsState()
-
 //    val items = listOf(
 //        ItemData(R.drawable.empty, "", ""), // 왼쪽 빈 이미지
 //        ItemData(R.drawable.google, "이모티콘 제목 1", "작성자 1"),
@@ -90,7 +90,6 @@ fun StoreScreen(
             val closestItem = listState.layoutInfo.visibleItemsInfo.minByOrNull { item ->
                 abs((item.offset + item.size / 2) - viewportCenter)
             }
-
             closestItem?.let { item ->
                 if (centerIndex != item.index) {
                     centerIndex = item.index
@@ -154,7 +153,13 @@ fun StoreScreen(
                             .alpha(if (index == centerIndex) 1f else 0.5f)
                             .width(150.dp)
                             .padding(bottom = 1.dp)
-                            .clickable {
+                            .clickable(
+                                indication = null, // 클릭 효과 제거
+                                interactionSource = remember { MutableInteractionSource() } // 상호작용 효과 제거
+                            ) {
+                                if (index == 0 || index == newEmoticonPack.size - 1) {
+                                    navController.navigate("emoticonAll/new")
+                                }
                                 if (index == centerIndex) {
                                     navController.navigate("emoticonPack/${item.id}")
                                 } else {
