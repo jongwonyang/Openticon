@@ -23,19 +23,18 @@
             }}</span>
             <span
               v-if="emoticon?.aigenerated"
-              class="ml-2 py-1 px-2 text-xs rounded-full bg-blue-500 text-white font-nnsqneo whitespace-nowrap"
-            >
-              AI 생성
+              class="mx-2 py-1 px-2 text-xs rounded-full bg-blue-500 text-white font-nnsqneo whitespace-nowrap"
+              >AI 생성
             </span>
           </div>
         </div>
         <div class="flex items-center px-2 pt-2">
           <RouterLink
             class="text-md text-gray-500 text-center sm:text-left hover:underline"
-          :to="{
-            name: 'searchResult',
-            query: { type: 'author', query: emoticon?.author.nickname },
-          }"
+            :to="{
+              name: 'searchResult',
+              query: { type: 'author', query: emoticon?.author.nickname },
+            }"
           >
             {{ emoticon?.author.nickname }}
           </RouterLink>
@@ -57,7 +56,7 @@
         </div>
       </div>
 
-      <div class="pt-1 px-2">
+      <div class="pt-1 px-2 flex justify-between">
         <template v-if="emoticon?.price !== 0">
           <span class="font-bold text-2xl text-red-500">{{
             emoticon?.price
@@ -67,15 +66,30 @@
         <template v-else>
           <span class="font-bold text-2xl text-blue-500"> 무료 </span>
         </template>
+        <div class="flex items-center">
+          <button
+            class="text-sm text-gray-500 hover:bg-gray-200 rounded-full p-1 flex items-center justify-center transition duration-200"
+            @click="shareEmoticon"
+          >
+            <i class="material-symbols-outlined">share</i>
+          </button>
+        </div>
       </div>
       <div class="px-2 pt-2">
         <div
-          class="w-full p-4 text-center border text-gray-500 border-gray-300 bg-gray-200 rounded-sm"
+          class="w-full p-4 text-center border text-white border-blue-400 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition duration-200 rounded-md"
+          @click="handleOpenApp"
         >
-          앱에서 구매할 수 있습니다.
+          앱에서 보기
         </div>
       </div>
     </div>
+
+    <ShareModal
+      :is-open="isShareModalOpen"
+      :emoticon="emoticon"
+      @close="isShareModalOpen = false"
+    />
   </div>
 </template>
 
@@ -83,6 +97,7 @@
 import type { EmoticonPack } from "@/types/emoticonPack";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
+import ShareModal from "./ShareModal.vue";
 
 const props = defineProps<{
   emoticon: EmoticonPack | null;
@@ -98,6 +113,19 @@ const formattedDate = computed(() => {
 });
 
 const isExpanded = ref(false);
+
+const isShareModalOpen = ref(false);
+
+const shareEmoticon = () => {
+  isShareModalOpen.value = true;
+};
+
+const handleOpenApp = () => {
+  window.open(
+    `${import.meta.env.VITE_SHARE_URL}/${props.emoticon?.sharedLink}`,
+    "_blank"
+  );
+};
 </script>
 
 <style>

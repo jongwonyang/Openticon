@@ -110,6 +110,7 @@ watch(props, (newVal) => {
       view: 0,
       public: newVal.emoticonPackUploadInfo.isPublic,
       blacklist: false,
+      sharedLink: "",
     };
   }
 });

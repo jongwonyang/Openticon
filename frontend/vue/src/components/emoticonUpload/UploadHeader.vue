@@ -78,7 +78,7 @@ const categories = [
   { value: "REAL", label: "실사" },
   { value: "ENTERTAINMENT", label: "방송연예" },
   { value: "CHARACTER", label: "캐릭터" },
-  { value: "TEXT", label: "텍스트" },
+  { value: "LETTER", label: "텍스트" },
 ];
 
 function handleThumbnailUpdate(file: File) {
