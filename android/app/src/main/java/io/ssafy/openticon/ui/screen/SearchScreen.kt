@@ -110,7 +110,7 @@ fun SearchScreen(
                     }
                 } else {
                     Text(
-                        text = "( ꩜ ᯅ ꩜;)",
+                        text = "\u0028\u0020\uaa5c\u0020\u1bc5\u0020\uaa5c\u003b\u0029", // ( ꩜ ᯅ ꩜;)
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Spacer(Modifier.height(4.dp))
