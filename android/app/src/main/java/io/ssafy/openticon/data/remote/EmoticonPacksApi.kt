@@ -8,6 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Streaming
 import retrofit2.http.Url
@@ -33,6 +34,11 @@ interface EmoticonPacksApi {
     @GET("/api/v1/emoticonpacks/info")
     suspend fun getPublicPackInfo(
         @Query("emoticonPackId") emoticonPackId: Int
+    ): PackInfoResponseDto
+
+    @GET("/api/v1/emoticonpacks/info/{uuid}")
+    suspend fun getPackInfo(
+        @Path("uuid") uuid: String
     ): PackInfoResponseDto
 
     @Streaming
