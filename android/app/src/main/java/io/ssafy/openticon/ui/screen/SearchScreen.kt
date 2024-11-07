@@ -18,11 +18,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,6 +55,7 @@ import io.ssafy.openticon.domain.model.SearchEmoticonPacksListItem
 import io.ssafy.openticon.ui.component.ImageSearchBar
 import io.ssafy.openticon.ui.component.SearchBar
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
+import io.ssafy.openticon.ui.viewmodel.Sort
 
 @Composable
 fun SearchScreen(
@@ -64,6 +71,7 @@ fun SearchScreen(
     val imageUrl by viewModel.selectedImageUri.collectAsState()
 
     var isImageSearch by remember { mutableStateOf(false) }
+    var isSortExpanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val contentResolver = context.contentResolver
@@ -85,11 +93,49 @@ fun SearchScreen(
             )
         }
 
-        Text(
-            text = "검색결과",
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(16.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "검색결과",
+                style = MaterialTheme.typography.labelMedium,
+            )
+            Column {
+                TextButton(onClick = { isSortExpanded = !isSortExpanded }) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "최신순",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                DropdownMenu(
+                    expanded = isSortExpanded,
+                    onDismissRequest = { isSortExpanded = false }
+                ) {
+                    Sort.entries.forEach {
+                        DropdownMenuItem(
+                            text = { Text(it.displayName) },
+                            onClick = {
+                                isSortExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
 
         if (searchResult.isEmpty()) {
             Column(

@@ -165,3 +165,11 @@ enum class SearchKey(
     Author("author", "작가"),
     Tag("tag", "태그")
 }
+
+enum class Sort(
+    val value: String,
+    val displayName: String
+) {
+    New("new", "최신순"),
+    Most("most", "인기순")
+}
