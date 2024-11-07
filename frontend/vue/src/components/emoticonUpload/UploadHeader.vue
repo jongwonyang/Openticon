@@ -1,36 +1,56 @@
 <template>
   <div class="flex flex-col max-w-screen-lg mx-auto">
-    <div class="mt-10 px-4 grid grid-cols-1 gap-4 md:grid-cols-2 grid-flow-col">
-      <div class="flex flex-row items-center justify-around">
-        <ImageUploader
-          label="대표 이미지"
-          @update:file="handleThumbnailUpdate"
-        />
-        <ImageUploader
-          label="목록 이미지"
-          @update:file="handleListImageUpdate"
-        />
-      </div>
-      <div class="flex flex-col items-center justify-center gap-2">
-        <input
-          type="text"
-          placeholder="이모티콘 이름"
-          class="w-full h-10 border-2 border-gray-400 rounded-md"
-          v-model="packTitle"
-        />
-        <select
-          v-model="selectedCategory"
-          class="w-full h-10 border-2 border-gray-400 rounded-md"
-        >
-          <option value="" disabled>카테고리 선택</option>
-          <option
-            v-for="category in categories"
-            :key="category.value"
-            :value="category.value"
+    <div class="mt-10 px-4 grid grid-cols-1 gap-4">
+      <div class="flex flex-row gap-2">
+        <div class="flex-grow">
+          <p class="text-xl text-black font-nnsqneo-bold">이모티콘 이름</p>
+          <input
+            type="text"
+            placeholder="이모티콘 이름"
+            class="w-full h-10 border-2 border-gray-400 rounded-md px-2 focus:outline-none focus:border-slate-500 mt-2"
+            v-model="packTitle"
+          />
+        </div>
+        <div class="flex-grow-0 min-w-40">
+          <p class="text-xl text-black font-nnsqneo-bold">카테고리</p>
+          <select
+            v-model="selectedCategory"
+            class="w-full h-10 border-2 border-gray-400 rounded-md focus:outline-none focus:border-slate-500 mt-2"
           >
-            {{ category.label }}
-          </option>
-        </select>
+            <option value="" disabled>카테고리 선택</option>
+            <option
+              v-for="category in categories"
+              :key="category.value"
+              :value="category.value"
+            >
+              {{ category.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+        <div
+          class="flex flex-row items-center justify-around flex-grow-0 gap-4 w-full md:w-auto"
+        >
+          <ImageUploader
+            label="대표 이미지"
+            @update:file="handleThumbnailUpdate"
+          />
+          <ImageUploader
+            label="목록 이미지"
+            @update:file="handleListImageUpdate"
+          />
+        </div>
+        <div class="flex-grow flex flex-col h-full w-full">
+          <div class="text-xl text-black font-nnsqneo-bold">설명</div>
+          <textarea
+            v-model="description"
+            placeholder="이모티콘 설명"
+            class="w-full flex-grow h-full border-2 border-gray-400 rounded-md p-2 resize-none focus:outline-none focus:border-slate-500 mt-2"
+          >
+          </textarea>
+        </div>
       </div>
     </div>
   </div>
@@ -45,10 +65,11 @@ const emit = defineEmits([
   "update:listFile",
   "update:selectedCategory",
   "update:packTitle",
+  "update:description",
 ]);
 
 const selectedCategory = ref<string>("");
-
+const description = ref<string>("");
 watch(selectedCategory, (newValue) => {
   emit("update:selectedCategory", newValue);
 });
@@ -74,4 +95,7 @@ watch(packTitle, (newValue) => {
   emit("update:packTitle", newValue);
 });
 
+watch(description, (newValue) => {
+  emit("update:description", newValue);
+});
 </script>

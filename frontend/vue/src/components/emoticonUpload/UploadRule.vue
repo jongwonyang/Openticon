@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col max-w-screen-lg mx-auto mt-10 px-4">
+  <div class="flex flex-col max-w-screen-lg mx-auto">
     <div class="mt-4 mx-4 bg-gray-100 text-gray-600 rounded-md p-4">
       <p>
         1. 이모티콘 이미지는 폭력, 성희롱, 음란물 등 부적절한 이미지는 등록할 수
