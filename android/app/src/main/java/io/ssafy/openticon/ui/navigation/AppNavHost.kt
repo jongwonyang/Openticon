@@ -60,21 +60,24 @@ fun AppNavHost() {
             LoginSuccessScreen(accessToken, navController)
         }
 
-        composable("emoticonAll/{type}") { backStackEntry ->
-            val arg1 = backStackEntry.arguments?.getString("type")
-            EmoticonAllScreen(navController, arg1, null)
-        }
-
         composable(
-            route = "emoticonAll/{type}/{tag}",
+            route = "emoticonAll/{type}",
             arguments = listOf(
-                navArgument("type") { type = NavType.StringType },
-                navArgument("tag") { type = NavType.StringType; nullable = true }
+                navArgument("type") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val type = backStackEntry.arguments?.getString("type")
+            EmoticonAllScreen(navController, type, tag = null)
+        }
+
+        composable(
+            route = "emoticonAlltag/{tag}",
+            arguments = listOf(
+                navArgument("tag") { type = NavType.StringType; nullable = true }
+            )
+        ) { backStackEntry ->
             val tag = backStackEntry.arguments?.getString("tag")
-            EmoticonAllScreen(navController, type, tag)
+            EmoticonAllScreen(navController, "tag", tag)
         }
 
     }
