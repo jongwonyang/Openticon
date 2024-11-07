@@ -1,12 +1,41 @@
 package io.ssafy.openticon.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonRemove
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,14 +57,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import io.ssafy.openticon.R
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
@@ -46,173 +69,182 @@ fun ProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    fun getFormattedDate(timestamp: String): String {
-        return try {
-            // String 타입의 Unix 타임스탬프를 Long으로 변환
-            val seconds = timestamp.toDouble().toLong()  // 초 단위로 변환
-            val createdAt = Instant.ofEpochSecond(seconds)
-                .atZone(ZoneId.of("Asia/Seoul"))
-                .toOffsetDateTime()
-
-            // 원하는 형식으로 포맷
-            val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
-            createdAt.format(formatter)
-        } catch (e: NumberFormatException) {
-            "날짜 형식 오류"
-        }
-    }
-    Spacer(modifier = Modifier.height(30.dp))
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
-
-        // 프로필 이미지
-        AsyncImage(
-            model = if (memberEntity?.profile_image.isNullOrEmpty()) {
-                "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
-            } else {
-                memberEntity?.profile_image
-            },
-            contentDescription = "Profile Image",
-            contentScale = ContentScale.Crop, // 잘리지 않게 조정
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(Color.White, CircleShape)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 이름과 인증 마크
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            memberEntity?.nickname?.let {
-                Text(
-                    text = it,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+            IconButton(
+                onClick = { navController.navigate("settings") },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "앱 설정",
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
-            Spacer(modifier = Modifier.width(4.dp))
-            Image(
-                painter = painterResource(id = R.drawable.writer_mark),
-                contentDescription = "Writer Mark",
-                modifier = Modifier.size(20.dp)
-            )
         }
 
-        // 가입 날짜
-        memberEntity?.createdAt?.let {
-            Text(
-                text = it.slice(0..9),
-                fontSize = 14.sp,
-                color = Color.LightGray
-            )
-        }
+        LazyColumn {
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 포인트
-        Text(
-            text = "${memberEntity?.point ?: 0} 포인트",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 회원 수정, 회원 탈퇴 버튼
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Button(
-                onClick = { navController.navigate("edit_profile") },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(Color.LightGray)
-            ) {
-                Text("회원 수정", color = Color.Black)
-            }
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        val result = viewModel.deleteMember()
-                        if (result.isSuccess) {
-                            // 회원 삭제 성공 시 모달 창 띄우기
-                            showDeleteDialog = true
-                        } else {
-                            println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .border(
+                                    width = 4.dp,
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = CircleShape
+                                )
+                        ) {
+                            if (memberEntity?.profile_image.isNullOrEmpty()) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = memberEntity?.profile_image,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(R.drawable.loading_img),
+                                    error = painterResource(R.drawable.ic_broken_image),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = memberEntity?.nickname ?: "",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        FilledTonalButton(
+                            onClick = {}
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Payments,
+                                    contentDescription = null
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text("${memberEntity?.point ?: 0} 포인트")
+                            }
                         }
                     }
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(Color.LightGray)
-            ) {
-                Text("회원 탈퇴", color = Color.Black)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // 포인트 충전 버튼
-        Button(
-            onClick = { /* 포인트 충전 기능 */ },
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(48.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(Color(0xFF4C9EFF)) // 파란색 버튼
-        ) {
-            Text("포인트 충전", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize() // 화면 전체 크기로 설정
-                .padding(bottom = 16.dp) // 하단 여백 설정
-        ) {
-            Spacer(modifier = Modifier.weight(1f)) // 남은 공간을 채우기 위한 Spacer
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp), // 좌우 여백 설정
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // 버튼 간 간격 조정
-            ) {
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            viewModel.logout()
-                            navController.navigate("login")
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB22222)), // 어두운 빨간색 버튼
-                    modifier = Modifier
-                        .weight(1f) // 버튼 크기 균일하게 설정
-                        .height(40.dp) // 버튼 높이 설정
-                ) {
-                    Text("로그아웃", color = Color.White)
                 }
 
-                Button(
-                    onClick = {
-                        navController.navigate("settings")
-                    },
-                    modifier = Modifier
-                        .weight(1f) // 버튼 크기 균일하게 설정
-                        .height(40.dp) // 버튼 높이 설정
-                ) {
-                    Text("설정")
+                Spacer(Modifier.height(16.dp))
+
+                Column {
+                    ListItem(
+                        headlineContent = { Text("내 정보 수정") },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = null
+                            )
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier
+                            .clickable { navController.navigate("edit_profile") }
+                            .padding(vertical = 8.dp)
+                    )
+                    HorizontalDivider()
+                    ListItem(
+                        headlineContent = { Text("로그아웃") },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = null
+                            )
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier
+                            .clickable {
+                                coroutineScope.launch {
+                                    viewModel.logout()
+                                    navController.navigate("login")
+                                }
+                            }
+                            .padding(vertical = 8.dp)
+                    )
+                    HorizontalDivider()
+                    ListItem(
+                        headlineContent = { Text("회원탈퇴") },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Filled.PersonRemove,
+                                contentDescription = null
+                            )
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier
+                            .clickable {
+                                coroutineScope.launch {
+                                    val result = viewModel.deleteMember()
+                                    if (result.isSuccess) {
+                                        // 회원 삭제 성공 시 모달 창 띄우기
+                                        showDeleteDialog = true
+                                    } else {
+                                        println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
+                                    }
+                                }
+                            }
+                            .padding(vertical = 8.dp)
+                    )
+                    HorizontalDivider()
+                    Spacer(Modifier.height(128.dp))
                 }
             }
         }
-
-
-
-
 
         if (showDeleteDialog) {
             AlertDialog(
