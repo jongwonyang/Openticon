@@ -70,10 +70,10 @@ const REDIRECT_URI = `${PAGE_BASE_URL}/processLogin`;
 
 function handleMessage(event: MessageEvent) {
   if (event.origin !== PAGE_BASE_URL) return;
-  console.log("event : ", event);
-  console.log(PAGE_BASE_URL);
+  if (typeof event.data !== "string") return;
   const userStore = useUserStore();
   userStore.login(event.data);
+  // TODO: 로그인 성공 알림 지우기
   makeSuccessAlert(
     "로그인이 완료되었습니다. 콘솔 로그에서 액세스 토큰을 확인해주세요."
   );

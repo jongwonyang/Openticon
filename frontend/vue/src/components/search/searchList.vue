@@ -20,6 +20,16 @@
           <p class="text-sm text-center text-gray-500">
             {{ emoticon.member.nickname }}
           </p>
+          <div>
+            <span
+              v-if="emoticon.price == 0"
+              class="text-md text-blue-500 font-nnsqneo-bold"
+              >무료</span
+            >
+            <span v-else class="text-md text-red-500 font-nnsqneo-bold"
+              >{{ emoticon.price }} 포인트</span
+            >
+          </div>
         </div>
       </RouterLink>
     </div>
@@ -84,21 +94,12 @@ const loadMoreEmoticons = async () => {
   }
 };
 
-const { y } = useWindowScroll();
-
 useInfiniteScroll(
   window,
   async () => {
-    const scrollHeight = document.documentElement.scrollHeight;
-    const scrollTop = y.value;
-    const clientHeight = document.documentElement.clientHeight;
-
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-      // 하단에서 100px 남았을 때 로드
-      await loadMoreEmoticons();
-    }
+    await loadMoreEmoticons();
   },
-  { distance: 10 }
+  { distance: 400 }
 );
 
 onMounted(async () => {
@@ -121,7 +122,7 @@ watch(props, (newProps) => {
   transition: transform 0.05s ease, box-shadow 0.05s ease,
     border-color 0.05s ease, border-radius 0.05s ease;
   cursor: pointer;
-  @apply hover:font-bold hover:underline hover:rounded-lg hover:shadow-lg hover:scale-105;
+  @apply hover:rounded-lg hover:shadow-lg hover:scale-105 active:scale-95 active:bg-gray-50;
 }
 
 .emoticon-item-no-hover {

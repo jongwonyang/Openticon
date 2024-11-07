@@ -11,6 +11,7 @@ import MypageView from "@/views/MypageView.vue";
 import { useUserStore } from "@/stores/user";
 import { makeWarningAlert } from "@/util/alert";
 import SearchResultView from "@/views/SearchResultView.vue";
+import EmoticonDetailPrivateView from "@/views/EmoticonDetailPrivateView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,11 @@ const router = createRouter({
       path: "/packDetail/:id",
       name: "packDetail",
       component: EmoticonDetailView,
+    },
+    {
+      path: "/packDetailPrivate/:id",
+      name: "packDetailPrivate",
+      component: EmoticonDetailPrivateView,
     },
     {
       path: "/processLogin",
