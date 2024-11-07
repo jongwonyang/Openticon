@@ -37,12 +37,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import io.ssafy.openticon.R
 import io.ssafy.openticon.domain.model.SearchEmoticonPacksListItem
 import io.ssafy.openticon.ui.component.ImageSearchBar
 import io.ssafy.openticon.ui.component.SearchBar
@@ -200,7 +202,9 @@ fun SearchResultItem(
                     modifier = Modifier
                         .size(72.dp)
                         .clip(RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.loading_img),
+                    error = painterResource(R.drawable.ic_broken_image),
                 )
                 Spacer(Modifier.width(16.dp))
                 Column(
