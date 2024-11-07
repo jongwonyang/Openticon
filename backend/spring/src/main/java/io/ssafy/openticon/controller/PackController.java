@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -86,20 +87,22 @@ public class PackController {
     @GetMapping("/info/{uuid}")
     @Operation(summary = "비공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfo(@AuthenticationPrincipal UserDetails userDetails,
-                                                            @PathVariable("uuid") String uuid) throws AuthenticationException {
+                                                            @PathVariable("uuid") String uuid,
+                                                            HttpServletRequest request) throws AuthenticationException {
 
-        String email=userDetails.getUsername();
+        //String email=userDetails.getUsername();
 
-        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfo(uuid,email));
+        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfo(uuid,userDetails,request.getRemoteAddr()));
 
     }
 
     @GetMapping("/info")
     @Operation(summary = "공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfoPublic(@AuthenticationPrincipal UserDetails userDetails,
-                                                                  @RequestParam("emoticonPackId") String packId){
+                                                                  @RequestParam("emoticonPackId") String packId,
+                                                                  HttpServletRequest request){
 
-        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId));
+        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfoByPackId(packId, userDetails, request.getRemoteAddr()));
 
     }
 

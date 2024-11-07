@@ -2,6 +2,8 @@ package io.ssafy.openticon.controller.response;
 
 import io.ssafy.openticon.dto.Category;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
+import io.ssafy.openticon.entity.TagEntity;
+import io.ssafy.openticon.entity.TagListEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -43,6 +46,10 @@ public class PackInfoResponseDto {
 
     private String createdAt;
 
+    private List<String> tags;
+
+    private String sharedLink;
+
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
     public PackInfoResponseDto(EmoticonPackEntity emoticonPackEntity, List<String> emoticons){
@@ -64,6 +71,11 @@ public class PackInfoResponseDto {
         this.emoticons=emoticons;
         this.isPublic = emoticonPackEntity.isPublic();
         this.isBlacklist = emoticonPackEntity.getBlacklist();
+        this.tags = new ArrayList<>();
+        for(TagListEntity tagListEntity : emoticonPackEntity.getTagLists()){
+            tags.add(tagListEntity.getTag().getTagName());
+        }
+        this.sharedLink=emoticonPackEntity.getShareLink();
     }
 
     private String formatToKST(OffsetDateTime dateTime) {
