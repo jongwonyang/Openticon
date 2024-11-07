@@ -5,10 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ssafy.openticon.di.UserSession
-import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.domain.model.SearchEmoticonPacksListItem
 import io.ssafy.openticon.domain.usecase.SearchEmoticonPacksUseCase
-import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,7 +17,7 @@ import javax.inject.Inject
 class StoreViewModel @Inject constructor(
     private val searchEmoticonPacksUseCase: SearchEmoticonPacksUseCase,
     private val userSession: UserSession
-): ViewModel() {
+) : ViewModel() {
     private val _newEmoticonPack = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
     private val _popularEmoticonPack = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
     private val _tag1EmoticonPack = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
@@ -55,22 +53,56 @@ class StoreViewModel @Inject constructor(
                 val updatedNewItems = mutableListOf<SearchEmoticonPacksListItem>()
 
                 // Add empty items to the beginning and end of the list
-                updatedNewItems.add(SearchEmoticonPacksListItem(0, "", "", "https://www.htmlcsscolor.com/preview/128x128/FAF9FD.png"))
+                updatedNewItems.add(
+                    SearchEmoticonPacksListItem(
+                        0,
+                        "",
+                        "",
+                        "https://www.htmlcsscolor.com/preview/128x128/FAF9FD.png",
+                        ""
+                    )
+                )
                 updatedNewItems.addAll(newItems)
-                updatedNewItems.add(SearchEmoticonPacksListItem(0, "", "", "https://www.htmlcsscolor.com/preview/128x128/FAF9FD.png"))
+                updatedNewItems.add(
+                    SearchEmoticonPacksListItem(
+                        0,
+                        "",
+                        "",
+                        "https://www.htmlcsscolor.com/preview/128x128/FAF9FD.png",
+                        ""
+                    )
+                )
 
                 _newEmoticonPack.value = updatedNewItems
 
                 val (popularItems, _) = searchEmoticonPacksUseCase("title", "", "most", 9, 0)
                 _popularEmoticonPack.value = popularItems
 
-                val (tag1Items, _) = searchEmoticonPacksUseCase("tag",_tagQuery1.value, "most", 10, 0)
+                val (tag1Items, _) = searchEmoticonPacksUseCase(
+                    "tag",
+                    _tagQuery1.value,
+                    "most",
+                    10,
+                    0
+                )
                 _tag1EmoticonPack.value = tag1Items
 
-                val (tag2Items, _) = searchEmoticonPacksUseCase("tag",_tagQuery2.value, "most", 10, 0)
+                val (tag2Items, _) = searchEmoticonPacksUseCase(
+                    "tag",
+                    _tagQuery2.value,
+                    "most",
+                    10,
+                    0
+                )
                 _tag2EmoticonPack.value = tag2Items
 
-                val (tag3Items, _) = searchEmoticonPacksUseCase("tag",_tagQuery3.value, "most", 10, 0)
+                val (tag3Items, _) = searchEmoticonPacksUseCase(
+                    "tag",
+                    _tagQuery3.value,
+                    "most",
+                    10,
+                    0
+                )
                 _tag3EmoticonPack.value = tag3Items
             } catch (e: Exception) {
                 Log.e("StoreViewModel", "Error loading tag emoticon packs", e)

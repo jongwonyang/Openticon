@@ -1,10 +1,9 @@
 package io.ssafy.openticon.ui.screen
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -53,8 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -76,7 +73,7 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmoticonPackDetailScreen(
-    emoticonPackId: Int,
+    emoticonPackUuid: String,
     navController: NavController,
     viewModel: EmoticonPackDetailScreenViewModel = hiltViewModel()
 ) {
@@ -89,9 +86,15 @@ fun EmoticonPackDetailScreen(
     var selectedEmoticonIndex by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var showDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(emoticonPackId) {
-        viewModel.fetchEmoticonPackDetail(emoticonPackId)
-        viewModel.fetchPurchaseInfo(emoticonPackId)
+    LaunchedEffect(emoticonPackUuid) {
+        viewModel.fetchEmoticonPackDetail(emoticonPackUuid)
+    }
+
+    LaunchedEffect(uiState) {
+        if (uiState is UiState.Success) {
+            val data = (uiState as UiState.Success).data
+            viewModel.fetchPurchaseInfo(data.id)
+        }
     }
 
     Scaffold(
@@ -115,7 +118,17 @@ fun EmoticonPackDetailScreen(
                             contentDescription = null
                         )
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {
+                        val shareIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "https://share.openticon.store/$emoticonPackUuid"
+                            )
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "공유하기"))
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Share,
                             contentDescription = null
@@ -164,7 +177,7 @@ fun EmoticonPackDetailScreen(
                                 PrimaryActionButton(
                                     onClick = {
                                         if (!isDownloading)
-                                            viewModel.downloadEmoticonPack(packId = emoticonPackId)
+                                            viewModel.downloadEmoticonPack(packId = purchaseInfo.packId)
                                     },
                                     text = if (isDownloading) "다운로드 중" else "다운로드",
                                     enabled = !isDownloading
@@ -420,7 +433,9 @@ fun EmoticonPackDetailScreen(
         }
     }
 
-    if (showDialog) {
+    if (purchaseState is UiState.Success && showDialog) {
+        val purchaseInfo = (purchaseState as UiState.Success).data
+
         AlertDialog(
             icon = {
                 Icon(
@@ -440,7 +455,7 @@ fun EmoticonPackDetailScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.purchaseEmoticonPack(packId = emoticonPackId)
+                        viewModel.purchaseEmoticonPack(packId = purchaseInfo.packId)
                         showDialog = false
                     }
                 ) {

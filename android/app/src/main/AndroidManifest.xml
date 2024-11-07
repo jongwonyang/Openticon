@@ -51,6 +51,17 @@
                 <data android:host="successLogin" android:scheme="openticon"
                     tools:ignore="AppLinkUrlError" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="openticon"
+                    android:host="emoticon-pack"
+                    android:pathPrefix="/"
+                    android:pathPattern="/.*" />
+            </intent-filter>
         </activity>
         <service
             android:name=".KeyboardAccessibilityService"

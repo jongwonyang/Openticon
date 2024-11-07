@@ -42,10 +42,10 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
     private val _isDownloading = MutableStateFlow(false)
     val isDownloading: StateFlow<Boolean> = _isDownloading
 
-    fun fetchEmoticonPackDetail(emoticonPackId: Int) {
+    fun fetchEmoticonPackDetail(emoticonPackUuid: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val result = getPublicPackDetailUseCase(emoticonPackId)
+            val result = getPublicPackDetailUseCase(emoticonPackUuid)
             if (result.isSuccess) {
                 _uiState.value = UiState.Success(result.getOrThrow())
             } else {

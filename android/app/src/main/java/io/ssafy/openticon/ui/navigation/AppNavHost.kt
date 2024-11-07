@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import io.ssafy.openticon.ui.screen.EditProfileScreen
 import io.ssafy.openticon.ui.screen.EmoticonAllScreen
 import io.ssafy.openticon.ui.screen.EmoticonPackDetailScreen
@@ -40,23 +41,30 @@ fun AppNavHost() {
         }
 
         composable(
-            route = "emoticonPack/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.IntType })
+            route = "emoticonPack/{uuid}",
+            arguments = listOf(navArgument("uuid") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "openticon://emoticon-pack/{uuid}" })
         ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getInt("id")
-            if (id != null) {
-                EmoticonPackDetailScreen(emoticonPackId = id, navController = navController)
+            val uuid = backStackEntry.arguments?.getString("uuid")
+            if (uuid != null) {
+                EmoticonPackDetailScreen(emoticonPackUuid = uuid, navController = navController)
             }
         }
 
 
         composable(
-            route = "login_success?accessToken={accessToken}&refreshToken={refreshToken}",
+            route = "login_success?access_token={access_token}",
             arguments = listOf(
-                navArgument("accessToken") { defaultValue = "" },
+                navArgument("access_token") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "openticon://successLogin?access_token={access_token}" }
             )
         ) { backStackEntry ->
-            val accessToken = backStackEntry.arguments?.getString("accessToken") ?: ""
+            val accessToken = backStackEntry.arguments?.getString("access_token") ?: ""
             LoginSuccessScreen(accessToken, navController)
         }
 
@@ -80,12 +88,5 @@ fun AppNavHost() {
             EmoticonAllScreen(navController, "tag", tag)
         }
 
-    }
-
-    context.intent?.data?.let { uri ->
-        if (uri.toString().contains("successLogin")) {
-            val accessToken = uri.getQueryParameter("access_token") ?: ""
-            navController.navigate("login_success?accessToken=$accessToken")
-        }
     }
 }
