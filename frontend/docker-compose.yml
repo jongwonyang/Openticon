@@ -8,6 +8,7 @@ services:
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
         VITE_APP_URL: ${VITE_APP_URL}
+        VITE_SHARE_URL: ${VITE_SHARE_URL}
     ports:
       - "3000:80"
     networks:
