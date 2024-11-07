@@ -26,6 +26,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,7 +79,7 @@ fun LoginScreen(
                     IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Help,
-                            contentDescription = "Localized description"
+                            contentDescription = null
                         )
                     }
                 },
@@ -93,7 +94,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Box(
-                modifier = Modifier.clip(RoundedCornerShape(16.dp))
+                modifier = Modifier.clip(RoundedCornerShape(40))
             ) {
                 Image(
                     painter = painterResource(R.drawable.ic_launcher_background),
@@ -104,6 +105,17 @@ fun LoginScreen(
                     contentDescription = null,
                 )
             }
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = "OPENTICON",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "세상의 모든 이모티콘",
+                style = MaterialTheme.typography.titleSmall
+            )
 
             Spacer(Modifier.height(128.dp))
 
