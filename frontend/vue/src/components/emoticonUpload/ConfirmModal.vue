@@ -38,9 +38,16 @@
             'bg-gray-500 border-gray-500 hover:bg-gray-500 active:bg-gray-500':
               isUploading,
           }"
+          v-if="!isFailed"
         >
           <span v-if="!isUploading">업로드</span>
           <span v-else>업로드중...</span>
+        </button>
+        <button
+          class="border border-orange-500 bg-orange-500 text-white rounded-md px-4 py-2 hover:bg-orange-600 transition-all duration-200 ease-in-out active:bg-orange-700"
+          v-if="isFailed"
+        >
+          업로드 실패!
         </button>
       </div>
       <div v-if="isUploaded" class="flex justify-end gap-2 p-6">
@@ -111,7 +118,7 @@ const emoticonPackStore = useEmoticonPackStore();
 
 const isUploading = ref(false);
 const isUploaded = ref(false);
-
+const isFailed = ref(false);
 function closeModal() {
   emit("update:isOpen", false);
 }
@@ -129,7 +136,10 @@ function handleConfirm() {
       isUploaded.value = true;
     }).catch((e) => {
       isUploading.value = false;
-      makeWarningAlert(e.response.data.message);
+      isFailed.value = true;
+      setTimeout(() => {
+        isFailed.value = false;
+      }, 3000);
     });
 
 //     {
