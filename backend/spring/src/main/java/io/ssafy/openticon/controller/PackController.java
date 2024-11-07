@@ -87,11 +87,12 @@ public class PackController {
     @GetMapping("/info/{uuid}")
     @Operation(summary = "비공개 이모티콘팩 경로에 접근합니다.")
     public ResponseEntity<PackInfoResponseDto> viewPackInfo(@AuthenticationPrincipal UserDetails userDetails,
-                                                            @PathVariable("uuid") String uuid) throws AuthenticationException {
+                                                            @PathVariable("uuid") String uuid,
+                                                            HttpServletRequest request) throws AuthenticationException {
 
-        String email=userDetails.getUsername();
+        //String email=userDetails.getUsername();
 
-        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfo(uuid,email));
+        return ResponseEntity.status(HttpStatus.OK).body(packService.getPackInfo(uuid,userDetails,request.getRemoteAddr()));
 
     }
 
