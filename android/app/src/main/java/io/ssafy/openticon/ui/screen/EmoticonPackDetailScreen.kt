@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
@@ -117,7 +118,17 @@ fun EmoticonPackDetailScreen(
                             contentDescription = null
                         )
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {
+                        val shareIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "https://share.openticon.store/$emoticonPackUuid"
+                            )
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "공유하기"))
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Share,
                             contentDescription = null
