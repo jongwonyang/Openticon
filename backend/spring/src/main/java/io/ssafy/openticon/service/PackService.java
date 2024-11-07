@@ -276,13 +276,13 @@ public class PackService {
         return body;
     }
 
-    public PackInfoResponseDto getPackInfo(String uuid, String email) throws AuthenticationException {
+    public PackInfoResponseDto getPackInfo(String uuid, UserDetails userDetails, String requestIp) throws AuthenticationException {
 
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
 
-        if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
-            throw new OpenticonException(ErrorCode.PRIVATE_PACK);
-        }
+//        if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
+//            throw new OpenticonException(ErrorCode.PRIVATE_PACK);
+//        }
 
         if(emoticonPackEntity.getBlacklist()){
             throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
@@ -290,6 +290,7 @@ public class PackService {
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
 
+        redisViewService.incrementView(emoticonPackEntity, userDetails, requestIp);
         return new PackInfoResponseDto(emoticonPackEntity,emoticons);
     }
 
