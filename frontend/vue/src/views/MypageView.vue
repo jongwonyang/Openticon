@@ -51,7 +51,7 @@
         </div>
 
         <div class="flex flex-col p-4">
-          <MyEmoticonList />
+          <MyEmoticonList :myEmoticonList="myEmoticonList" />
         </div>
       </div>
     </div>
@@ -63,8 +63,19 @@ import { useUserStore } from "@/stores/user";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import MyEmoticonList from "@/components/mypage/MyEmoticonList.vue";
+import { useEmoticonPackStore } from "@/stores/emoticonPack";
+import type { EmoticonPackInList } from "@/types/emoticonPackInList";
 
 const userStore = useUserStore();
+const emoticonStore = useEmoticonPackStore();
+
+const myEmoticonList = ref<EmoticonPackInList[]>([]);
+
+onMounted(async () => {
+  const response = await emoticonStore.getMyEmoticonPackList(0, 10);
+  myEmoticonList.value = response.content;
+});
+
 </script>
 
 <style scoped>

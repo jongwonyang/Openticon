@@ -77,5 +77,15 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
     });
   };
 
-  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack, uploadEmoticonPack };
+  const getMyEmoticonPackList = async (page: number, size: number): Promise<EmoticonPackSearchList> => {
+    const response = await apiClient.get(`/emoticonpacks/mylist`, {
+      params: {
+        page: page,
+        size: size,
+      },
+    });
+    return response.data;
+  };
+
+  return { getEmoticonPackData, getNewEmoticonPackList, getPopularEmoticonPackList, searchEmoticonPack, uploadEmoticonPack, getMyEmoticonPackList };
 });
