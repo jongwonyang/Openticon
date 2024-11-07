@@ -57,15 +57,15 @@
       </div>
 
       <div class="pt-1 px-2 flex justify-between">
-        <template v-if="emoticon?.price !== 0">
+        <div v-if="emoticon?.price !== 0">
           <span class="font-bold text-2xl text-red-500">{{
             emoticon?.price
           }}</span>
           <span class="text-sm text-gray-500 pl-1">포인트</span>
-        </template>
-        <template v-else>
+        </div>
+        <div v-else>
           <span class="font-bold text-2xl text-blue-500"> 무료 </span>
-        </template>
+        </div>
         <div class="flex items-center">
           <button
             class="text-sm text-gray-500 hover:bg-gray-200 rounded-full p-1 flex items-center justify-center transition duration-200"

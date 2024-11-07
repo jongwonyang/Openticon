@@ -15,15 +15,15 @@
         <div class="flex flex-col">
           <div class="text-xl">{{ emoticon.title }}</div>
           <div>
-          <span
-            v-if="emoticon.price == 0"
-            class="text-md text-blue-500 font-nnsqneo-bold"
-            >무료</span
-          >
-          <span v-else class="text-md text-red-500 font-nnsqneo-bold"
-            >{{ emoticon.price }} 포인트</span
-          >
-          <span
+            <span
+              v-if="emoticon.price == 0"
+              class="text-md text-blue-500 font-nnsqneo-bold"
+              >무료</span
+            >
+            <span v-else class="text-md text-red-500 font-nnsqneo-bold"
+              >{{ emoticon.price }} 포인트</span
+            >
+            <span
               class="text-sm text-white ml-1 px-2 rounded-full w-fit whitespace-nowrap"
               :class="emoticon.public ? 'bg-green-500' : 'bg-red-500'"
               >{{ emoticon.public ? "공개" : "비공개" }}</span
@@ -63,7 +63,10 @@ const handleEmoticonClick = (emoticon: EmoticonPackInList) => {
   if (emoticon.public) {
     router.push({ name: "packDetail", params: { id: emoticon.id } });
   } else {
-    router.push({ name: "packDetailPrivate", params: { id: emoticon.shareLink } });
+    router.push({
+      name: "packDetailPrivate",
+      params: { id: emoticon.shareLink },
+    });
   }
 };
 </script>
