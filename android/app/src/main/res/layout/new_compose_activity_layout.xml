@@ -63,7 +63,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@android:drawable/ic_menu_preferences" />
+            android:src="@drawable/otter"/>
     </TableRow>
 
     <!-- 텍스트뷰 -->
@@ -71,7 +71,6 @@
         android:id="@+id/floatingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Floating View!"
         android:textSize="18sp" />
 
     <!-- ScrollView와 TableLayout 추가 -->

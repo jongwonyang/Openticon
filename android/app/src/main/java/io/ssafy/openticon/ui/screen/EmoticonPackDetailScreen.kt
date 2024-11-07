@@ -56,6 +56,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +67,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.request.ImageRequest
+import io.ssafy.openticon.R
 import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel
 import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel.UiState
@@ -224,7 +226,9 @@ fun EmoticonPackDetailScreen(
                                     }
                                     .build(),
                                 modifier = Modifier
-                                    .size(128.dp)
+                                    .size(128.dp),
+                                placeholder = painterResource(R.drawable.loading_img),
+                                error = painterResource(R.drawable.ic_broken_image),
                             )
                         }
                     }
@@ -270,11 +274,10 @@ fun EmoticonPackDetailScreen(
                         Spacer(Modifier.height(16.dp))
                     }
 
-                    items(emoticonPack.items.chunked(3).withIndex().toList()) { (rowIndex,row) ->
+                    items(emoticonPack.items.chunked(3).withIndex().toList()) { (rowIndex, row) ->
                         Row(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                ,
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             if (row.size == 3) {
@@ -312,8 +315,8 @@ fun EmoticonPackDetailScreen(
                                                 // 다른 곳을 클릭하면 선택 해제
                                                 selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
                                             },
-
-
+                                        placeholder = painterResource(R.drawable.loading_img),
+                                        error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 }
                             } else {
@@ -350,7 +353,8 @@ fun EmoticonPackDetailScreen(
                                                 // 다른 곳을 클릭하면 선택 해제
                                                 selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
                                             },
-
+                                        placeholder = painterResource(R.drawable.loading_img),
+                                        error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 }
                                 for (i in row.size until 3) {
