@@ -9,7 +9,7 @@
             <p class="absolute -top-[12%] left-[70%] text-indigo-700 z-0 whitespace-nowrap rotate-[20deg]">
                 <span class="material-icons text-[150px] transition-all duration-300">local_fire_department</span>
             </p>
-            <p class="absolute top-12 left-[5%] text-7xl font-nnsqneo-heavy text-blue-800 z-10 shadow-text whitespace-nowrap">인기</p>
+            <p class="absolute top-12 left-[5%] text-7xl font-nnsqneo-heavy text-indigo-700 z-10 shadow-text whitespace-nowrap">인기</p>
         </div>
     </div>
 </template>
