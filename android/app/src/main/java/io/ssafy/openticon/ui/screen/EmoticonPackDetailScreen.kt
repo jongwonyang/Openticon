@@ -3,7 +3,10 @@ package io.ssafy.openticon.ui.screen
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +52,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -275,10 +281,16 @@ fun EmoticonPackDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             if (row.size == 3) {
-                                for ((colIndex, item) in row.withIndex()) {
-                                    val isSelected =
-                                        selectedEmoticonIndex == Pair(rowIndex, colIndex)
-                                    val size by animateDpAsState(targetValue = if (isSelected) 130.dp else 100.dp)
+                                for ((colIndex,item) in row.withIndex()) {
+                                    val isSelected = selectedEmoticonIndex == Pair(rowIndex, colIndex)
+                                    val scale by animateFloatAsState(
+                                        targetValue = when {
+                                            isSelected -> 1.25f
+                                            selectedEmoticonIndex == null -> 1f
+                                            else -> 0.75f
+                                        }
+                                    )
+
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(item)
@@ -291,23 +303,33 @@ fun EmoticonPackDetailScreen(
                                             }
                                             .build(),
                                         modifier = Modifier
-//                                            .size(size)
+                                            .scale(scale)
+//                                            .height(size)
                                             .weight(1f)
                                             .aspectRatio(1f)
-                                            .clickable {
-                                                // 클릭한 이모티콘이 이미 선택된 경우 해제, 아니면 선택
-                                                selectedEmoticonIndex =
-                                                    if (isSelected) null else Pair(
-                                                        rowIndex,
-                                                        colIndex
-                                                    )
+                                            .clickable(
+                                                indication = null, // 클릭 효과 제거
+                                                interactionSource = remember { MutableInteractionSource() } // 상호작용 효과 제거
+                                            ) {
+                                                Log.d("EmoticonPackDetailScreen", "Clicked: $rowIndex, $colIndex")
+                                                // 다른 곳을 클릭하면 선택 해제
+                                                selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
                                             },
                                         placeholder = painterResource(R.drawable.loading_img),
                                         error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 }
                             } else {
-                                for (item in row) {
+                                for ((colIndex,item) in row.withIndex()) {
+                                    val isSelected = selectedEmoticonIndex == Pair(rowIndex, colIndex)
+                                    val scale by animateFloatAsState(
+                                        targetValue = when {
+                                            isSelected -> 1.25f
+                                            selectedEmoticonIndex == null -> 1f
+                                            else -> 0.75f
+                                        }
+                                    )
+
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(item)
@@ -320,9 +342,17 @@ fun EmoticonPackDetailScreen(
                                             }
                                             .build(),
                                         modifier = Modifier
-//                                            .size(size)
+                                            .scale(scale)
+//                                            .height(size)
                                             .weight(1f)
-                                            .aspectRatio(1f),
+                                            .aspectRatio(1f)
+                                            .clickable(
+                                                indication = null, // 클릭 효과 제거
+                                                interactionSource = remember { MutableInteractionSource() } // 상호작용 효과 제거
+                                            ) {
+                                                // 다른 곳을 클릭하면 선택 해제
+                                                selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
+                                            },
                                         placeholder = painterResource(R.drawable.loading_img),
                                         error = painterResource(R.drawable.ic_broken_image),
                                     )
@@ -353,9 +383,7 @@ fun EmoticonPackDetailScreen(
                                         contentDescription = null,
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(50))
-                                            .size(40.dp),
-                                        placeholder = painterResource(R.drawable.loading_img),
-                                        error = painterResource(R.drawable.ic_broken_image),
+                                            .size(40.dp)
                                     )
                                 },
                                 headlineContent = { Text(emoticonPack.authorNickname) },
