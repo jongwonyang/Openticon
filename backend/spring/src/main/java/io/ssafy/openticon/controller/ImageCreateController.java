@@ -38,6 +38,19 @@ public class ImageCreateController {
                 .post()
                 .bodyValue(gpuRequest)
                 .retrieve()
+                // 상태 코드에 따른 오류 처리
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse -> {
+                    // 응답 상태 코드 및 본문 로그
+                    clientResponse.bodyToMono(String.class)
+                            .doOnTerminate(() -> {
+                                System.out.println("Response Status: " + clientResponse.statusCode());
+                            })
+                            .flatMap(body -> {
+                                System.out.println("Error Response Body: " + body);
+                                return Mono.error(new RuntimeException("GPU server error: " + body));
+                            });
+                    return Mono.empty(); // 해당 오류를 정상 처리
+                })
                 .bodyToMono(byte[].class)  // PNG 파일을 byte[] 형태로 받음
                 .map(imageBytes -> {
                     // byte[] 데이터를 InputStream으로 변환
@@ -45,12 +58,13 @@ public class ImageCreateController {
 
                     // PNG 파일을 클라이언트에게 스트리밍으로 전송
                     return ResponseEntity.ok()
-                            .contentType(MediaType.IMAGE_PNG)  // 응답의 콘텐츠 타입을 image/png로 설정
-                            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"generated-image.png\"")  // 인라인 파일로 전송
+                            .contentType(MediaType.IMAGE_PNG)
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"generated-image.png\"")
                             .body(new InputStreamResource(byteArrayInputStream));  // InputStreamResource로 스트리밍 파일 반환
                 })
                 .onErrorResume(e -> {
-                    // GPU 서버에서 오류 발생 시 처리 (예: 500 오류 반환)
+                    // 오류 발생 시 로그 추가
+                    e.printStackTrace();
                     return Mono.error(new RuntimeException("Error generating image from GPU server", e));
                 });
     }
