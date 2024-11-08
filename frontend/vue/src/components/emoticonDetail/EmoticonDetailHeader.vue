@@ -76,8 +76,15 @@
         </div>
       </div>
       <div class="px-2 pt-2">
+        <!-- 데스크톱에서만 표시되는 구매 안내 메시지 -->
         <div
-          class="w-full p-4 text-center border text-white border-blue-400 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition duration-200 rounded-md"
+          class="hidden sm:block w-full p-4 text-center border text-gray-500 border-gray-300 bg-gray-200 rounded-sm"
+        >
+          앱에서 구매할 수 있습니다.
+        </div>
+        <!-- 앱에서 보기 버튼 (모바일에서만 표시) -->
+        <div
+          class="sm:hidden w-full p-4 text-center border text-white border-blue-400 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition duration-200 rounded-md"
           @click="handleOpenApp"
         >
           앱에서 보기

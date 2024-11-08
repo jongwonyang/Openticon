@@ -33,5 +33,13 @@ export const useUserStore = defineStore("user", () => {
   const getAccessToken = () => {
     return accessToken.value;
   };
-  return { isLogined, userInfo, getAccessToken, login, logout };
+
+  const updateProfileImage = (file: File) => {
+    alert("프로필 이미지 변경은 준비중입니다.");
+    // apiClient.put("/member/profile-image", { file }).then((res) => {
+    //   userInfo.value = res.data;
+    // });
+  };
+
+  return { isLogined, userInfo, getAccessToken, login, logout, updateProfileImage };
 });

@@ -83,8 +83,12 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
     formData.append("packInfo", JSON.stringify(packInfo));
 
     // 파일들 추가
-    formData.append("thumbnail_img", files.thumbnailImg);
-    formData.append("list_img", files.listImg);
+    if (files.thumbnailImg) {
+      formData.append("thumbnail_img", files.thumbnailImg);
+    }
+    if (files.listImg) {
+      formData.append("list_img", files.listImg);
+    }
 
     // 여러 이모티콘 파일들 추가
     files.emoticons.forEach((emoticon) => {

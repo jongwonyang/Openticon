@@ -1,7 +1,10 @@
 <template>
   <div class="flex flex-col max-w-screen-lg mx-auto mt-4">
     <div class="px-4">
-      <div class="text-xl text-black font-nnsqneo-bold">이모티콘 이미지</div>
+      <div class="flex flex-row items-center">
+        <span class="text-lg text-black font-nnsqneo-bold">이모티콘 이미지</span>
+        <span class="text-red-500">*</span>
+      </div>
       <VueDraggable
         v-model="emoticonImages"
         :animation="200"

@@ -3,7 +3,10 @@
     <div class="mt-10 px-4 grid grid-cols-1 gap-4">
       <div class="flex flex-row gap-2">
         <div class="flex-grow">
-          <p class="text-xl text-black font-nnsqneo-bold">이모티콘 이름</p>
+          <p class="flex flex-row items-center">
+            <span class="text-lg text-black font-nnsqneo-bold">이모티콘 팩 이름</span>
+            <span class="text-red-500">*</span>
+          </p>
           <input
             type="text"
             placeholder="이모티콘 이름"
@@ -12,7 +15,14 @@
           />
         </div>
         <div class="flex-grow-0 min-w-40">
-          <p class="text-xl text-black font-nnsqneo-bold">카테고리</p>
+            <p class="flex flex-row items-center">
+              <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
+            <span class="text-red-500">*</span>
+          </p>
+            <p class="flex flex-row items-center">
+              <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
+            <span class="text-red-500">*</span>
+          </p>
           <select
             v-model="selectedCategory"
             class="w-full h-10 border-2 border-gray-400 rounded-md focus:outline-none focus:border-slate-500 mt-2"
@@ -33,17 +43,27 @@
         <div
           class="flex flex-row items-center justify-around flex-grow-0 gap-4 w-full md:w-auto"
         >
-          <ImageUploader
-            label="대표 이미지"
-            @update:file="handleThumbnailUpdate"
-          />
-          <ImageUploader
-            label="목록 이미지"
-            @update:file="handleListImageUpdate"
-          />
+          <div class="flex flex-col items-center justify-center md:items-start gap-2">
+            <div
+              class="flex flex-row items-center"
+            >
+              <span class="text-lg text-black font-nnsqneo-bold">대표 이미지</span>
+              <span class="text-red-500">*</span>
+            </div>
+            <ImageUploader @update:file="handleThumbnailUpdate" />
+          </div>
+          <div class="flex flex-col items-center justify-center md:items-start gap-2">
+            <div
+              class="flex flex-row items-center"
+            >
+              <span class="text-lg text-black font-nnsqneo-bold">목록 이미지</span>
+              <span class="text-red-500">*</span>
+            </div>
+            <ImageUploader @update:file="handleListImageUpdate" />
+          </div>
         </div>
         <div class="flex-grow flex flex-col h-full w-full">
-          <div class="text-xl text-black font-nnsqneo-bold">설명</div>
+          <div class="text-lg text-black font-nnsqneo-bold">설명</div>
           <textarea
             v-model="description"
             placeholder="이모티콘 설명"
