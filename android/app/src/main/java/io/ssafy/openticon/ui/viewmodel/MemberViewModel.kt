@@ -3,6 +3,7 @@ package io.ssafy.openticon.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.MemberEntity
@@ -104,6 +105,7 @@ class MemberViewModel @Inject constructor(
             if (result.isSuccess) {
                 _purchaseSuccess.value = true
                 Log.i("PointRecharge", "포인트 충전 성공")
+                fetchMemberInfo()
             } else {
                 _purchaseSuccess.value = false
                 Log.w("PointRecharge", "포인트 충전 실패")
