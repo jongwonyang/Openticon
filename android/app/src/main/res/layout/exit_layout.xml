@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/linearLayoutInsideScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="1dp"
-    android:background="@drawable/round_border">
+    android:paddingTop="500dp">
 
     <!-- TableRow로 요소 배치 -->
 
@@ -26,7 +24,8 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center_vertical"
-            android:src="@android:drawable/btn_dialog" />
+            android:contentDescription="TODO"
+            android:src="@android:drawable/ic_notification_clear_all" />
 
         <Space
             android:layout_width="0dp"
