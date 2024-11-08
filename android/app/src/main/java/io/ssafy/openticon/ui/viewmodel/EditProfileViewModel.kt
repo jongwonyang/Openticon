@@ -10,7 +10,6 @@ import io.ssafy.openticon.data.model.MemberEntity
 import io.ssafy.openticon.di.UserSession
 import io.ssafy.openticon.domain.usecase.EditProfileUseCase
 import io.ssafy.openticon.domain.usecase.GetMemberInfoUseCase
-import io.ssafy.openticon.ui.viewmodel.MemberViewModel.UiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -34,11 +33,10 @@ class EditProfileViewModel @Inject constructor(
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri.asStateFlow()
 
-    fun editProfile(contentResolver: ContentResolver, nickname: String) {
+    fun editProfile(contentResolver: ContentResolver, nickname: String, bio: String) {
         viewModelScope.launch {
             val currentUri = _selectedImageUri.value
             Log.d("EditProfileViewModel", "Selected Image URI: $currentUri")
-
             val result: Result<*>
             val imagePart = if (currentUri != null) {
                 uriToMultipartBody(contentResolver, currentUri)
@@ -47,12 +45,13 @@ class EditProfileViewModel @Inject constructor(
             }
             _uiState.value = UiState.Loading // 로딩 상태 설정
 
-            result = editProfileUseCase.invoke(nickname, imagePart)
+            result = editProfileUseCase(nickname = nickname, bio = bio, profileImage = imagePart)
 
             result.onSuccess {
                 _uiState.value = UiState.Success // 성공 상태 설정
                 updateMemberEntity()
             }.onFailure { exception ->
+                Log.d("editProfile", exception.toString())
                 _uiState.value = UiState.Error(exception) // 오류 상태 설정
             }
         }
@@ -94,8 +93,8 @@ class EditProfileViewModel @Inject constructor(
                         if (result != null) {
                             userSession.login(result)
                         }
-
-                    } else if (status == 401 || status == 403) {Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
+                    } else if (status == 401 || status == 403) {
+                        Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
                     }
                 } catch (e: Exception) {
                 }

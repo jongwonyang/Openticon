@@ -1,7 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
 import android.Manifest
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -36,7 +35,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +49,7 @@ fun EditProfileScreen(
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
     var nickname by remember { mutableStateOf(TextFieldValue("")) }
+    var bio by remember { mutableStateOf(TextFieldValue("")) }
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
 
 
@@ -151,7 +150,7 @@ fun EditProfileScreen(
                             containerColor = Color(0xFF42A5F5) // Blue color
                         )
                     ) {
-                        Text(text = "프로필 수정", color = Color.White)
+                        Text(text = "이미지 수정", color = Color.White)
                     }
                 }
 
@@ -170,6 +169,18 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(48.dp))
 
+                TextField(
+                    value = bio,
+                    onValueChange = { bio = it },
+                    placeholder = { Text("상태 메세지를 입력해 주세요.") },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f),
+                    shape = RoundedCornerShape(0.dp),
+                    interactionSource = interactionSource
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
+
                 // Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -177,10 +188,10 @@ fun EditProfileScreen(
                 ) {
                     Button(
                         onClick = {
-                                viewModel.editProfile(contentResolver,nickname.text)
+                                viewModel.editProfile(contentResolver,nickname.text, bio.text)
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF42A5F5) // Confirm button color
+                            containerColor = MaterialTheme.colorScheme.primary // Confirm button color
                         ),
                         modifier = Modifier.width(100.dp)
                     ) {

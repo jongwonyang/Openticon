@@ -4,9 +4,11 @@ import retrofit2.Response
 import retrofit2.http.GET
 import io.ssafy.openticon.data.model.MemberEntity;
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -26,9 +28,11 @@ interface MemberApi {
     @Multipart
     @PUT("/api/v1/member")
     suspend fun editProfile(
-        @Query("nickname") nickname: String,
-        @Part profile_img: MultipartBody.Part?
+        @Part("nickname") nickname: RequestBody,
+        @Part("bio") bio: RequestBody,
+        @Part profile_img: MultipartBody.Part? = null
     ): Response<String>
+
 
     @DELETE("/api/v1/member")
     suspend fun deleteMember(): Response<Unit>

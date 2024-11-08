@@ -28,6 +28,8 @@ data class MemberEntity(
 
     val webFcm: String = "",  // Web FCM Token
 
-    val profile_image: String = ""  // Profile Image
+    val profile_image: String = "",  // Profile Image
+
+    val bio : String = "" //삳태 메세지
 )
 

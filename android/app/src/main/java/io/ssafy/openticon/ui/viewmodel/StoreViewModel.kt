@@ -49,7 +49,7 @@ class StoreViewModel @Inject constructor(
         viewModelScope.launch {
             // 태그별 이모티콘 팩 로드하는 로직 추가
             try {
-                val (newItems, _) = searchEmoticonPacksUseCase("title", "", "most", 9, 0)
+                val (newItems, _) = searchEmoticonPacksUseCase("title", "", "new", 9, 0)
                 val updatedNewItems = mutableListOf<SearchEmoticonPacksListItem>()
 
                 // Add empty items to the beginning and end of the list
