@@ -20,6 +20,7 @@ public class MemberResponseDto {
     private String mobile_fcm;
     private String web_fcm;
     private String profile_image;
+    private String bio;
 
     public MemberResponseDto(MemberEntity member){
         this.id = member.getId();
@@ -35,5 +36,6 @@ public class MemberResponseDto {
         this.mobile_fcm = member.getMobile_fcm();
         this.web_fcm = member.getWeb_fcm();
         this.profile_image = member.getProfile_image();
+        this.bio = member.getBio();
     }
 }
