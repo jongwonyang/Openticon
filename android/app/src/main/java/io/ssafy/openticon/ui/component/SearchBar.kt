@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -63,11 +65,13 @@ fun SearchBar(
     onKeyChange: (SearchKey) -> Unit,
     searchText: String,
     onTextChange: (String) -> Unit,
-    viewModel: SearchScreenViewModel = hiltViewModel()
+    viewModel: SearchScreenViewModel = hiltViewModel(),
+    listState: LazyListState
 ) {
     val focusManager = LocalFocusManager.current
     var isExpanded by remember { mutableStateOf(false) }
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
+    val isEmptyField by viewModel.isEmptyField.collectAsState()
     val context = LocalContext.current
 
     // 이미지 선택 런처
@@ -76,7 +80,7 @@ fun SearchBar(
     ) { uri: Uri? ->
         if (uri != null) {
             viewModel.setImageUri(uri)
-            viewModel.performSearch(context.contentResolver)
+            viewModel.performSearch(context.contentResolver, context, listState)
         } else {
             Log.e("ImageSearch", "Error: Selected file URI is null.")
         }
@@ -99,7 +103,14 @@ fun SearchBar(
             .height(64.dp)
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .then(
+                if (isEmptyField) Modifier.border(
+                    2.dp,
+                    MaterialTheme.colorScheme.error,
+                    RoundedCornerShape(50)
+                ) else Modifier
+            ),
         contentAlignment = Alignment.CenterStart
     ) {
         if (selectedImageUri == null) {
@@ -168,7 +179,7 @@ fun SearchBar(
                     keyboardActions = KeyboardActions(
                         onSearch = {
                             focusManager.clearFocus()
-                            viewModel.search()
+                            viewModel.search(context, listState)
                         }
                     ),
                     modifier = Modifier
@@ -191,7 +202,7 @@ fun SearchBar(
                 IconButton(
                     onClick = {
                         focusManager.clearFocus()
-                        viewModel.search()
+                        viewModel.search(context, listState)
                     },
                     modifier = Modifier.size(48.dp)
                 ) {

@@ -52,7 +52,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import io.ssafy.openticon.R
 import io.ssafy.openticon.domain.model.SearchEmoticonPacksListItem
-import io.ssafy.openticon.ui.component.ImageSearchBar
 import io.ssafy.openticon.ui.component.SearchBar
 import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
 import io.ssafy.openticon.ui.viewmodel.Sort
@@ -80,19 +79,13 @@ fun SearchScreen(
     Column {
         Spacer(Modifier.height(16.dp))
 
-        if (!isImageSearch) {
-            SearchBar(
-                selectedKey = selectedKey,
-                onKeyChange = { viewModel.onSearchKeyChange(it) },
-                searchText = searchText,
-                onTextChange = { viewModel.onSearchTextChange(it) }
-            )
-        } else {
-            ImageSearchBar(
-                onTextSearchClick = { isImageSearch = false },
-                contentResolver = contentResolver
-            )
-        }
+        SearchBar(
+            selectedKey = selectedKey,
+            onKeyChange = { viewModel.onSearchKeyChange(it) },
+            searchText = searchText,
+            onTextChange = { viewModel.onSearchTextChange(it) },
+            listState = listState
+        )
 
         Row(
             modifier = Modifier
@@ -130,7 +123,7 @@ fun SearchScreen(
                         DropdownMenuItem(
                             text = { Text(it.displayName) },
                             onClick = {
-                                viewModel.onSortChange(it, contentResolver)
+                                viewModel.onSortChange(it, contentResolver, context, listState)
                                 isSortExpanded = false
                             }
                         )
