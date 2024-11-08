@@ -205,7 +205,7 @@ fun MyEmoticonsScreen(
                         .zIndex(if (isDragging) 1f else 0f)
                         .offset { IntOffset(x = 0, y = if (isDragging) offsetY.roundToInt() else 0) }
                         .combinedClickable(
-                            onClick = { navController.navigate("emoticonPack/${emoticonPack.id}") },
+                            onClick = { navController.navigate("emoticonPack/${emoticonPack.uuid}") },
                             onLongClick = { onDragStart(index) }
                         )
                 )
