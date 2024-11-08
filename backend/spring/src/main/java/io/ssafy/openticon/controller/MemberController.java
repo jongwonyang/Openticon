@@ -47,8 +47,10 @@ public class MemberController {
             @Parameter(description = "프로필 이미지", required = false)
             @RequestPart(value = "profile_img", required = false) MultipartFile profileImg,
             @Parameter(description = "닉네임", required = true)
-            @RequestParam("nickname") String nickname) {
-
+            @RequestParam("nickname") String nickname,
+            @Parameter(description = "상태메시지", required = true)
+            @RequestParam("bio") String bio)
+    {
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
         try {
@@ -58,6 +60,7 @@ public class MemberController {
 
             // 닉네임 설정
             member.setNickname(nickname);
+            member.setBio(bio);
 
             // 프로필 이미지가 있을 경우에만 저장
             if (profileImg != null && !profileImg.isEmpty()) {
@@ -76,13 +79,10 @@ public class MemberController {
             // 변경된 회원 정보 저장
             memberRepository.save(member);
             logger.info("회원 정보 수정 완료: 닉네임 = {}", nickname);
-
             return ResponseEntity.ok("회원 정보가 성공적으로 수정되었습니다.");
-
         } catch (ResponseStatusException e) {
             logger.error("사용자 조회 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자가 존재하지 않습니다.");
-
         } catch (Exception e) {
             logger.error("회원 정보 수정 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.internalServerError().body("오류 발생: " + e.getMessage());
