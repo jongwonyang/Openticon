@@ -1,8 +1,11 @@
 package io.ssafy.openticon.ui.viewmodel
 
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,6 +32,7 @@ class SearchScreenViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     private val _searchSort = MutableStateFlow(Sort.New)
+    private val _isEmptyField = MutableStateFlow(false)
 
     val searchKey: StateFlow<SearchKey> = _searchKey
     val searchText: StateFlow<String> = _searchText
@@ -36,6 +40,7 @@ class SearchScreenViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
     val searchSort: StateFlow<Sort> = _searchSort
+    val isEmptyField = _isEmptyField
 
     private var page = 0
     private var pageSize = 20
@@ -53,30 +58,37 @@ class SearchScreenViewModel @Inject constructor(
         _searchKey.value = value
     }
 
-    fun search() {
+    fun search(context: Context, listState: LazyListState) {
+        if (_searchText.value.isEmpty()) {
+            _isEmptyField.value = true
+            Toast.makeText(context, "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        _isEmptyField.value = false
         page = 0
         lastPageReached = false
         _searchResult.value = emptyList()
 
-        loadMoreSearchResult()
+        viewModelScope.launch {
+            loadMoreSearchResult()
+            listState.scrollToItem(0)
+        }
     }
 
-    fun loadMoreSearchResult() {
+    suspend fun loadMoreSearchResult() {
         if (lastPageReached || _isLoading.value) return
-        viewModelScope.launch {
-            _isLoading.value = true
-            val (newItems, isLast) = searchEmoticonPacksUseCase(
-                searchKey = _searchKey.value.key,
-                searchText = _searchText.value,
-                page = page,
-                size = pageSize,
-                sort = _searchSort.value.key
-            )
-            _searchResult.value += newItems
-            lastPageReached = isLast
-            page++
-            _isLoading.value = false
-        }
+        _isLoading.value = true
+        val (newItems, isLast) = searchEmoticonPacksUseCase(
+            searchKey = _searchKey.value.key,
+            searchText = _searchText.value,
+            page = page,
+            size = pageSize,
+            sort = _searchSort.value.key
+        )
+        _searchResult.value += newItems
+        lastPageReached = isLast
+        page++
+        _isLoading.value = false
     }
 
     //image Search
@@ -106,52 +118,67 @@ class SearchScreenViewModel @Inject constructor(
     }
 
     // 검색 기능
-    fun performSearch(contentResolver: ContentResolver) {
+    fun performSearch(contentResolver: ContentResolver, context: Context, listState: LazyListState) {
+        if (_selectedImageUri.value == null) {
+            _isEmptyField.value = true
+            Toast.makeText(context, "이미지를 선택해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        _isEmptyField.value = false
         page = 0
         lastPageReached = false
         _searchResult.value = emptyList()
 
-        loadMoreImageSearchResult(contentResolver)
-    }
-
-
-    fun loadMoreImageSearchResult(contentResolver: ContentResolver) {
-        if (lastPageReached || _isLoading.value) return
         viewModelScope.launch {
-            _isLoading.value = true
-
-            val currentUri = _selectedImageUri.value
-            if (currentUri != null) {
-                try {
-                    val imagePart = currentUri.let { uriToMultipartBody(contentResolver, it) }
-
-                    val (newItems, isLast) = searchEmoticonPacksByImageUseCase(
-                        size = pageSize,
-                        page = page,
-                        sort = _searchSort.value.key,
-                        image = imagePart
-                    )
-
-                    _searchResult.value += newItems
-                    lastPageReached = isLast
-                    page++
-                    _isLoading.value = false
-                } catch (e: Exception) {
-                    _isLoading.value = false
-                }
-            } else {
-                Log.e("e", "!!")
-            }
+            loadMoreImageSearchResult(contentResolver)
+            listState.scrollToItem(0)
         }
     }
 
-    fun onSortChange(value: Sort, contentResolver: ContentResolver) {
+
+    suspend fun loadMoreImageSearchResult(contentResolver: ContentResolver) {
+        if (lastPageReached || _isLoading.value) return
+
+        _isLoading.value = true
+
+        val currentUri = _selectedImageUri.value
+        if (currentUri != null) {
+            try {
+                val imagePart = currentUri.let { uriToMultipartBody(contentResolver, it) }
+
+                val (newItems, isLast) = searchEmoticonPacksByImageUseCase(
+                    size = pageSize,
+                    page = page,
+                    sort = _searchSort.value.key,
+                    image = imagePart
+                )
+
+                _searchResult.value += newItems
+                lastPageReached = isLast
+                page++
+                _isLoading.value = false
+            } catch (e: Exception) {
+                _isLoading.value = false
+            }
+        } else {
+            Log.e("e", "!!")
+        }
+
+    }
+
+    fun onSortChange(
+        value: Sort,
+        contentResolver: ContentResolver,
+        context: Context,
+        listState: LazyListState
+    ) {
         _searchSort.value = value
         if (_searchResult.value.isNotEmpty()) {
             if (_selectedImageUri.value != null) {
-                performSearch(contentResolver = contentResolver)
+                performSearch(contentResolver = contentResolver, context = context, listState = listState)
             } else {
-                search()
+                search(context, listState)
             }
         }
     }
