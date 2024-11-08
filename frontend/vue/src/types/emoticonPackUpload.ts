@@ -9,7 +9,7 @@ export type EmoticonPackUploadInfo = {
 }
 
 export type EmoticonPackUploadFiles = {
-  thumbnailImg: File;
-  listImg: File;
+  thumbnailImg: File | null;
+  listImg: File | null;
   emoticons: File[];
 } 
