@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
@@ -169,7 +170,7 @@ class FloatingService : Service() {
         val horizontalScrollView = secondFloatingView.findViewById<LinearLayout>(R.id.horizontal_linear)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
         val closeButton = secondFloatingView.findViewById<ImageView>(R.id.closeButton)
-        val settingButton = secondFloatingView.findViewById<ImageView>(R.id.settingButton)
+        val settingButton = secondFloatingView.findViewById<FrameLayout>(R.id.homeBtn)
         val likeView = secondFloatingView.findViewById<LikeEmoticonPackView>(R.id.imageLike)
         val titleText = secondFloatingView.findViewById<TextView>(R.id.floatingTextView)
 
@@ -224,8 +225,8 @@ class FloatingService : Service() {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE // FLAG_IMMUTABLE은 Android 12+에서 필요
         )
-        pendingIntent.send()
         stopSelf()
+        pendingIntent.send()
     }
     private fun lkeEmoticon(emoticon: Emoticon){
 //        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
@@ -393,7 +394,8 @@ class FloatingService : Service() {
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_layout, null)
 
 
-        val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton)
+        val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton1)
+        val backgroundB = floatingView.findViewById<ShapeableImageView>(R.id.imageButton2)
         imageButton.shapeAppearanceModel = imageButton.shapeAppearanceModel.toBuilder()
             .setAllCorners(CornerFamily.ROUNDED, 75f) // 원하는 크기의 반지름 설정
             .build()
@@ -405,7 +407,7 @@ class FloatingService : Service() {
             true // 이벤트를 소비했음을 나타냅니다.
         }
 
-        floatingView.findViewById<ShapeableImageView>(R.id.imageButton).setOnTouchListener { _, event ->
+        floatingView.findViewById<ShapeableImageView>(R.id.imageButton1).setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     initialTouchX = event.rawX.toInt()

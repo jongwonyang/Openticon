@@ -23,6 +23,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -70,6 +71,8 @@ fun MainScreen(
 
     val activity = context as? Activity
 
+    val selectedKey by likeEmoticonViewModel.sampleEmoticonPacksLiveData.observeAsState()
+
     val mainActivityLifecycle = (context as? MainActivity)?.lifecycle
 
     DisposableEffect(mainActivityLifecycle) {
@@ -85,16 +88,6 @@ fun MainScreen(
                             lifecycleOwner
                         )
                         Log.d("MainScreen", "MainActivity가 포그라운드로 전환되었습니다.")
-                    }
-
-                    Lifecycle.Event.ON_PAUSE -> {
-                        startFloatingService(
-                            context,
-                            myViewModel,
-                            likeEmoticonViewModel,
-                            lifecycleOwner
-                        )
-                        Log.d("MainScreen", "MainActivity가 백그라운드로 전환되었습니다.")
                     }
 
                     else -> {}
@@ -254,7 +247,7 @@ private fun stopFloatingService(
 
 }
 
-    private fun startFloatingService(
+private fun startFloatingService(
     context: Context,
     myViewModel: EmoticonViewModel,
     likeEmoticonViewModel: LikeEmoticonViewModel,
@@ -274,7 +267,6 @@ private fun stopFloatingService(
         CoroutineScope(Dispatchers.Main).launch {
             myViewModel.loadEmoticonPacks() // suspend 함수로 비동기 처리
             likeEmoticonViewModel.initEmoticonDataFromPreferences() // 이 함수가 완료된 후 실행
-
             delay(100L)
             // 데이터 저장이 모두 완료된 후에 서비스 시작
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

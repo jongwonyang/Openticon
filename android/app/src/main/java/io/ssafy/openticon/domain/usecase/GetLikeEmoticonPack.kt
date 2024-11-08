@@ -16,7 +16,7 @@ class GetLikeEmoticonPack @Inject constructor(
         // 모든 EmoticonPack을 가져옴
         val emoticons = emoticonRepository.getLikeEmoticonPack().first()
 
-        val likeEmoticonPack = LikeEmoticonPack(emoticons = emoticons, filePath = R.drawable.sin, name = "즐겨 찾기")
+        val likeEmoticonPack = LikeEmoticonPack(emoticons = emoticons, filePath = R.drawable.pngwing_com__7_, name = "즐겨 찾기")
 
 
         // Flow로 변환된 데이터를 emit
