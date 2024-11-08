@@ -73,8 +73,8 @@ public class EmoticonPackEntity {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    @OneToOne(mappedBy = "emoticonPack", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-    private DownloadEntity download;
+    @Column(name = "download", nullable = false)
+    private int download;
 
 
     @PreUpdate
@@ -87,6 +87,7 @@ public class EmoticonPackEntity {
         this.createdAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
         this.updatedAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
         this.shareLink= UUID.randomUUID().toString();
+        this.download = 0;
     }
 
     public EmoticonPackEntity(EmoticonPack emoticonPack, MemberEntity member, String thumbnailImg, String listImg){
