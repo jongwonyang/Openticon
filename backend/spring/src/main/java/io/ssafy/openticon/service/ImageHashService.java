@@ -121,7 +121,7 @@ public class ImageHashService {
         File image=makeFile(findImage);
         HashingAlgorithm hasher = new PerceptiveHash(32);
         Hash imageHash=hasher.hash(image);
-        List<ImageHashEntity> imageHashEntities=imageHashRepository.findAll();
+        List<ImageHashEntity> imageHashEntities=imageHashRepository.findAll(pageable.getSort());
         Set<Long> alreadyFound=new HashSet<>();
         List<ImageHashResponseDto> result=new ArrayList<>();
         for(ImageHashEntity imageHashEntity: imageHashEntities){
