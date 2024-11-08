@@ -28,12 +28,14 @@ class SearchScreenViewModel @Inject constructor(
     private val _searchResult = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
     private val _isLoading = MutableStateFlow(false)
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
+    private val _searchSort = MutableStateFlow(Sort.New)
 
     val searchKey: StateFlow<SearchKey> = _searchKey
     val searchText: StateFlow<String> = _searchText
     val searchResult: StateFlow<List<SearchEmoticonPacksListItem>> = _searchResult
     val isLoading: StateFlow<Boolean> = _isLoading
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
+    val searchSort: StateFlow<Sort> = _searchSort
 
     private var page = 0
     private var pageSize = 20
@@ -61,25 +63,19 @@ class SearchScreenViewModel @Inject constructor(
 
     fun loadMoreSearchResult() {
         if (lastPageReached || _isLoading.value) return
-        Log.d("SEARCH", "viewModelScope.launch")
         viewModelScope.launch {
             _isLoading.value = true
-            Log.d("SEARCH", "_searchKey.value: ${_searchKey.value}")
-            Log.d("SEARCH", "_searchText.value: ${_searchText.value}")
-            Log.d("SEARCH", "page: $page")
-            Log.d("SEARCH", "pageSize: $pageSize")
             val (newItems, isLast) = searchEmoticonPacksUseCase(
                 searchKey = _searchKey.value.key,
                 searchText = _searchText.value,
                 page = page,
-                size = pageSize
+                size = pageSize,
+                sort = _searchSort.value.key
             )
-            Log.d("SEARCH", "newItems: $newItems")
             _searchResult.value += newItems
             lastPageReached = isLast
             page++
             _isLoading.value = false
-            Log.d("SEARCH", "searchResult.value: ${searchResult.value}")
         }
     }
 
@@ -121,13 +117,8 @@ class SearchScreenViewModel @Inject constructor(
 
     fun loadMoreImageSearchResult(contentResolver: ContentResolver) {
         if (lastPageReached || _isLoading.value) return
-        Log.d("SEARCH", "viewModelScope.launch")
         viewModelScope.launch {
             _isLoading.value = true
-            Log.d("SEARCH", "_searchKey.value: ${_searchKey.value}")
-            Log.d("SEARCH", "_searchText.value: ${_searchText.value}")
-            Log.d("SEARCH", "page: $page")
-            Log.d("SEARCH", "pageSize: $pageSize")
 
             val currentUri = _selectedImageUri.value
             if (currentUri != null) {
@@ -137,21 +128,30 @@ class SearchScreenViewModel @Inject constructor(
                     val (newItems, isLast) = searchEmoticonPacksByImageUseCase(
                         size = pageSize,
                         page = page,
+                        sort = _searchSort.value.key,
                         image = imagePart
                     )
 
-                    Log.d("SEARCH", "newItems: $newItems")
                     _searchResult.value += newItems
                     lastPageReached = isLast
                     page++
                     _isLoading.value = false
-                    Log.d("SEARCH", "searchResult.value: ${searchResult.value}")
                 } catch (e: Exception) {
-                    Log.e("ImageUpload", "Error uploading image", e)
                     _isLoading.value = false
                 }
             } else {
                 Log.e("e", "!!")
+            }
+        }
+    }
+
+    fun onSortChange(value: Sort, contentResolver: ContentResolver) {
+        _searchSort.value = value
+        if (_searchResult.value.isNotEmpty()) {
+            if (_selectedImageUri.value != null) {
+                performSearch(contentResolver = contentResolver)
+            } else {
+                search()
             }
         }
     }
@@ -167,7 +167,7 @@ enum class SearchKey(
 }
 
 enum class Sort(
-    val value: String,
+    val key: String,
     val displayName: String
 ) {
     New("new", "최신순"),

@@ -16,7 +16,7 @@ data class PackInfoResponseDto(
     val createdAt: String,
     val public: Boolean,
     val aigenerated: Boolean,
-    val shareLink: String
+    val sharedLink: String
 )
 
 fun PackInfoResponseDto.toEmoticonPack(): EmoticonPack {
@@ -27,6 +27,6 @@ fun PackInfoResponseDto.toEmoticonPack(): EmoticonPack {
         listImg = listImg,
         isPublic = public,
         emoticonUrls = emoticons,
-        uuid = shareLink
+        uuid = sharedLink
     )
 }

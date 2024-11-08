@@ -66,6 +66,7 @@ fun SearchScreen(
     val searchText by viewModel.searchText.collectAsState()
     val searchResult by viewModel.searchResult.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val searchSort by viewModel.searchSort.collectAsState()
     val listState = rememberLazyListState()
 
     val imageUrl by viewModel.selectedImageUri.collectAsState()
@@ -110,7 +111,7 @@ fun SearchScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "최신순",
+                            text = searchSort.displayName,
                             style = MaterialTheme.typography.labelMedium
                         )
                         Spacer(Modifier.width(4.dp))
@@ -129,6 +130,7 @@ fun SearchScreen(
                         DropdownMenuItem(
                             text = { Text(it.displayName) },
                             onClick = {
+                                viewModel.onSortChange(it, contentResolver)
                                 isSortExpanded = false
                             }
                         )
