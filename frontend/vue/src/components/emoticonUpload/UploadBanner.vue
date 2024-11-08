@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-28 bg-gray-200 overflow-hidden" style="user-select: none;">
+  <div class="w-full h-28 overflow-hidden" style="user-select: none; background: radial-gradient(circle at center, #f5f5f5 0%, #d8d8d8 120%);">
     <div class="relative mx-auto max-w-screen-lg h-full">
       <p class="absolute -top-[12%] left-[70%] text-gray-600 z-10 whitespace-nowrap rotate-[20deg]">
         <span class="material-icons text-[150px]">upload</span>
@@ -26,7 +26,7 @@
       <p class="absolute top-[10%] left-[85%] text-gray-600 z-0 whitespace-nowrap rotate-[20deg] blur-[10px] opacity-70">
         <span class="material-icons text-[80px]">upload</span>
       </p>
-      <p class="absolute top-12 left-[5%] text-7xl font-nnsqneo-heavy text-gray-600 z-10 whitespace-nowrap">업로드</p>
+      <p class="absolute -bottom-2 left-[5%] text-7xl font-nnsqneo-heavy text-gray-600 z-10 whitespace-nowrap">업로드</p>
     </div>
   </div>
 </template>

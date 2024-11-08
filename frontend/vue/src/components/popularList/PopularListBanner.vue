@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-28 bg-[#98cbff] overflow-hidden" style="user-select: none;">
+    <div class="w-full h-28 overflow-hidden" style="user-select: none; background: radial-gradient(circle at center, #ade0f7 0%, #7ac0f2  120%);">
         <div class="relative mx-auto max-w-screen-lg h-full">
             <p class="absolute top-[42%] left-[31%] text-3xl font-nnsqneo-heavy text-blue-600 z-0 blur-[1.9px] whitespace-nowrap">유행하는</p>
             <p class="absolute top-[77%] left-[43%] text-5xl font-nnsqneo-heavy text-blue-600 z-0 blur-[1.1px] whitespace-nowrap">너도나도</p>
@@ -9,7 +9,7 @@
             <p class="absolute -top-[12%] left-[70%] text-indigo-700 z-0 whitespace-nowrap rotate-[20deg]">
                 <span class="material-icons text-[150px] transition-all duration-300">local_fire_department</span>
             </p>
-            <p class="absolute top-12 left-[5%] text-7xl font-nnsqneo-heavy text-indigo-700 z-10 shadow-text whitespace-nowrap">인기</p>
+            <p class="absolute -bottom-2 left-[5%] text-7xl font-nnsqneo-heavy text-indigo-700 z-10 shadow-text whitespace-nowrap">인기</p>
         </div>
     </div>
 </template>
