@@ -154,11 +154,7 @@ public class PackService {
             return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         });
 
-        //이모티콘 팩 저장과 이모티콘 저장이 완료된 후 다음 로직 실행
-        allFutures.join();
-
         EmoticonPackEntity emoticonPackEntity = allSaveFutures.join();
-
 
         if (emoticonPackEntity.getBlacklist()) {
             objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
@@ -233,20 +229,6 @@ public class PackService {
         return false;
     }
 
-
-    private File makeFile(MultipartFile image){
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile("upload", image.getOriginalFilename());
-            image.transferTo(tempFile);
-            return tempFile;
-        }catch (IOException e){
-            throw new RuntimeException("File만들기 실패");
-        }
-
-    }
-    
-
     private void saveImage(MultipartFile image, EmoticonFileAndName dto) {
         String uploadServerUrl = imageServerUrl + "/upload/image";
 
@@ -312,10 +294,6 @@ public class PackService {
     public PackInfoResponseDto getPackInfo(String uuid, UserDetails userDetails, String requestIp) throws AuthenticationException {
 
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
-
-//        if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
-//            throw new OpenticonException(ErrorCode.PRIVATE_PACK);
-//        }
 
         if(emoticonPackEntity.getBlacklist()){
             throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
