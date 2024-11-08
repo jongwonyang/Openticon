@@ -5,9 +5,12 @@ import io.ssafy.openticon.controller.request.ObjectionSubmitRequestDto;
 import io.ssafy.openticon.controller.request.ObjectionTestRequestDto;
 import io.ssafy.openticon.controller.response.AnswerResponseDto;
 import io.ssafy.openticon.controller.response.ObjectionListResponseDto;
+import io.ssafy.openticon.controller.response.ObjectionMsgResponseDto;
 import io.ssafy.openticon.dto.ReportStateType;
 import io.ssafy.openticon.dto.ReportType;
 import io.ssafy.openticon.entity.*;
+import io.ssafy.openticon.exception.ErrorCode;
+import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.AnswerRepository;
 import io.ssafy.openticon.repository.ObjectionRepository;
 import io.ssafy.openticon.repository.ObjectionSumbitRepository;
@@ -28,17 +31,18 @@ import java.util.Optional;
 
 @Service
 public class ObjectionService {
-    @Autowired
     ObjectionRepository objectionRepository;
-
-    @Autowired
     PackRepository packRepository;
-
-    @Autowired
     ObjectionSumbitRepository objectionSumbitRepository;
-
-    @Autowired
     AnswerRepository answerRepository;
+
+    public ObjectionService(ObjectionRepository objectionRepository, PackRepository packRepository, ObjectionSumbitRepository objectionSumbitRepository, AnswerRepository answerRepository){
+        this.objectionRepository = objectionRepository;
+        this.packRepository = packRepository;
+        this.objectionSumbitRepository = objectionSumbitRepository;
+        this.answerRepository = answerRepository;
+    }
+
 
     public Page<ObjectionListResponseDto> getObjectionList(MemberEntity member, Pageable pageable){
         return objectionRepository.findByMember(member, pageable).map(ObjectionListResponseDto::new);
@@ -47,16 +51,16 @@ public class ObjectionService {
 
     // 이의 제기 신청
     @Transactional
-    public String submitObjection(MemberEntity member, ObjectionSubmitRequestDto request){
+    public ObjectionMsgResponseDto submitObjection(MemberEntity member, ObjectionSubmitRequestDto request){
         ObjectionEntity objectionEntity = objectionRepository.findById(request.getObjectionId())
-                .orElseThrow(()-> new NoSuchElementException("이의 신청을 찾을 수 없습니다."));
+                .orElseThrow(()-> new OpenticonException(ErrorCode.NOT_FOUND_OBJECTION));
 
         if(!objectionEntity.getMember().getEmail().equals(member.getEmail())){
-            throw new NoSuchElementException("이의 신청 요청자가 대상과 다릅니다.");
+            throw new OpenticonException(ErrorCode.ACCESS_DENIED_OBJECTION);
         }
 
         if(objectionSumbitRepository.findByObjectionEntity(objectionEntity).isPresent()){
-            throw new IllegalStateException("이미 이모티콘 팩에 대한 이의 신청을 진행하였습니다.");
+            throw new OpenticonException(ErrorCode.DUPLICATE_OBJECTION);
         }
 
         // 이의 신청 테이블에 저장
@@ -69,25 +73,31 @@ public class ObjectionService {
         // 상태를 접수 완료로 변경
         objectionEntity.setState(ReportStateType.RECEIVED);
         objectionRepository.save(objectionEntity);
-        return "이의 신청이 접수되었습니다.";
+        return ObjectionMsgResponseDto.builder()
+                .code("OK")
+                .message("이의 신청이 접수되었습니다.")
+                .build();
     }
 
 
     // 이의 제기 추가(테스트 용)
     @Transactional
-    public String testSubmitObjection(MemberEntity member, ObjectionTestRequestDto requestDto){
+    public ObjectionMsgResponseDto testSubmitObjection(MemberEntity member, ObjectionTestRequestDto requestDto){
         EmoticonPackEntity emoticonPackEntity = packRepository.findById(requestDto.getEmoticonPackId())
-                .orElseThrow(() -> new NoSuchElementException("이모티콘 팩을 찾을 수 없습니다."));
+                .orElseThrow(() -> new OpenticonException(ErrorCode.NOT_FOUND_OBJECTION));
 
         // 블랙리스트인가?
         if(emoticonPackEntity.getBlacklist()){
-            throw new NoSuchElementException("이미 이모티콘 팩이 차단되어 있습니다.");
+            throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
         }
 
         emoticonPackEntity.setBlacklist(true);
         packRepository.save(emoticonPackEntity);
         objectionEmoticonPack(emoticonPackEntity, requestDto.getReportType());
-        return emoticonPackEntity.getTitle()+" 이모티콘 팩을 차단하였습니다.";
+        return ObjectionMsgResponseDto.builder()
+                .code("OK")
+                .message(emoticonPackEntity.getTitle()+" 이모티콘 팩을 차단하였습니다.")
+                .build();
     }
 
     // 이모티콘 팩이 블랙리스트로 만들어야 하는 순간에 불러오는 서비스
@@ -106,14 +116,14 @@ public class ObjectionService {
     // 이의제기에 대한 심사 결과를 보여줍니다.
     public AnswerResponseDto answerObjection(MemberEntity member, Long objectionId){
         ObjectionEntity objectionEntity = objectionRepository.findById(objectionId)
-                .orElseThrow(() -> new NoSuchElementException("이의 신청을 찾을 수 없습니다."));
+                .orElseThrow(() -> new OpenticonException(ErrorCode.NOT_FOUND_OBJECTION));
 
         if(!objectionEntity.getMember().getEmail().equals(member.getEmail())){
-            throw new NoSuchElementException("이의 신청 요청자가 대상과 다릅니다.");
+            throw new OpenticonException(ErrorCode.ACCESS_DENIED_OBJECTION);
         }
 
         AnswerEntity answerEntity = answerRepository.findByObjectionEntity(objectionEntity)
-                .orElseThrow(() -> new NoSuchElementException("이의 신청에 대한 답변을 찾을 수 없습니다."));
+                .orElseThrow(() -> new OpenticonException(ErrorCode.NOT_FOUND_ANSWER));
 
         return new AnswerResponseDto(answerEntity);
     }
@@ -122,19 +132,19 @@ public class ObjectionService {
     // 관리자 리스트
     public Page<ObjectionListResponseDto> managerObjection(MemberEntity member, Pageable pageable){
         if(!member.getManager()){
-            throw new NoSuchElementException("관리자 계정이 아닙니다.");
+            throw new OpenticonException(ErrorCode.ACCESS_DENIED);
         }
         return objectionRepository.findByState(ReportStateType.RECEIVED, pageable).map(ObjectionListResponseDto::new);
     }
 
     // 관리자 - 이의 제기에 대해 관리자가 심사
     @Transactional
-    public String managerAnswerObjection(MemberEntity member, ObjectionManswerAnswerRequestDto request){
+    public ObjectionMsgResponseDto managerAnswerObjection(MemberEntity member, ObjectionManswerAnswerRequestDto request){
         if(!member.getManager()){
-            throw new NoSuchElementException("관리자 계정이 아닙니다.");
+            throw new OpenticonException(ErrorCode.ACCESS_DENIED);
         }
         ObjectionEntity objectionEntity = objectionRepository.findById(request.getObjectionId())
-                .orElseThrow(() -> new NoSuchElementException("이의제기 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new OpenticonException(ErrorCode.NOT_FOUND_OBJECTION));
 
         AnswerEntity answerEntity = AnswerEntity.builder()
                 .content(request.getContent())
@@ -151,10 +161,13 @@ public class ObjectionService {
             // 사용자의 이의제기를 받아들이지 않음
             objectionEntity.setState(ReportStateType.REJECTED);
         }else{
-            throw new NoSuchElementException("이의제기 상태가 잘못되었습니다.");
+            throw new OpenticonException(ErrorCode.OBJECTION_REPORT_STATE_TYPE_ERROR);
         }
         objectionRepository.save(objectionEntity);
         answerRepository.save(answerEntity);
-        return "success";
+        return ObjectionMsgResponseDto.builder()
+                .code("OK")
+                .message("SUCCESS")
+                .build();
     }
 }

@@ -36,7 +36,12 @@ public enum ErrorCode {
     DUPLICATE_EMOTICON_PACK_PURCHASE(HttpStatus.BAD_REQUEST, "이미 구매한 이모티콘 팩입니다."),
     INSUFFICIENT_BALANCE_ERROR(HttpStatus.PAYMENT_REQUIRED, "소지 금액이 부족합니다."),
     NON_POSITIVE_INTEGER(HttpStatus.PAYMENT_REQUIRED, "금액이 잘못 입력되었습니다."),
-    POINT_LIST_NO_CONTENT(HttpStatus.PAYMENT_REQUIRED, "포인트 기록이 없습니다.");
+    POINT_LIST_NO_CONTENT(HttpStatus.PAYMENT_REQUIRED, "포인트 기록이 없습니다."),
+    NOT_FOUND_OBJECTION(HttpStatus.BAD_REQUEST, "이모티콘 팩을 찾을 수 없습니다."),
+    NOT_FOUND_ANSWER(HttpStatus.BAD_REQUEST, "이의 신청에 대한 답변을 찾을 수 없습니다."),
+    DUPLICATE_OBJECTION(HttpStatus.FORBIDDEN, "이미 이모티콘 팩에 대한 이의 신청을 진행하였습니다."),
+    ACCESS_DENIED_OBJECTION(HttpStatus.FORBIDDEN, "현재 이모티콘 팩의 이의 신청 요청자가 아닙니다."),
+    OBJECTION_REPORT_STATE_TYPE_ERROR(HttpStatus.BAD_REQUEST, "이의제기 상태가 잘못 입력 되었습니다.");
 
 
 
