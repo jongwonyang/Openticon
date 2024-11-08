@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +7,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     kotlin("plugin.serialization") version "1.9.0"
+    id("kotlin-android")
 }
 
 android {
@@ -17,8 +20,15 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // local.properties의 속성 값 로드
+        val properties = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+        // defaultConfig에서 `IMP_USERCODE` 설정
+        buildConfigField("String", "IMP_USERCODE", "\"${properties.getProperty("IMP_USERCODE") ?: ""}\"")
+
     }
 
     buildTypes {
@@ -30,6 +40,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -39,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -103,6 +115,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core) // 최신 버전 확인 가능
     implementation(libs.kotlinx.coroutines.android)
 
+    // iamport
+    implementation(libs.iamport.android)
 }
 
 kapt {
