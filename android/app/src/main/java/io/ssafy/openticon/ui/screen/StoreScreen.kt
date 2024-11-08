@@ -235,7 +235,7 @@ fun StoreScreen(
                     navController.navigate("emoticonAll/popular")
                 }) {
                     Text(
-                        text = "Show All"
+                        text = "모두보기"
                     )
                 }
 
@@ -348,11 +348,10 @@ fun StoreScreen(
                             } ?: Log.d("StoreScreen", "Tag is null or empty")
                         }) {
                             Text(
-                                text = "Show All"
+                                text = "모두보기"
                             )
                         }
                     }
-
 
 
                     LazyRow(
