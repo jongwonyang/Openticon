@@ -12,11 +12,13 @@ import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.TagListRepository;
 import io.ssafy.openticon.repository.TagRepository;
 import lombok.extern.slf4j.Slf4j;
+import io.ssafy.openticon.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class PackService {
 
     private final ImageHashService imageHashService;
+    private final PurchaseHistoryRepository purchaseHistoryRepository;
+    private final DownloadRepository downloadRepository;
     @Value("${spring.image-server-url}")
     private String imageServerUrl;
 
@@ -62,7 +66,7 @@ public class PackService {
     private final RedisViewService redisViewService;
 
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService, PurchaseHistoryRepository purchaseHistoryRepository, DownloadRepository downloadRepository){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -75,6 +79,8 @@ public class PackService {
         this.imageHashService = imageHashService;
         this.objectionService = objectionService;
         this.redisViewService = redisViewService;
+        this.purchaseHistoryRepository = purchaseHistoryRepository;
+        this.downloadRepository = downloadRepository;
     }
 
     @Transactional
@@ -302,6 +308,7 @@ public class PackService {
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
 
         redisViewService.incrementView(emoticonPackEntity, userDetails, requestIp);
+        emoticonPackEntity.setView(redisViewService.getRedisView(emoticonPackEntity));
         return new PackInfoResponseDto(emoticonPackEntity,emoticons);
     }
 
@@ -340,26 +347,47 @@ public class PackService {
 
         List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
         redisViewService.incrementView(emoticonPackEntity, userDetails, requestIp);
+        emoticonPackEntity.setView(redisViewService.getRedisView(emoticonPackEntity));
         return new PackInfoResponseDto(emoticonPackEntity,emoticons);
     }
 
     public Page<EmoticonPackResponseDto> search(String query, String type, Pageable pageable) {
         if (query == null || query.isEmpty()) {
-            return packRepository.findAllByIsPublicTrueAndIsBlacklistFalse(pageable).map(EmoticonPackResponseDto::new); // 검색어가 없으면 전체 조회
+            return convertToDtoPage(packRepository.findAllByIsPublicTrueAndIsBlacklistFalse(pageable));
         }
 
-        // TODO: type 기준
+        Page<EmoticonPackEntity> entities;
         switch (type.toLowerCase()) {
             case "title":
-                return packRepository.findByTitleContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
+                entities = packRepository.findByTitleContaining(query, pageable);
+                break;
             case "tag":
-                return packRepository.findByTag(query, pageable).map(EmoticonPackResponseDto::new);   // 부분 일치
+                entities = packRepository.findByTag(query, pageable);
+                break;
             case "author":
-                return packRepository.findByAuthorContaining(query, pageable).map(EmoticonPackResponseDto::new); // 부분 일치
+                entities = packRepository.findByAuthorContaining(query, pageable);
+                break;
             default:
-                return packRepository.findAll(pageable).map(EmoticonPackResponseDto::new); // 기본 전체 조회
+                entities = packRepository.findAll(pageable);
+                break;
         }
+        return convertToDtoPage(entities);
     }
+
+    private Page<EmoticonPackResponseDto> convertToDtoPage(Page<EmoticonPackEntity> entities) {
+        return entities.map(emoticonPackEntity -> {
+            EmoticonPackResponseDto dto = new EmoticonPackResponseDto(emoticonPackEntity);
+
+            // Redis에서 조회수 가져오기
+            Long redisView = redisViewService.getRedisView(emoticonPackEntity);
+            if (redisView != -1L) {
+                dto.setView(redisView);
+            }
+
+            return dto;
+        });
+    }
+
 
     public PackDownloadResponseDto downloadPack(String email, Long packId) {
         MemberEntity member=memberService.getMemberByEmail(email).orElseThrow();
@@ -388,6 +416,43 @@ public class PackService {
         return packRepository.findByMyEmoticonPack(member, pageable).map(EmoticonPackResponseDto::new);
 
     }
+
+    @Transactional
+    public void downloadInit() {
+        // Step 1: 모든 이모티콘 팩에 대해 download 테이블에 레코드를 생성
+        List<EmoticonPackEntity> emoticonPacks = packRepository.findAll();
+
+        for (EmoticonPackEntity emoticonPack : emoticonPacks) {
+            // 각 이모티콘 팩에 대한 DownloadEntity를 확인하여 없으면 새로 생성
+            DownloadEntity download = downloadRepository.findByEmoticonPackId(emoticonPack.getId());
+
+            if (download == null) {
+                // DownloadEntity가 없으면 새로 생성
+                download = new DownloadEntity();
+                download.setEmoticonPack(emoticonPack);
+                download.setCount(0);  // 기본 다운로드 수는 0으로 설정
+                downloadRepository.save(download);  // 새로 생성된 DownloadEntity 저장
+            }
+        }
+
+        // Step 2: purchaseHistory 데이터를 기반으로 다운로드 수 업데이트
+        List<Object[]> downloadCounts = purchaseHistoryRepository.findDownloadCountsByEmoticonPack();
+
+        for (Object[] row : downloadCounts) {
+            Long emoticonPackId = (Long) row[0];
+            Long downloadCount = (Long) row[1];
+
+            // 이미 존재하는 DownloadEntity를 조회하고 다운로드 수 업데이트
+            DownloadEntity download = downloadRepository.findByEmoticonPackId(emoticonPackId);
+
+            if (download != null) {
+                download.setCount(downloadCount.intValue());
+                downloadRepository.save(download);  // 업데이트된 DownloadEntity 저장
+            }
+        }
+    }
+
+
     private BufferedImage convertTransparentToWhiteBackground(BufferedImage originalImage) {
         BufferedImage newImage = new BufferedImage(
                 originalImage.getWidth(),

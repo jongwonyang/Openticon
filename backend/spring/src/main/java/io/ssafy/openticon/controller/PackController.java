@@ -159,4 +159,11 @@ public class PackController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponseEntity.status(HttpStatus.OK).body(packService.myPackList(member, pageable));
     }
+
+    @GetMapping("download-init")
+    @Operation(summary = "다운로드 수 초기 세팅")
+    public ResponseEntity<?> emoticonPackDownloadInit(){
+        packService.downloadInit();
+        return ResponseEntity.ok().body("다했어요");
+    }
 }

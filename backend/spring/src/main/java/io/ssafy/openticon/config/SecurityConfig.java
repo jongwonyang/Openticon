@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(antMatcher("/h2-console/**")).permitAll()
                         .requestMatchers(antMatcher("/oauth2/**")).permitAll()
                         .requestMatchers(antMatcher("/login/**")).permitAll()
+                        .requestMatchers(antMatcher("/emoticonpacks/download-init")).permitAll()
                         .requestMatchers(antMatcher("/emoticonpacks/search")).permitAll()
                         .requestMatchers(antMatcher("/emoticonpacks/info/**")).permitAll()
                         .requestMatchers(antMatcher("/emoticonpacks/search/image")).permitAll()

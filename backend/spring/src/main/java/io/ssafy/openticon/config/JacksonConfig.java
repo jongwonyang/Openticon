@@ -11,8 +11,8 @@ public class JacksonConfig {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return Jackson2ObjectMapperBuilder.json()
-                .modules(new JavaTimeModule())
-                .build();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // Java 8 날짜/시간 타입 지원 추가
+        return mapper;
     }
 }
