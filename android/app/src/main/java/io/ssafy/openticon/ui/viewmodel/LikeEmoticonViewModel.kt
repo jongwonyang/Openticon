@@ -51,7 +51,7 @@ class LikeEmoticonViewModel @Inject constructor(
         editor.apply()
     }
 
-    private fun loadEmoticonDataFromPreferences() {
+    fun loadEmoticonDataFromPreferences() {
         val jsonString = sharedPreferences.getString("like_emoticon_data", null)
         val data = jsonString?.let {
             try {
