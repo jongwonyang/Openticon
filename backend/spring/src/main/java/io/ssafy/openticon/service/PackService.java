@@ -49,7 +49,6 @@ public class PackService {
 
     private final ImageHashService imageHashService;
     private final PurchaseHistoryRepository purchaseHistoryRepository;
-    private final DownloadRepository downloadRepository;
     @Value("${spring.image-server-url}")
     private String imageServerUrl;
 
@@ -66,7 +65,7 @@ public class PackService {
     private final RedisViewService redisViewService;
 
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService, PurchaseHistoryRepository purchaseHistoryRepository, DownloadRepository downloadRepository){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService, PurchaseHistoryRepository purchaseHistoryRepository){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -80,7 +79,6 @@ public class PackService {
         this.objectionService = objectionService;
         this.redisViewService = redisViewService;
         this.purchaseHistoryRepository = purchaseHistoryRepository;
-        this.downloadRepository = downloadRepository;
     }
 
     @Transactional
@@ -115,11 +113,6 @@ public class PackService {
                         // EmoticonPackEntity 생성 및 저장
                         EmoticonPackEntity emoticonPackEntity = new EmoticonPackEntity(emoticonPack, member, thumbnamilDto.getUrl(), listImgDto.getUrl());
                         packRepository.save(emoticonPackEntity);
-                        DownloadEntity download = DownloadEntity.builder()
-                                .emoticonPack(emoticonPackEntity)
-                                .count(0)
-                                .build();
-                        downloadRepository.save(download);
 
                         // 해시 저장
                         imageHashService.saveThumbnailHash(thumbnamilDto.getFile(), emoticonPackEntity);
@@ -185,6 +178,14 @@ public class PackService {
                     packRepository.save(emoticonPackEntity);
                     throw new OpenticonException(ErrorCode.TIMEOUT);
                 });
+
+        // 구매기록 추가
+        PurchaseHistoryEntity purchaseHistory = PurchaseHistoryEntity.builder()
+                .member(member)
+                .emoticonPack(emoticonPackEntity)
+                .build();
+        purchaseHistoryRepository.save(purchaseHistory);
+
         return new EmoticonPackResponseDto(emoticonPackEntity);
 
     }
@@ -427,36 +428,16 @@ public class PackService {
 
     @Transactional
     public void downloadInit() {
-        // Step 1: 모든 이모티콘 팩에 대해 download 테이블에 레코드를 생성
-        List<EmoticonPackEntity> emoticonPacks = packRepository.findAll();
-
-        for (EmoticonPackEntity emoticonPack : emoticonPacks) {
-            // 각 이모티콘 팩에 대한 DownloadEntity를 확인하여 없으면 새로 생성
-            DownloadEntity download = downloadRepository.findByEmoticonPackId(emoticonPack.getId());
-
-            if (download == null) {
-                // DownloadEntity가 없으면 새로 생성
-                download = new DownloadEntity();
-                download.setEmoticonPack(emoticonPack);
-                download.setCount(0);  // 기본 다운로드 수는 0으로 설정
-                downloadRepository.save(download);  // 새로 생성된 DownloadEntity 저장
-            }
-        }
-
-        // Step 2: purchaseHistory 데이터를 기반으로 다운로드 수 업데이트
         List<Object[]> downloadCounts = purchaseHistoryRepository.findDownloadCountsByEmoticonPack();
 
         for (Object[] row : downloadCounts) {
             Long emoticonPackId = (Long) row[0];
             Long downloadCount = (Long) row[1];
 
-            // 이미 존재하는 DownloadEntity를 조회하고 다운로드 수 업데이트
-            DownloadEntity download = downloadRepository.findByEmoticonPackId(emoticonPackId);
-
-            if (download != null) {
-                download.setCount(downloadCount.intValue());
-                downloadRepository.save(download);  // 업데이트된 DownloadEntity 저장
-            }
+            EmoticonPackEntity emoticonPackEntity = packRepository.findById(emoticonPackId)
+                    .orElseThrow(() -> new OpenticonException(ErrorCode.EMOTICON_PACK_EMPTY));
+            emoticonPackEntity.setDownload(Math.toIntExact(downloadCount));
+            packRepository.save(emoticonPackEntity);
         }
     }
 

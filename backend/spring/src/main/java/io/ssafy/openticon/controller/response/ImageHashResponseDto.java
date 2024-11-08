@@ -18,6 +18,7 @@ public class ImageHashResponseDto {
     private PackMemberResponseDto member;
     private boolean isAiGenerated;
     private int price;
+    private int download;
     private Long view;
     private boolean isPublic;
     private boolean isBlacklist;
@@ -52,6 +53,7 @@ public class ImageHashResponseDto {
         this.listImg = emoticonPackEntity.getListImg();
         this.description = emoticonPackEntity.getDescription();
         this.shareLink = emoticonPackEntity.getShareLink();
+        this.download = emoticonPackEntity.getDownload();
 
         // KST 변환 및 포맷 적용
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
