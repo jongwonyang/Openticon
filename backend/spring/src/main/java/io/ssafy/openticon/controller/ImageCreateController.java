@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @RestController
@@ -28,26 +29,30 @@ public class ImageCreateController {
     }
 
     @PostMapping("/create-image")
-    public Mono<ResponseEntity<InputStreamResource>> createImage(@RequestBody ImageCreateRequestDto imageCreateRequestDto,
-                                                                 HttpServletResponse response){
+    public Mono<ResponseEntity<InputStreamResource>> createImage(@RequestBody ImageCreateRequestDto imageCreateRequestDto) {
 
-        String prompt=imageCreateRequestDto.getPrompt();
-        GpuRequest gpuRequest=new GpuRequest(prompt, 20, 7);
+        String prompt = imageCreateRequestDto.getPrompt();
+        GpuRequest gpuRequest = new GpuRequest(prompt, 20, 7);
+
         return webClient
                 .post()
-                .bodyValue(gpuRequest)  // 사용자가 보낸 문자열을 요청 본문에 넣음
+                .bodyValue(gpuRequest)
                 .retrieve()
-                .bodyToMono(InputStream.class)  // GPU 서버로부터 PNG 파일을 InputStream으로 받음
-                .map(pngStream -> {
-                    // 응답 헤더 설정
-                    response.setContentType(MediaType.IMAGE_PNG_VALUE);
-                    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"generated-image.png\"");
-                    System.out.println(pngStream);
+                .bodyToMono(byte[].class)  // PNG 파일을 byte[] 형태로 받음
+                .map(imageBytes -> {
+                    // byte[] 데이터를 InputStream으로 변환
+                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageBytes);
+
                     // PNG 파일을 클라이언트에게 스트리밍으로 전송
                     return ResponseEntity.ok()
-                            .contentType(MediaType.IMAGE_PNG)
-                            .body(new InputStreamResource(pngStream));  // InputStreamResource를 사용하여 파일 스트리밍
+                            .contentType(MediaType.IMAGE_PNG)  // 응답의 콘텐츠 타입을 image/png로 설정
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"generated-image.png\"")  // 인라인 파일로 전송
+                            .body(new InputStreamResource(byteArrayInputStream));  // InputStreamResource로 스트리밍 파일 반환
+                })
+                .onErrorResume(e -> {
+                    // GPU 서버에서 오류 발생 시 처리 (예: 500 오류 반환)
+                    return Mono.error(new RuntimeException("Error generating image from GPU server", e));
                 });
-
     }
+
 }
