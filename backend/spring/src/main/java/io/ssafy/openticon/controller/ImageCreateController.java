@@ -3,6 +3,7 @@ package io.ssafy.openticon.controller;
 import io.ssafy.openticon.controller.request.ImageCreateRequestDto;
 import io.ssafy.openticon.dto.GpuRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.awt.image.DataBuffer;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -21,11 +23,14 @@ import java.io.InputStream;
 @RequestMapping("/ai")
 public class ImageCreateController {
 
+
+
     private final WebClient webClient;
 
-
     public ImageCreateController(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://222.107.238.124:7777").build();
+        this.webClient = webClientBuilder.
+                codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)).
+                baseUrl("http://222.107.238.124:7777").build();
     }
 
     @PostMapping("/create-image")
@@ -41,15 +46,11 @@ public class ImageCreateController {
                 // 상태 코드에 따른 오류 처리
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse -> {
                     // 응답 상태 코드 및 본문 로그
-                    clientResponse.bodyToMono(String.class)
-                            .doOnTerminate(() -> {
-                                System.out.println("Response Status: " + clientResponse.statusCode());
-                            })
+                    return clientResponse.bodyToMono(String.class)
                             .flatMap(body -> {
                                 System.out.println("Error Response Body: " + body);
                                 return Mono.error(new RuntimeException("GPU server error: " + body));
                             });
-                    return Mono.empty(); // 해당 오류를 정상 처리
                 })
                 .bodyToMono(byte[].class)  // PNG 파일을 byte[] 형태로 받음
                 .map(imageBytes -> {
@@ -68,5 +69,5 @@ public class ImageCreateController {
                     return Mono.error(new RuntimeException("Error generating image from GPU server", e));
                 });
     }
-
 }
+
