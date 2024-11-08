@@ -23,5 +23,7 @@ public class PurchaseEmoticonResponseDto {
 
     private String listImage;
 
+    private String shareLink;
+
     private List<String> emoticons;
 }

@@ -66,6 +66,7 @@ public class PurchaseHistoryService {
                             .isPublic(emoticonPackEntity.isPublic())
                             .isHide(purchaseHistoryEntity.isHide())
                             .emoticons(emoticonService.getEmoticons(emoticonPackEntity.getId()))
+                            .shareLink(emoticonPackEntity.getShareLink())
                             .build();
                     result.add(purchaseEmoticonResponseDto);
                 }
