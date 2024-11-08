@@ -36,7 +36,8 @@ public enum ErrorCode {
     NON_POSITIVE_INTEGER(HttpStatus.PAYMENT_REQUIRED, "금액이 잘못 입력되었습니다."),
     POINT_LIST_NO_CONTENT(HttpStatus.PAYMENT_REQUIRED, "포인트 기록이 없습니다."),
     HARMFUL_IMAGES(HttpStatus.BAD_REQUEST,"유해한 이미지"),
-    DUPLICATE_PACK_TITLE(HttpStatus.BAD_REQUEST,"중복된 타이틀");
+    DUPLICATE_PACK_TITLE(HttpStatus.BAD_REQUEST,"중복된 타이틀"),
+    TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "요청 타임아웃");
 
 
 

@@ -1,8 +1,6 @@
 package io.ssafy.openticon.service;
 
-import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
-import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
-import io.ssafy.openticon.controller.request.ReportPackRequestDto;
+
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
@@ -16,7 +14,6 @@ import io.ssafy.openticon.repository.TagRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -29,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import com.madgag.gif.fmsware.GifDecoder;
-import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -38,12 +34,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.security.sasl.AuthenticationException;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -133,7 +123,6 @@ public class PackService {
         List<String> emoticonsUrls = new ArrayList<>();
 
 
-
         // EmoticonPackEntity 생성 후 진행할 emoticons 비동기 저장 및 해시 작업
         CompletableFuture<Void> allFutures = allSaveFutures.thenCompose(emoticonPackEntity -> {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -165,12 +154,11 @@ public class PackService {
             return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         });
 
-// 최종적으로 모든 작업이 완료된 후에 진행할 로직
+        //이모티콘 팩 저장과 이모티콘 저장이 완료된 후 다음 로직 실행
         allFutures.join();
-        allSaveFutures.join(); // ensure emoticonPackEntity creation is complete
 
-// 이후 작업: emoticonPackEntity를 사용한 추가 작업
         EmoticonPackEntity emoticonPackEntity = allSaveFutures.join();
+
 
         if (emoticonPackEntity.getBlacklist()) {
             objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
@@ -178,8 +166,20 @@ public class PackService {
 
         emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
 
+        saveTag(emoticonPackEntity,emoticonPack);
 
-        // 태그 정보 추가
+        detectFuture.orTimeout(10, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    // 타임아웃이나 예외가 발생했을 때 처리
+                    emoticonPackEntity.setBlacklist(true);
+                    packRepository.save(emoticonPackEntity);
+                    throw new OpenticonException(ErrorCode.TIMEOUT);
+                });
+        return new EmoticonPackResponseDto(emoticonPackEntity);
+
+    }
+
+    private void saveTag(EmoticonPackEntity emoticonPackEntity, EmoticonPack emoticonPack){
         List<String> tagNames = emoticonPack.getTags();
         List<TagListEntity> tagListEntities = new ArrayList<>();
         for (String tag : tagNames) {
@@ -202,8 +202,6 @@ public class PackService {
             tagListEntities.add(tagListEntity);
         }
         emoticonPackEntity.setTagLists(tagListEntities);
-        return new EmoticonPackResponseDto(emoticonPackEntity);
-
     }
 
     private void detect(EmoticonPack emoticonPack, AtomicBoolean detectPass) {
