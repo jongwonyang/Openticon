@@ -52,4 +52,7 @@ public class MemberEntity {
 
     @Builder.Default
     private String profile_image = "";  // 프로필 이미지
+
+    @Builder.Default
+    private String bio = ""; // 상태 메세지
 }
