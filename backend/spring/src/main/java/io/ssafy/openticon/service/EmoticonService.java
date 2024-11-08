@@ -3,6 +3,7 @@ package io.ssafy.openticon.service;
 import io.ssafy.openticon.entity.EmoticonEntity;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.repository.EmoticonRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,18 @@ public class EmoticonService {
 
     private final EmoticonRepository emoticonRepository;
 
+    @Transactional
     public void saveEmoticons(List<String> emoticons, EmoticonPackEntity emoticonPackEntity){
 
         for(int i=0; i<emoticons.size();i++){
             EmoticonEntity emoticonEntity=new EmoticonEntity(emoticonPackEntity,i, emoticons.get(i));
             emoticonRepository.save(emoticonEntity);
         }
+    }
+    @Transactional
+    public void saveEmoticon(String emoticon, EmoticonPackEntity emoticonPackEntity, int cnt){
+        EmoticonEntity emoticonEntity=new EmoticonEntity(emoticonPackEntity,cnt,emoticon);
+        emoticonRepository.save(emoticonEntity);
     }
 
     public List<String> getEmoticons(Long packId){
