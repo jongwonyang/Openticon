@@ -41,6 +41,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,6 +84,9 @@ fun ProfileScreen(
     var showPriceSelectionDialog by remember { mutableStateOf(false) }
     var selectedAmount by remember { mutableStateOf(TextFieldValue("")) }
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchMemberInfo()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -291,7 +295,7 @@ fun ProfileScreen(
                         // 결제 결과 모달 창
                         if (showPaymentResultDialog) {
                             if (purchaseSuccess) {
-                                viewModel.fetchMemberInfo()
+
                             }
                             AlertDialog(
                                 onDismissRequest = { showPaymentResultDialog = false },
