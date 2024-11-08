@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
     public EmoticonPackEntity findByShareLink(String uuid);
 
@@ -28,5 +30,7 @@ public interface PackRepository extends JpaRepository<EmoticonPackEntity,Long> {
 
     @Query("SELECT ep FROM EmoticonPackEntity ep WHERE ep.member = :member")
     Page<EmoticonPackEntity> findByMyEmoticonPack(@Param("member") MemberEntity member, Pageable pageable);
+
+    public Optional<EmoticonPackEntity> findByTitle(String title);
 
 }

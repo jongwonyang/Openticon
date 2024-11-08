@@ -1,11 +1,9 @@
 package io.ssafy.openticon.exception;
 
-import com.google.api.Http;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.http.HttpStatus;
-import reactor.netty.http.server.HttpServerState;
 
 @Getter
 @RequiredArgsConstructor
@@ -36,7 +34,9 @@ public enum ErrorCode {
     DUPLICATE_EMOTICON_PACK_PURCHASE(HttpStatus.BAD_REQUEST, "이미 구매한 이모티콘 팩입니다."),
     INSUFFICIENT_BALANCE_ERROR(HttpStatus.PAYMENT_REQUIRED, "소지 금액이 부족합니다."),
     NON_POSITIVE_INTEGER(HttpStatus.PAYMENT_REQUIRED, "금액이 잘못 입력되었습니다."),
-    POINT_LIST_NO_CONTENT(HttpStatus.PAYMENT_REQUIRED, "포인트 기록이 없습니다.");
+    POINT_LIST_NO_CONTENT(HttpStatus.PAYMENT_REQUIRED, "포인트 기록이 없습니다."),
+    HARMFUL_IMAGES(HttpStatus.BAD_REQUEST,"유해한 이미지"),
+    DUPLICATE_PACK_TITLE(HttpStatus.BAD_REQUEST,"중복된 타이틀");
 
 
 
