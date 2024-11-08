@@ -126,7 +126,7 @@ fun ProfileScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(horizontal = 16.dp, vertical = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
@@ -294,9 +294,6 @@ fun ProfileScreen(
 
                         // 결제 결과 모달 창
                         if (showPaymentResultDialog) {
-                            if (purchaseSuccess) {
-
-                            }
                             AlertDialog(
                                 onDismissRequest = { showPaymentResultDialog = false },
                                 title = {

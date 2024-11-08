@@ -13,7 +13,8 @@ data class EmoticonPackEntity(
     val thumbnail: String,
     val listImg: String,
     val isPublic: Boolean,
-    val downloaded: Boolean
+    val downloaded: Boolean,
+    val uuid: String
 )
 
 fun EmoticonPack.toEmoticonPackEntity(
@@ -26,6 +27,7 @@ fun EmoticonPack.toEmoticonPackEntity(
         thumbnail = thumbnailFilePath,
         listImg = listImgFilePath,
         isPublic = isPublic,
-        downloaded = false
+        downloaded = false,
+        uuid = uuid
     )
 }

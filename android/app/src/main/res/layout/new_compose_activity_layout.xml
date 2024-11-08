@@ -58,12 +58,23 @@
         </HorizontalScrollView>
 
         <!-- 설정 버튼 -->
-        <ImageView
-            android:id="@+id/settingButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/otter"/>
+        <FrameLayout
+            android:id="@+id/homeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <!-- 첫 번째 이미지 -->
+
+
+            <!-- 두 번째 이미지 (위에 겹쳐서 배치됨) -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imageButton2"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_storefront_24" />
+
+        </FrameLayout>
     </TableRow>
 
     <!-- 텍스트뷰 -->

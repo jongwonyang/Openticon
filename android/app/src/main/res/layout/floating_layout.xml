@@ -18,11 +18,25 @@
             android:src="@android:drawable/btn_dialog" />
     </FrameLayout>
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/imageButton"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:src="@drawable/otter"
-        android:scaleType="centerCrop"
-    />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <!-- 첫 번째 이미지 -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageButton1"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background" />
+
+        <!-- 두 번째 이미지 (위에 겹쳐서 배치됨) -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageButton2"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_foreground" />
+
+    </FrameLayout>
 </LinearLayout>
