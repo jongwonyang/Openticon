@@ -27,7 +27,7 @@ public class RedisViewScheduler {
         this.packRepository = packRepository;
     }
 
-    @Scheduled(cron = "0 * * * * *") // 매 분마다 실행
+    @Scheduled(cron = "0 */10 * * * *") // 매 0, 10, 20, 30, 40, 50분마다 조회수를 데이터 베이스에 저장
     @Transactional
     public void updateViewCount() {
         Set<String> keys = redisEmoticonPackTemplate.keys("emoticon_pack:*");

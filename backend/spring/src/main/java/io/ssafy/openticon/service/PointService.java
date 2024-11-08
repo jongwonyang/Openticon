@@ -98,24 +98,22 @@ public class PointService {
 
     @Transactional
     public PointResponseDto purchaseEmoticonPack(Long emoticonPackId, MemberEntity member) {
-        Optional<EmoticonPackEntity> emoticonPack = packRepository.findById(emoticonPackId);
-        if(emoticonPack.isEmpty()){
-            throw new OpenticonException(ErrorCode.EMOTICON_PACK_EMPTY);
-        }
+        EmoticonPackEntity emoticonPack = packRepository.findById(emoticonPackId)
+                .orElseThrow(() -> new OpenticonException(ErrorCode.EMOTICON_PACK_EMPTY));
 
-        Optional<PurchaseHistoryEntity> getPurchaseHistory = purchaseHistoryRepository.findByMemberAndEmoticonPack(member, emoticonPack.get());
+        Optional<PurchaseHistoryEntity> getPurchaseHistory = purchaseHistoryRepository.findByMemberAndEmoticonPack(member, emoticonPack);
         if(getPurchaseHistory.isPresent()){
             throw new OpenticonException(ErrorCode.DUPLICATE_EMOTICON_PACK_PURCHASE);
         }
 
-        if(member.getPoint() < emoticonPack.get().getPrice()){
+        if(member.getPoint() < emoticonPack.getPrice()){
             throw new OpenticonException(ErrorCode.INSUFFICIENT_BALANCE_ERROR);
         }
 
         // 구매기록 추가
         PurchaseHistoryEntity purchaseHistory = PurchaseHistoryEntity.builder()
                 .member(member)
-                .emoticonPack(emoticonPack.get())
+                .emoticonPack(emoticonPack)
                 .build();
         purchaseHistoryRepository.save(purchaseHistory);
 
@@ -123,24 +121,25 @@ public class PointService {
         PointHistoryEntity purchasePointHistory = PointHistoryEntity.builder()
                 .member(member)  // 멤버 정보
                 .type(PointType.PURCHASE)      // 구입
-                .point(emoticonPack.get().getPrice())    // 포인트 금액
+                .point(emoticonPack.getPrice())    // 포인트 금액
                 .build();
         pointHistoryRepository.save(purchasePointHistory);
 
         // 판매자
         PointHistoryEntity salePointHistory = PointHistoryEntity.builder()
-                .member(emoticonPack.get().getMember())  // 멤버 정보
+                .member(emoticonPack.getMember())  // 멤버 정보
                 .type(PointType.SALE)      // 판매
-                .point(emoticonPack.get().getPrice())    // 포인트 금액
+                .point(emoticonPack.getPrice())    // 포인트 금액
                 .build();
         pointHistoryRepository.save(salePointHistory);
 
         // 소지 금액 수정
-        int point = member.getPoint() - emoticonPack.get().getPrice();
+        int point = member.getPoint() - emoticonPack.getPrice();
         member.setPoint(point);
+        emoticonPack.setDownload(emoticonPack.getDownload() + 1);
         memberRepository.save(member);
 
-        return new PointResponseDto(emoticonPack.get().getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
+        return new PointResponseDto(emoticonPack.getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
     }
 
     public Page<PointHistoryResponseDto> getPointHistory(MemberEntity member, Pageable pageable) {

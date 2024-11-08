@@ -58,7 +58,7 @@ public class EmoticonPackResponseDto {
         this.listImg = emoticonPackEntity.getListImg();
         this.description = emoticonPackEntity.getDescription();
         this.shareLink = emoticonPackEntity.getShareLink();
-        this.download = emoticonPackEntity.getDownload() != null ? emoticonPackEntity.getDownload().getCount() : 0;
+        this.download = emoticonPackEntity.getDownload();
 
         // KST 변환 및 포맷 적용
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
