@@ -19,6 +19,10 @@
               <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
             <span class="text-red-500">*</span>
           </p>
+            <p class="flex flex-row items-center">
+              <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
+            <span class="text-red-500">*</span>
+          </p>
           <select
             v-model="selectedCategory"
             class="w-full h-10 border-2 border-gray-400 rounded-md focus:outline-none focus:border-slate-500 mt-2"
