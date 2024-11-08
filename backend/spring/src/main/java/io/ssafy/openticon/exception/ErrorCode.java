@@ -37,7 +37,12 @@ public enum ErrorCode {
     POINT_LIST_NO_CONTENT(HttpStatus.PAYMENT_REQUIRED, "포인트 기록이 없습니다."),
     HARMFUL_IMAGES(HttpStatus.BAD_REQUEST,"유해한 이미지"),
     DUPLICATE_PACK_TITLE(HttpStatus.BAD_REQUEST,"중복된 타이틀"),
-    TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "요청 타임아웃");
+    TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "요청 타임아웃"),
+    NOT_FOUND_OBJECTION(HttpStatus.BAD_REQUEST, "이모티콘 팩을 찾을 수 없습니다."),
+    NOT_FOUND_ANSWER(HttpStatus.BAD_REQUEST, "이의 신청에 대한 답변을 찾을 수 없습니다."),
+    DUPLICATE_OBJECTION(HttpStatus.FORBIDDEN, "이미 이모티콘 팩에 대한 이의 신청을 진행하였습니다."),
+    ACCESS_DENIED_OBJECTION(HttpStatus.FORBIDDEN, "현재 이모티콘 팩의 이의 신청 요청자가 아닙니다."),
+    OBJECTION_REPORT_STATE_TYPE_ERROR(HttpStatus.BAD_REQUEST, "이의제기 상태가 잘못 입력 되었습니다.");
 
 
 

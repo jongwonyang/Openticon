@@ -4,6 +4,8 @@ import io.ssafy.openticon.dto.Category;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.TagListEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.swing.text.html.HTML;
 import java.time.OffsetDateTime;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class EmoticonPackResponseDto {
     private Long id;
     private String title;
@@ -31,6 +35,7 @@ public class EmoticonPackResponseDto {
     private String createdAt;
     private String updatedAt;
     private List<String> tags;
+    private int download;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
@@ -53,6 +58,7 @@ public class EmoticonPackResponseDto {
         this.listImg = emoticonPackEntity.getListImg();
         this.description = emoticonPackEntity.getDescription();
         this.shareLink = emoticonPackEntity.getShareLink();
+        this.download = emoticonPackEntity.getDownload().getCount();
 
         // KST 변환 및 포맷 적용
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
