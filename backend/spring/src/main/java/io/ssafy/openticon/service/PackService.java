@@ -115,6 +115,11 @@ public class PackService {
                         // EmoticonPackEntity 생성 및 저장
                         EmoticonPackEntity emoticonPackEntity = new EmoticonPackEntity(emoticonPack, member, thumbnamilDto.getUrl(), listImgDto.getUrl());
                         packRepository.save(emoticonPackEntity);
+                        DownloadEntity download = DownloadEntity.builder()
+                                .emoticonPack(emoticonPackEntity)
+                                .count(0)
+                                .build();
+                        downloadRepository.save(download);
 
                         // 해시 저장
                         imageHashService.saveThumbnailHash(thumbnamilDto.getFile(), emoticonPackEntity);
