@@ -1,8 +1,6 @@
 package io.ssafy.openticon.service;
 
-import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
-import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
-import io.ssafy.openticon.controller.request.ReportPackRequestDto;
+
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
@@ -10,11 +8,13 @@ import io.ssafy.openticon.dto.*;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
+import io.ssafy.openticon.repository.PackRepository;
+import io.ssafy.openticon.repository.TagListRepository;
+import io.ssafy.openticon.repository.TagRepository;
+import lombok.extern.slf4j.Slf4j;
 import io.ssafy.openticon.repository.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -28,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import com.madgag.gif.fmsware.GifDecoder;
-import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -37,18 +36,15 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.security.sasl.AuthenticationException;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
+@Slf4j
 public class PackService {
 
     private final ImageHashService imageHashService;
@@ -89,128 +85,155 @@ public class PackService {
 
     @Transactional
     public EmoticonPackResponseDto emoticonPackUpload(EmoticonPack emoticonPack) {
-        try {
-            System.out.println("Step 1: Start processing EmoticonPack upload.");
 
-            List<MultipartFile> infoImages = new ArrayList<>();
-            infoImages.add(emoticonPack.getThumbnailImg());
-            infoImages.add(emoticonPack.getListImg());
+        AtomicBoolean detectPass = null;
 
-            System.out.println("Step 2: Checking for problematic images.");
-            boolean problematicInfoImage = safeSearchService.detectSafeSearch(infoImages); // true면 이상한 이미지
-            System.out.println("Step 2 Result: Problematic info image found? " + problematicInfoImage);
+        if(isDuplicateTitle(emoticonPack.getPackTitle())){
+            throw new OpenticonException(ErrorCode.DUPLICATE_PACK_TITLE);
+        }
+        MemberEntity member = memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
+        CompletableFuture<Void> detectFuture = CompletableFuture.runAsync(() -> detect(emoticonPack, detectPass));
 
-            List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
-            MultipartFile thumbnailImg = emoticonPack.getThumbnailImg();
-            MultipartFile listImg = emoticonPack.getListImg();
-            System.out.println("Step 3: Retrieved thumbnail and list images.");
 
-            EmoticonFileAndName thumbnamilDto = new EmoticonFileAndName();
-            EmoticonFileAndName listImgDto = new EmoticonFileAndName();
+        List<MultipartFile> emoticonList = emoticonPack.getEmoticons();
+        MultipartFile thumbnailImg = emoticonPack.getThumbnailImg();
+        MultipartFile listImg = emoticonPack.getListImg();
 
-            System.out.println("Step 4: Saving thumbnail and list images.");
-            saveImage(thumbnailImg, thumbnamilDto);
-            saveImage(listImg, listImgDto);
-//            System.out.println("Step 4 Result: Thumbnail URL - " + thumbnailImgUrl + ", List Image URL - " + listImgUrl);
 
-            List<String> emoticonsUrls = new ArrayList<>();
-            System.out.println("Step 5: Fetching member by username - " + emoticonPack.getUsername());
-            MemberEntity member = memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
-            EmoticonPackEntity emoticonPackEntity = new EmoticonPackEntity(emoticonPack, member, thumbnamilDto.getUrl(), listImgDto.getUrl());
-            System.out.println("Step 6: Created EmoticonPackEntity.");
+        EmoticonFileAndName thumbnamilDto = new EmoticonFileAndName();
+        EmoticonFileAndName listImgDto = new EmoticonFileAndName();
 
-            boolean problematicImage = false;
-            System.out.println("Step 7: Checking emoticon images for safety.");
-            for (int i = 0; i < emoticonList.size(); i += 16) {
-                int end = Math.min(i + 16, emoticonList.size());
-                List<MultipartFile> subList = emoticonList.subList(i, end);
 
-                if (safeSearchService.detectSafeSearch(subList)) {
-                    problematicImage = true;
-                    System.out.println("Step 7 Warning: Problematic emoticon image found in sublist.");
-                }
-            }
+        CompletableFuture<Void> thumbnailSaveFuture = CompletableFuture.runAsync(() -> saveImage(thumbnailImg, thumbnamilDto));
 
-            if (problematicImage || problematicInfoImage) {
-                emoticonPackEntity.setBlacklist(true);
-                System.out.println("Step 8: Emoticon pack marked as blacklisted.");
-            }
+        CompletableFuture<Void> listImgSaveFuture = CompletableFuture.runAsync(() -> saveImage(listImg, listImgDto));
 
-            packRepository.save(emoticonPackEntity);
-            System.out.println("Step 9: Emoticon pack saved.");
 
-            if (problematicImage || problematicInfoImage) {
-                objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
-                System.out.println("Step 10: Objection registered for EmoticonPackEntity.");
-            }
+        CompletableFuture<EmoticonPackEntity> allSaveFutures = CompletableFuture.allOf(thumbnailSaveFuture, listImgSaveFuture)
+                .thenApply(v -> {
+                    try {
+                        // EmoticonPackEntity 생성 및 저장
+                        EmoticonPackEntity emoticonPackEntity = new EmoticonPackEntity(emoticonPack, member, thumbnamilDto.getUrl(), listImgDto.getUrl());
+                        packRepository.save(emoticonPackEntity);
 
-            imageHashService.saveThumbnailHash(thumbnamilDto.getFile(), emoticonPackEntity);
-            imageHashService.saveListImgHash(listImgDto.getFile(), emoticonPackEntity);
-            System.out.println("Step 11: Saved image hashes for thumbnail and list image.");
+                        // 해시 저장
+                        imageHashService.saveThumbnailHash(thumbnamilDto.getFile(), emoticonPackEntity);
+                        imageHashService.saveListImgHash(listImgDto.getFile(), emoticonPackEntity);
+
+                        return emoticonPackEntity;  // 이후 작업에서 사용할 수 있도록 반환
+                    } catch (IOException e) {
+                        throw new RuntimeException("hash 실패", e);
+                    }
+                });
+
+        List<String> emoticonsUrls = new ArrayList<>();
+
+
+        // EmoticonPackEntity 생성 후 진행할 emoticons 비동기 저장 및 해시 작업
+        CompletableFuture<Void> allFutures = allSaveFutures.thenCompose(emoticonPackEntity -> {
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             int cnt = 0;
-            System.out.println("Step 12: Saving emoticon images.");
             for (MultipartFile emoticon : emoticonList) {
                 EmoticonFileAndName emoticonDto = new EmoticonFileAndName();
-//                File emoticonFile = makeFile(emoticon);
-                saveImage(emoticon, emoticonDto);
-                emoticonsUrls.add(emoticonDto.getUrl());
-                imageHashService.saveEmoticonHash(emoticonDto.getFile(), emoticonPackEntity, cnt);
+                int finalCnt = cnt; // lambda에서 사용하기 위해 final로 캡처
+
+                // 각 이미지 저장 및 해시 생성 작업을 비동기로 실행
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    try {
+                        // 이미지 저장
+                        saveImage(emoticon, emoticonDto);
+                        emoticonsUrls.add(emoticonDto.getUrl());
+
+                        // 이미지 해시 저장
+                        imageHashService.saveEmoticonHash(emoticonDto.getFile(), emoticonPackEntity, finalCnt);
+                    } catch (IOException e) {
+                        throw new RuntimeException("emoticonHash 실패: " + emoticonDto.getFile(), e);
+                    }
+                });
+
+                futures.add(future);
                 cnt++;
-                System.out.println("Step 12: Emoticon image " + cnt + " processed and saved.");
             }
-            emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
-            System.out.println("Step 13: Emoticons saved.");
-            // 태그 정보 추가
-            List<String> tagNames = emoticonPack.getTags();
-            List<TagListEntity> tagListEntities = new ArrayList<>();
-            System.out.println("Step 14: Processing tags.");
-            for (String tag : tagNames) {
-                TagEntity findTagEntity;
-                Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
-                if (getTagEntity.isEmpty()) {
-                    TagEntity tagEntity = TagEntity.builder()
-                            .tagName(tag)
-                            .build();
-                    tagRepository.save(tagEntity);
-                    findTagEntity = tagEntity;
-                    System.out.println("Step 14: New tag created - " + tag);
-                } else {
-                    findTagEntity = getTagEntity.get();
-                    System.out.println("Step 14: Existing tag found - " + tag);
-                }
-                TagListEntity tagListEntity = TagListEntity.builder()
-                        .emoticonPack(emoticonPackEntity)
-                        .tag(findTagEntity)
+
+            // 모든 futures 작업이 완료될 때까지 대기
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        });
+
+        EmoticonPackEntity emoticonPackEntity = allSaveFutures.join();
+
+        if (emoticonPackEntity.getBlacklist()) {
+            objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
+        }
+
+        emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
+
+        saveTag(emoticonPackEntity,emoticonPack);
+
+        detectFuture.orTimeout(10, TimeUnit.SECONDS)
+                .exceptionally(ex -> {
+                    // 타임아웃이나 예외가 발생했을 때 처리
+                    emoticonPackEntity.setBlacklist(true);
+                    packRepository.save(emoticonPackEntity);
+                    throw new OpenticonException(ErrorCode.TIMEOUT);
+                });
+        return new EmoticonPackResponseDto(emoticonPackEntity);
+
+    }
+
+    private void saveTag(EmoticonPackEntity emoticonPackEntity, EmoticonPack emoticonPack){
+        List<String> tagNames = emoticonPack.getTags();
+        List<TagListEntity> tagListEntities = new ArrayList<>();
+        for (String tag : tagNames) {
+            TagEntity findTagEntity;
+            Optional<TagEntity> getTagEntity = tagRepository.findByTagName(tag);
+            if (getTagEntity.isEmpty()) {
+                TagEntity tagEntity = TagEntity.builder()
+                        .tagName(tag)
                         .build();
-                tagListRepository.save(tagListEntity);
-                tagListEntities.add(tagListEntity);
+                tagRepository.save(tagEntity);
+                findTagEntity = tagEntity;
+            } else {
+                findTagEntity = getTagEntity.get();
             }
-            emoticonPackEntity.setTagLists(tagListEntities);
-            System.out.println("Step 15: Tags processed and saved.");
+            TagListEntity tagListEntity = TagListEntity.builder()
+                    .emoticonPack(emoticonPackEntity)
+                    .tag(findTagEntity)
+                    .build();
+            tagListRepository.save(tagListEntity);
+            tagListEntities.add(tagListEntity);
+        }
+        emoticonPackEntity.setTagLists(tagListEntities);
+    }
 
-            return new EmoticonPackResponseDto(emoticonPackEntity);
-        } catch (IOException e) {
-            System.err.println("Exception during EmoticonPack upload: " + e.getMessage());
-            throw new RuntimeException(e.getMessage());
+    private void detect(EmoticonPack emoticonPack, AtomicBoolean detectPass) {
+        List<MultipartFile> images = new ArrayList<>();
+        images.add(emoticonPack.getThumbnailImg());
+        images.add(emoticonPack.getListImg());
+        images.addAll(emoticonPack.getEmoticons());
+
+        for (int i = 0; i < images.size(); i += 16) {
+            int end = Math.min(i + 16, images.size());
+            List<MultipartFile> subList = images.subList(i, end);
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    if (safeSearchService.detectSafeSearch(subList)) {
+                        detectPass.set(false);  // 유해 이미지 발견 시 detectPass를 false로 설정
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 
-
-    private File makeFile(MultipartFile image){
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile("upload", image.getOriginalFilename());
-            image.transferTo(tempFile);
-            return tempFile;
-        }catch (IOException e){
-            throw new RuntimeException("File만들기 실패");
+    private boolean isDuplicateTitle(String title){
+        if(packRepository.findByTitle(title).isPresent()){
+            return true;
         }
-
+        return false;
     }
-
-
-
 
     private void saveImage(MultipartFile image, EmoticonFileAndName dto) {
         String uploadServerUrl = imageServerUrl + "/upload/image";
@@ -277,10 +300,6 @@ public class PackService {
     public PackInfoResponseDto getPackInfo(String uuid, UserDetails userDetails, String requestIp) throws AuthenticationException {
 
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
-
-//        if(!validatePrivatePack(email,emoticonPackEntity.getId()) && !emoticonPackEntity.isPublic()){
-//            throw new OpenticonException(ErrorCode.PRIVATE_PACK);
-//        }
 
         if(emoticonPackEntity.getBlacklist()){
             throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
