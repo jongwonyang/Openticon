@@ -15,4 +15,6 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Integer> {
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM MemberEntity m WHERE m.email = :email AND m.isResigned = false")
     boolean existsMemberByEmail(@Param("email") String email);
 
+    boolean existsMemberByNickname(String nickname);
+
 }

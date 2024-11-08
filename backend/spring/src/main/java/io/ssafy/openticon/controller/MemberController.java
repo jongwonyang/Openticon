@@ -105,6 +105,17 @@ public class MemberController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
         return ResponseEntity.ok(new MemberResponseDto(member));
     }
+    @GetMapping("duplicate-check")
+    public ResponseEntity<String> checkNickNameDupl(
+            @Parameter(description = "닉네임", required = true)
+            @RequestParam("nickname") String nickname) {
+        boolean isDuplicate = memberRepository.existsMemberByNickname(nickname);
+        if (isDuplicate) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("닉네임이 이미 존재합니다.");
+        } else {
+            return ResponseEntity.ok("사용 가능한 닉네임입니다.");
+        }
+    }
 
     @PostMapping("deviceToken")
     @Operation(summary = "device token 저장 api")
