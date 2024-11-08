@@ -163,7 +163,10 @@ public class PackService {
 
             // 모든 futures 작업이 완료될 때까지 대기
             return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
         });
+
+        allFutures.join();
 
         EmoticonPackEntity emoticonPackEntity = allSaveFutures.join();
 
