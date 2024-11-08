@@ -65,6 +65,7 @@ dependencies {
 	implementation group: 'org.openjfx', name: 'javafx', version: '20.0.2', ext: 'pom'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
 	//gif encoder
 	implementation 'com.madgag:animated-gif-lib:1.4'

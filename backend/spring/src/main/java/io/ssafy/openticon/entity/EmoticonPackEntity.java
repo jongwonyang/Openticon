@@ -73,6 +73,8 @@ public class EmoticonPackEntity {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    @OneToOne(mappedBy = "emoticonPack", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private DownloadEntity download;
 
 
     @PreUpdate
