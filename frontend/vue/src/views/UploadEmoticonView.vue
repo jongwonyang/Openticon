@@ -49,8 +49,8 @@ const emoticonPackUploadInfo = ref<EmoticonPackUploadInfo>({
 });
 
 const emoticonPackUploadFiles = ref<EmoticonPackUploadFiles>({
-  thumbnailImg: new File([], ""),
-  listImg: new File([], ""),
+  thumbnailImg: null,
+  listImg: null,
   emoticons: [],
 });
 
@@ -68,7 +68,10 @@ function handlePackTitleUpdate(title: string) {
   emoticonPackUploadInfo.value.packTitle = title;
 }
 
+const requiredCategory = ref<string>("");
+
 function handleCategoryUpdate(category: string) {
+  requiredCategory.value = category;
   emoticonPackUploadInfo.value.category = category as
     | "REAL"
     | "CHARACTER"
@@ -101,11 +104,15 @@ function handleSubmit() {
     alert("이모티콘 팩 이름을 입력해주세요.");
     return;
   }
-  if (emoticonPackUploadFiles.value.thumbnailImg === new File([], "")) {
+  if (requiredCategory.value === "") {
+    alert("카테고리를 선택해주세요.");
+    return;
+  }
+  if (emoticonPackUploadFiles.value.thumbnailImg === null) {
     alert("이모티콘 대표 이미지를 추가해주세요.");
     return;
   }
-  if (emoticonPackUploadFiles.value.listImg === new File([], "")) {
+  if (emoticonPackUploadFiles.value.listImg === null) {
     alert("이모티콘 목록 이미지를 추가해주세요.");
     return;
   }

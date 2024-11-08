@@ -99,10 +99,8 @@ watch(props, (newVal) => {
       price: newVal.emoticonPackUploadInfo.price,
       category: newVal.emoticonPackUploadInfo.category,
       description: newVal.emoticonPackUploadInfo.description,
-      thumbnailImg: URL.createObjectURL(
-        newVal.emoticonPackUploadFiles.thumbnailImg
-      ),
-      listImg: URL.createObjectURL(newVal.emoticonPackUploadFiles.listImg),
+      thumbnailImg: newVal.emoticonPackUploadFiles.thumbnailImg ? URL.createObjectURL(newVal.emoticonPackUploadFiles.thumbnailImg) : "",
+      listImg: newVal.emoticonPackUploadFiles.listImg ? URL.createObjectURL(newVal.emoticonPackUploadFiles.listImg) : "",
       emoticons: newVal.emoticonPackUploadFiles.emoticons.map((file) =>
         URL.createObjectURL(file)
       ),

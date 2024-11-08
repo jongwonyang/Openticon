@@ -31,6 +31,7 @@ function handleFileInput(event: Event) {
 
 function resizeImage(file: File): Promise<File> {
   return new Promise((resolve, reject) => {
+    // 기존 이미지 처리 로직
     const img = new Image();
     img.src = URL.createObjectURL(file);
 
@@ -45,12 +46,10 @@ function resizeImage(file: File): Promise<File> {
       if (img.width === REQUIRED_WIDTH) {
         resolve(file);
         return;
-      }
-
-      if (img.width < REQUIRED_WIDTH) {
+      } else if (file.type.startsWith("image/gif")) {
         reject(
           new Error(
-            `이미지 해상도가 너무 작습니다. 최소 ${REQUIRED_WIDTH}x${REQUIRED_WIDTH} 이상이어야 합니다.`
+            "GIF 파일은 리사이징을 지원하지 않습니다. 정확히 200x200 크기여야 합니다."
           )
         );
         return;

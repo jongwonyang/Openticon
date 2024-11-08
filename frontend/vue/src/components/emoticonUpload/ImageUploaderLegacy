@@ -1,0 +1,321 @@
+<script setup lang="ts">
+import { ref } from "vue";
+
+interface ImageUploadTarget {
+  previewUrl: string | null;
+  file: File | null;
+}
+
+const props = defineProps<{
+  label: string;
+}>();
+
+const emit = defineEmits<{
+  (e: "update:file", file: File): void;
+}>();
+
+const imageData = ref<ImageUploadTarget>({
+  previewUrl: null,
+  file: null,
+});
+
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "gif"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const REQUIRED_WIDTH = 200; // 정확히 200px
+const REQUIRED_HEIGHT = 200; // 정확히 200px
+
+function handleDrop(event: DragEvent) {
+  event.preventDefault();
+  const files = event.dataTransfer?.files;
+  if (files && files.length > 0) {
+    handleImageFile(files[0]);
+  }
+}
+
+function handleFileInput(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+  if (files && files.length > 0) {
+    handleImageFile(files[0]);
+  }
+}
+
+function resizeImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+
+    if (extension === "gif") {
+      import("gifuct-js")
+        .then(({ parseGIF, decompressFrames }) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (reader.result instanceof ArrayBuffer) {
+              const gif = parseGIF(reader.result);
+              const frames = decompressFrames(gif, true);
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d", {
+                willReadFrequently: true
+              });
+              
+              if (!ctx) {
+                reject(new Error("Canvas 컨텍스트를 생성할 수 없습니다."));
+                return;
+              }
+
+              const originalWidth = gif.lsd.width;
+              const originalHeight = gif.lsd.height;
+              canvas.width = originalWidth;
+              canvas.height = originalHeight;
+              
+              const resizedGif = new gif({
+                workers: 2,
+                quality: 10,
+                width: REQUIRED_WIDTH,
+                height: REQUIRED_HEIGHT,
+                workerScript: "/gif.worker.js"
+              });
+
+              let previousImageData = ctx.createImageData(originalWidth, originalHeight);
+              let previousDisposalData = ctx.createImageData(originalWidth, originalHeight);
+              
+              frames.forEach((frame) => {
+                // 새로운 프레임 데이터 생성
+                const frameImageData = ctx.createImageData(originalWidth, originalHeight);
+                
+                // disposalType에 따른 이전 프레임 처리
+                switch (frame.disposalType) {
+                  case 2: // Restore to background color
+                    // 배경을 투명하게 초기화
+                    frameImageData.data.fill(0);
+                    break;
+                  case 3: // Restore to previous
+                    frameImageData.data.set(previousDisposalData.data);
+                    break;
+                  case 0: // No disposal specified
+                  case 1: // Do not dispose
+                  default:
+                    // 이전 프레임 유지
+                    frameImageData.data.set(previousImageData.data);
+                    break;
+                }
+
+                // 현재 프레임 패치 적용
+                const { width, height, left, top } = frame.dims;
+                for (let y = 0; y < height; y++) {
+                  for (let x = 0; x < width; x++) {
+                    const srcPos = (y * width + x) * 4;
+                    const targetPos = ((top + y) * originalWidth + (left + x)) * 4;
+
+                    // 투명도 처리 개선
+                    const alpha = frame.patch[srcPos + 3];
+                    if (alpha !== 0) {
+                      frameImageData.data[targetPos] = frame.patch[srcPos];
+                      frameImageData.data[targetPos + 1] = frame.patch[srcPos + 1];
+                      frameImageData.data[targetPos + 2] = frame.patch[srcPos + 2];
+                      frameImageData.data[targetPos + 3] = alpha;
+                    }
+                  }
+                }
+
+                // disposalType이 3인 경우를 위해 현재 상태 저장
+                if (frame.disposalType === 3) {
+                  previousDisposalData.data.set(previousImageData.data);
+                }
+
+                ctx.putImageData(frameImageData, 0, 0);
+                previousImageData = frameImageData;
+
+                const resizeCanvas = document.createElement("canvas");
+                resizeCanvas.width = REQUIRED_WIDTH;
+                resizeCanvas.height = REQUIRED_HEIGHT;
+                const resizeCtx = resizeCanvas.getContext("2d");
+                
+                if (!resizeCtx) {
+                  reject(new Error("리사이즈 캔버스 컨텍스트를 생성할 수 없습니다."));
+                  return;
+                }
+
+                const scale = Math.min(
+                  REQUIRED_WIDTH / originalWidth,
+                  REQUIRED_HEIGHT / originalHeight
+                );
+                const scaledWidth = originalWidth * scale;
+                const scaledHeight = originalHeight * scale;
+                const x = (REQUIRED_WIDTH - scaledWidth) / 2;
+                const y = (REQUIRED_HEIGHT - scaledHeight) / 2;
+
+                resizeCtx.drawImage(
+                  canvas,
+                  x,
+                  y,
+                  scaledWidth,
+                  scaledHeight
+                );
+
+                resizedGif.addFrame(resizeCanvas, {
+                  delay: frame.delay,
+                });
+              });
+
+              resizedGif.render();
+                
+              resizedGif.on("finished", (blob: Blob) => {
+                const resizedFile = new File([blob], file.name, {
+                  type: file.type,
+                  lastModified: Date.now(),
+                  });
+                resolve(resizedFile);
+              });
+
+              resizedGif.on("error", (err: Error) => {
+                reject(new Error("GIF 리사이즈 중 오류가 발생했습니다: " + err.message));
+              });
+            } else {
+              reject(new Error("파일을 읽는 중 오류가 발생했습니다."));
+            }
+          };
+          reader.onerror = () => {
+            reject(new Error("파일을 읽는 중 오류가 발생했습니다."));
+          };
+          reader.readAsArrayBuffer(file);
+        }).catch(() => {
+          reject(new Error("GIF 처리 라이브러리를 로드하는 중 오류가 발생했습니다."));
+        });
+      return;
+    }
+
+    // 기존 이미지 처리 로직
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+
+      if (img.width !== img.height) {
+        reject(new Error("이미지는 정사각형이어야 합니다."));
+        return;
+      }
+
+      if (img.width === REQUIRED_WIDTH) {
+        resolve(file);
+        return;
+      }
+
+      if (img.width < REQUIRED_WIDTH) {
+        reject(
+          new Error(
+            `이미지 해상도가 너무 작습니다. 최소 ${REQUIRED_WIDTH}x${REQUIRED_WIDTH} 이상이어야 합니다.`
+          )
+        );
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = REQUIRED_WIDTH;
+      canvas.height = REQUIRED_HEIGHT;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Canvas 컨텍스트를 생성할 수 없습니다."));
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, REQUIRED_WIDTH, REQUIRED_HEIGHT);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("이미지 변환 중 오류가 발생했습니다."));
+            return;
+          }
+
+          const resizedFile = new File([blob], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+
+          resolve(resizedFile);
+        },
+        file.type,
+        1.0
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src);
+      reject(new Error("이미지 파일을 읽는 중 오류가 발생했습니다."));
+    };
+  });
+}
+
+async function handleImageFile(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+
+  if (file.size > MAX_FILE_SIZE) {
+    alert("파일 크기는 5MB 이하여야 합니다.");
+    return;
+  }
+
+  if (!extension || !ALLOWED_EXTENSIONS.includes(extension)) {
+    alert("허용된 파일 형식이 아닙니다. (jpg, jpeg, png, gif만 가능)");
+    return;
+  }
+
+  if (file.type.startsWith("image/")) {
+    try {
+      const processedFile = await resizeImage(file);
+      imageData.value.file = processedFile;
+      imageData.value.previewUrl = URL.createObjectURL(processedFile);
+      emit("update:file", processedFile);
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("이미지 처리 중 오류가 발생했습니다.");
+      }
+    }
+  } else {
+    alert("이미지 파일만 업로드 가능합니다.");
+  }
+}
+
+function handleDragOver(event: DragEvent) {
+  event.preventDefault();
+}
+</script>
+
+<template>
+  <div class="flex flex-col items-center justify-center md:items-start">
+    <span class="text-lg font-bold font-nnsqneo">{{ label }}</span>
+    <div
+      @click="$refs.fileInput.click()"
+      @drop="handleDrop"
+      @dragover="handleDragOver"
+      :class="[
+        'w-32 h-32 bg-gray-100 rounded-md border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 mt-2',
+        imageData.previewUrl
+          ? 'border-gray-400 border-solid'
+          : 'border-gray-400 border-dashed',
+      ]"
+    >
+      <template v-if="!imageData.previewUrl">
+        <span class="material-icons text-gray-400 text-6xl"
+          >add_circle_outline</span
+        >
+        <span class="text-gray-400 text-sm">이미지 불러오기</span>
+      </template>
+      <img
+        v-else
+        :src="imageData.previewUrl"
+        class="w-full h-full object-cover rounded-md"
+      />
+      <input
+        ref="fileInput"
+        type="file"
+        class="hidden"
+        accept=".jpg,.jpeg,.png,.gif"
+        @change="handleFileInput"
+      />
+    </div>
+  </div>
+</template>

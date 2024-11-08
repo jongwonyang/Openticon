@@ -3,21 +3,26 @@
     <div class="flex flex-col justify-center px-4">
       <div class="flex flex-col sm:flex-row justify-end mt-2">
         <div class="w-full sm:w-1/4">
-          <div class="text-xl text-black font-nnsqneo-bold">가격</div>
-          <input
-            type="number"
-            v-model="price"
-            placeholder="가격"
-            class="w-full border-2 border-gray-400 rounded-md p-2 mt-2 focus:outline-none focus:border-slate-500"
-          />
+          <div class="text-lg text-black font-nnsqneo-bold">가격</div>
+            <input
+              type="number"
+              v-model="price"
+              placeholder="가격"
+              min="0"
+              max="10000"
+              class="w-full border-2 border-gray-400 rounded-md p-2 mt-2 focus:outline-none focus:border-slate-500 flex-auto"
+              @input="price = Math.max(0, Math.min(10000, Number(price)))"
+            />
           <div class="mt-2 flex flex-col">
-            <span class="text-xl text-black font-nnsqneo-bold">공개여부</span>
+            <span class="text-lg text-black font-nnsqneo-bold">공개여부</span>
             <button
               @click="isPublic = !isPublic"
               class="bg-blue-500 text-white px-4 py-2 rounded-md w-full mt-2 flex flex-row items-center justify-center gap-2 border-2 transition-all duration-50"
               :class="{
-                'bg-red-500 hover:bg-red-600 active:bg-red-700 border-red-500': !isPublic,
-                'bg-green-500 hover:bg-green-600 active:bg-green-700 border-green-500': isPublic,
+                'bg-red-500 hover:bg-red-600 active:bg-red-700 border-red-500':
+                  !isPublic,
+                'bg-green-500 hover:bg-green-600 active:bg-green-700 border-green-500':
+                  isPublic,
               }"
             >
               <span class="material-icons text-md text-right">
@@ -28,7 +33,7 @@
           </div>
         </div>
         <div class="w-full pl-0 sm:pl-6 sm:w-3/4 pt-2 sm:pt-0">
-          <div class="text-xl text-black font-nnsqneo-bold">태그</div>
+          <div class="text-lg text-black font-nnsqneo-bold">태그</div>
           <div
             class="flex flex-row flex-wrap transition-all duration-50"
             :class="{ 'mt-2': tags.length > 0 }"
@@ -56,7 +61,7 @@
             <input
               type="text"
               v-model="tag"
-              placeholder="태그"
+              placeholder="태그 (최대 20자, 엔터키로 추가)"
               class="w-full border-2 border-gray-400 rounded-full px-3 py-2 focus:outline-none focus:border-slate-500"
               @keydown.enter="handleTagAdd"
             />
@@ -116,6 +121,11 @@ function handleTagAdd() {
     tagErrorMessage.value = "중복된 태그입니다.";
     return;
   }
+  if (trimmedTag.length == 0) {
+    tagError.value = true;
+    tagErrorMessage.value = "태그를 입력해주세요.";
+    return;
+  }
   tags.value.push(trimmedTag);
   tag.value = "";
   tagError.value = false;
@@ -133,9 +143,13 @@ watch(price, (newValue) => {
   emit("update:price", newValue);
 });
 
-watch(tags, (newValue) => {
-  emit("update:tags", newValue);
-}, { deep: true });
+watch(
+  tags,
+  (newValue) => {
+    emit("update:tags", newValue);
+  },
+  { deep: true }
+);
 
 watch(isPublic, (newValue) => {
   emit("update:isPublic", newValue);
