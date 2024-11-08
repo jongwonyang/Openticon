@@ -138,27 +138,27 @@ public class PackService {
         CompletableFuture<Void> allFutures = allSaveFutures.thenCompose(emoticonPackEntity -> {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-            int cnt = 0;
-            for (MultipartFile emoticon : emoticonList) {
+
+            for (int i=0;i<emoticonList.size();i++) {
                 EmoticonFileAndName emoticonDto = new EmoticonFileAndName();
-                int finalCnt = cnt; // lambda에서 사용하기 위해 final로 캡처
 
                 // 각 이미지 저장 및 해시 생성 작업을 비동기로 실행
+                int finalI = i;
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     try {
                         // 이미지 저장
-                        saveImage(emoticon, emoticonDto);
-                        emoticonsUrls.add(emoticonDto.getUrl());
-
+                        saveImage(emoticonList.get(finalI), emoticonDto);
+                        //emoticonsUrls.add(emoticonDto.getUrl());
+                        emoticonService.saveEmoticon(emoticonDto.getUrl(),emoticonPackEntity,finalI);
                         // 이미지 해시 저장
-                        imageHashService.saveEmoticonHash(emoticonDto.getFile(), emoticonPackEntity, finalCnt);
+                        imageHashService.saveEmoticonHash(emoticonDto.getFile(), emoticonPackEntity, finalI);
                     } catch (IOException e) {
                         throw new RuntimeException("emoticonHash 실패: " + emoticonDto.getFile(), e);
                     }
                 });
 
                 futures.add(future);
-                cnt++;
+
             }
 
             // 모든 futures 작업이 완료될 때까지 대기
@@ -174,7 +174,7 @@ public class PackService {
             objectionService.objectionEmoticonPack(emoticonPackEntity, ReportType.EXAMINE);
         }
 
-        emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
+//        emoticonService.saveEmoticons(emoticonsUrls, emoticonPackEntity);
 
         saveTag(emoticonPackEntity,emoticonPack);
 

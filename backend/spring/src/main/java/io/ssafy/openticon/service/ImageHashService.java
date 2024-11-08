@@ -10,6 +10,7 @@ import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.ImageHashRepository;
 import io.ssafy.openticon.repository.PackRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +65,7 @@ public class ImageHashService {
         imageHashRepository.save(imageHashEntity);
     }
 
+    @Transactional
     public void saveEmoticonHash(File emoticon, EmoticonPackEntity emoticonPackEntity, int order) throws IOException {
         HashingAlgorithm hasher = new PerceptiveHash(32);
         Hash emoticonHash=hasher.hash(emoticon);
