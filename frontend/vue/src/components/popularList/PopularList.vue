@@ -36,6 +36,23 @@
     <div v-if="loading" class="flex justify-center items-center">
       <Loading />
     </div>
+    <div
+      v-if="!hasMore"
+      class="flex justify-center items-center h-24 bg-gray-200 rounded-lg mt-4"
+    >
+      <p class="text-gray-500">더 이상 불러올 이모티콘이 없습니다.</p>
+    </div>
+    <div v-if="errorOccurred" class="flex flex-col justify-center items-center bg-gray-200 rounded-lg mt-4 gap-4 p-4">
+      <p class="text-gray-500">
+        이모티콘을 불러오는 중 오류가 발생했습니다.
+      </p>
+      <button
+        @click="loadMoreEmoticons"
+        class="rounded-full border border-gray-300 px-4 py-2 bg-white hover:bg-gray-100 active:bg-gray-300"
+      >
+        다시시도
+      </button>
+    </div>
   </div>
 </template>
 
@@ -51,7 +68,7 @@ const popularEmoticonList = ref<EmoticonPackInList[]>([]);
 const currentPage = ref(0);
 const loading = ref(false);
 const hasMore = ref(true);
-
+const errorOccurred = ref(false);
 const emoticonPackStore = useEmoticonPackStore();
 
 const loadMoreEmoticons = async () => {
@@ -68,7 +85,9 @@ const loadMoreEmoticons = async () => {
       hasMore.value = false;
     }
     popularEmoticonList.value.push(...popularEmoticonsResult.content);
+    errorOccurred.value = false;
   } catch (error) {
+    errorOccurred.value = true;
     console.error("이모티콘을 불러오는 중 오류가 발생했습니다:", error);
   } finally {
     loading.value = false;
@@ -78,7 +97,9 @@ const loadMoreEmoticons = async () => {
 useInfiniteScroll(
   window,
   async () => {
-    await loadMoreEmoticons();
+    if (!errorOccurred.value) {
+      await loadMoreEmoticons();
+    }
   },
   { distance: 400 }
 );

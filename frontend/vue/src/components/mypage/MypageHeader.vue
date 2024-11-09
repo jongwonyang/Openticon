@@ -20,9 +20,9 @@
         </div>
       </div>
       <div
-        class="flex flex-col gap-1 text-center justify-center sm:text-left mx-4 flex-shrink-0"
+        class="flex flex-col gap-1 items-center justify-center sm:items-start mx-4 flex-shrink-0"
       >
-        <div class="flex items-center justify-center sm:justify-start">
+        <div class="flex">
           <span class="text-3xl font-nnsqneo-heavy truncate max-w-96">{{
             userStore.userInfo?.nickname
           }}</span>
@@ -46,7 +46,7 @@
           {{ userStore.userInfo?.point }} 포인트
         </div>
       </div>
-      <div v-if="false"class="flex justify-center items-center flex-1 min-w-72">
+      <div class="flex justify-center items-center flex-1 min-w-72">
         <div class="w-full h-full flex justify-center items-center rounded-lg bg-gray-100 p-4">
           알림
         </div>
