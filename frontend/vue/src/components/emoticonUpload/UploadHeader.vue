@@ -4,7 +4,9 @@
       <div class="flex flex-row gap-2">
         <div class="flex-grow">
           <p class="flex flex-row items-center">
-            <span class="text-lg text-black font-nnsqneo-bold">이모티콘 팩 이름</span>
+            <span class="text-lg text-black font-nnsqneo-bold"
+              >이모티콘 팩 이름</span
+            >
             <span class="text-red-500">*</span>
           </p>
           <input
@@ -15,12 +17,8 @@
           />
         </div>
         <div class="flex-grow-0 min-w-40">
-            <p class="flex flex-row items-center">
-              <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
-            <span class="text-red-500">*</span>
-          </p>
-            <p class="flex flex-row items-center">
-              <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
+          <p class="flex flex-row items-center">
+            <span class="text-lg text-black font-nnsqneo-bold">카테고리</span>
             <span class="text-red-500">*</span>
           </p>
           <select
@@ -43,20 +41,24 @@
         <div
           class="flex flex-row items-center justify-around flex-grow-0 gap-4 w-full md:w-auto"
         >
-          <div class="flex flex-col items-center justify-center md:items-start gap-2">
-            <div
-              class="flex flex-row items-center"
-            >
-              <span class="text-lg text-black font-nnsqneo-bold">대표 이미지</span>
+          <div
+            class="flex flex-col items-center justify-center md:items-start gap-2"
+          >
+            <div class="flex flex-row items-center">
+              <span class="text-lg text-black font-nnsqneo-bold"
+                >대표 이미지</span
+              >
               <span class="text-red-500">*</span>
             </div>
             <ImageUploader @update:file="handleThumbnailUpdate" />
           </div>
-          <div class="flex flex-col items-center justify-center md:items-start gap-2">
-            <div
-              class="flex flex-row items-center"
-            >
-              <span class="text-lg text-black font-nnsqneo-bold">목록 이미지</span>
+          <div
+            class="flex flex-col items-center justify-center md:items-start gap-2"
+          >
+            <div class="flex flex-row items-center">
+              <span class="text-lg text-black font-nnsqneo-bold"
+                >목록 이미지</span
+              >
               <span class="text-red-500">*</span>
             </div>
             <ImageUploader @update:file="handleListImageUpdate" />
