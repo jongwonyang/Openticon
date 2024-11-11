@@ -5,6 +5,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPackEntity
+import io.ssafy.openticon.data.model.EmoticonPackOrder
 import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
@@ -154,6 +155,24 @@ class EmoticonPacksRepository @Inject constructor(
     suspend fun insertLikeEmoticons(likeEmoticon: LikeEmoticon) {
         withContext(Dispatchers.IO) {
             emoticonDao.insertLikeEmoticon(likeEmoticon)
+        }
+    }
+
+    suspend fun deleteFromOrder(packId: Int) {
+        withContext(Dispatchers.IO) {
+            emoticonDao.deleteFromOrder(packId)
+        }
+    }
+
+    suspend fun deleteAllEmoticonPacksOrder(){
+        withContext(Dispatchers.IO) {
+            emoticonDao.deleteAllEmoticonPacksOrder()
+        }
+    }
+
+    suspend fun insertOrder(packId: Int){
+        withContext(Dispatchers.IO) {
+            emoticonDao.insertPackOrder(EmoticonPackOrder(packId = packId))
         }
     }
 }
