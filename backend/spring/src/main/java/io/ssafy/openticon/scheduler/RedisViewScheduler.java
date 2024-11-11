@@ -32,7 +32,7 @@ public class RedisViewScheduler {
     public void updateViewCount() {
         Set<String> keys = redisEmoticonPackTemplate.keys("emoticon_pack:*");
         if(keys != null){
-            System.out.println("1분 스케줄러 동작 중! redisKeys: " + keys.size());
+            System.out.println("10분 스케줄러 동작 중! redisKeys: " + keys.size());
             for(String redisKey : keys){
                 EmoticonPackResponseDto responseDto = (EmoticonPackResponseDto) redisEmoticonPackTemplate.opsForValue().get(redisKey);
                 if(responseDto != null){
