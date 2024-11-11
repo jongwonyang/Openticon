@@ -9,6 +9,7 @@ import io.ssafy.openticon.data.model.EmoticonPackOrder
 import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
+import io.ssafy.openticon.data.model.TagListResponseDto
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +40,10 @@ class EmoticonPacksRepository @Inject constructor(
             size = size,
             page = page
         )
+    }
+
+    suspend fun searchEmoticonTags() : TagListResponseDto{
+        return api.getTagsInfo()
     }
 
 

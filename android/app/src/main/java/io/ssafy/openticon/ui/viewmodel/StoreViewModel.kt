@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ssafy.openticon.data.model.TagListResponseDto
 import io.ssafy.openticon.di.UserSession
 import io.ssafy.openticon.domain.model.SearchEmoticonPacksListItem
 import io.ssafy.openticon.domain.usecase.SearchEmoticonPacksUseCase
+import io.ssafy.openticon.domain.usecase.SearchTagsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class StoreViewModel @Inject constructor(
     private val searchEmoticonPacksUseCase: SearchEmoticonPacksUseCase,
-    private val userSession: UserSession
+    private val userSession: UserSession,
+    private val searchTagsUseCase: SearchTagsUseCase
 ) : ViewModel() {
     private val _newEmoticonPack = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
     private val _popularEmoticonPack = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
@@ -77,6 +80,12 @@ class StoreViewModel @Inject constructor(
 
                 val (popularItems, _) = searchEmoticonPacksUseCase("title", "", "most", 9, 0)
                 _popularEmoticonPack.value = popularItems
+
+                val tag_list: TagListResponseDto = searchTagsUseCase.invoke()
+
+                _tagQuery1.value = tag_list.tags[0]
+                _tagQuery2.value = tag_list.tags[1]
+                _tagQuery3.value = tag_list.tags[2]
 
                 val (tag1Items, _) = searchEmoticonPacksUseCase(
                     "tag",
