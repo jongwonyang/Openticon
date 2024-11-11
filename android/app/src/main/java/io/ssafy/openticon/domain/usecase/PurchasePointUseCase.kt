@@ -1,5 +1,7 @@
 package io.ssafy.openticon.domain.usecase
 
+import com.google.gson.Gson
+import io.ssafy.openticon.data.model.ErrorResponse
 import io.ssafy.openticon.data.repository.PointsRepository
 import javax.inject.Inject
 
@@ -10,9 +12,18 @@ class PurchasePointUseCase @Inject constructor(
 
         val response = repository.purchasePoint(amount, impUid)
         return if(response.isSuccessful){
-            Result.success(response.body() ?: "포인트 충전 성공")
-        }else{
-            Result.failure(Exception("포인트 충전 실패"))
+            Result.success(response.body()?.message ?: "충전 성공")
+        } else {
+            val errorBody = response.errorBody()?.string()
+            val errorMessage = errorBody?.let {
+                try {
+                    Gson().fromJson(it, ErrorResponse::class.java).message
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    "알 수 없는 오류가 발생했습니다."
+                }
+            }
+            Result.failure(Exception(errorMessage))
         }
     }
 }
