@@ -60,7 +60,8 @@ public class PackInfoResponseDto {
         this.author = new AuthorResponseDto(
                 emoticonPackEntity.getMember().getId(),
                 emoticonPackEntity.getMember().getNickname(),
-                emoticonPackEntity.getMember().getProfile_image()
+                emoticonPackEntity.getMember().getProfile_image(),
+                emoticonPackEntity.getMember().getBio()
                 );
         this.isAIGenerated=emoticonPackEntity.isAiGenerated();
         this.price=emoticonPackEntity.getPrice();
