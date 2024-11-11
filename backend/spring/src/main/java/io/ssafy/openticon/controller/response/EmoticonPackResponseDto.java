@@ -36,6 +36,7 @@ public class EmoticonPackResponseDto {
     private String updatedAt;
     private List<String> tags;
     private int download;
+    private String deletedAt;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SS");
 
@@ -60,9 +61,13 @@ public class EmoticonPackResponseDto {
         this.shareLink = emoticonPackEntity.getShareLink();
         this.download = emoticonPackEntity.getDownload();
 
+
         // KST 변환 및 포맷 적용
         this.createdAt = formatToKST(emoticonPackEntity.getCreatedAt());
         this.updatedAt = formatToKST(emoticonPackEntity.getUpdatedAt());
+        if(emoticonPackEntity.getDeletedAt() != null){
+            this.deletedAt = formatToKST(emoticonPackEntity.getUpdatedAt());
+        }
 
         // 태그 이름 목록 설정
         this.tags = new ArrayList<>();

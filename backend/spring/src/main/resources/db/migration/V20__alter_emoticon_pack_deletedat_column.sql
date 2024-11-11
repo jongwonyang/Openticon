@@ -1,0 +1,2 @@
+ALTER TABLE emoticon_pack
+    ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;

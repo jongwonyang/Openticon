@@ -23,7 +23,7 @@ public interface ObjectionRepository extends JpaRepository<ObjectionEntity, Long
 
     Page<ObjectionEntity> findByMember(MemberEntity member, Pageable pageable);
 
-    @Query("SELECT o FROM ObjectionEntity o WHERE o.state = :state")
+    @Query("SELECT o FROM ObjectionEntity o JOIN o.emoticonPack ep WHERE o.state = :state AND ep.deletedAt IS NULL")
     Page<ObjectionEntity> findByState(@Param("state") ReportStateType state, Pageable pageable);
 
 }
