@@ -12,6 +12,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.List;
+
 @Configuration
 public class RedisConfig {
 
@@ -35,6 +37,18 @@ public class RedisConfig {
     @Bean
     public RedisTemplate<String, RedisViewEntity> redisMemberViewTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, RedisViewEntity> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Key와 Value의 직렬화 방법을 설정합니다.
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, List<String>> redisTagTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, List<String>> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         // Key와 Value의 직렬화 방법을 설정합니다.
