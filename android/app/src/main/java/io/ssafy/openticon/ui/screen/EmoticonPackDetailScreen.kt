@@ -526,3 +526,42 @@ fun ScaffoldPreview() {
         }
     }
 }
+
+@Composable
+fun ReportDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit
+) {
+    AlertDialog(
+        icon = {
+            Icon(Icons.Filled.Report, contentDescription = null)
+        },
+        title = {
+            Text(text = "이모티콘 팩 신고")
+        },
+        text = {
+            Text(text = "이 이모티콘 팩을 신고할까요?")
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Dismiss")
+            }
+        }
+    )
+}
