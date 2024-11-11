@@ -12,9 +12,11 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.graphics.drawable.AnimatedImageDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -67,6 +69,11 @@ class FloatingService : Service() {
     private lateinit var secondLayoutParams: WindowManager.LayoutParams
 
 
+    private var isCloseViewVisible = false  // 두 번째 뷰의 표시 상태
+    private lateinit var closeFloatingView: View
+    private lateinit var closeLayoutParams: WindowManager.LayoutParams
+
+
     private var initialTouchX = 0
     private var initialTouchY = 0
     private var initialX = 0
@@ -82,6 +89,7 @@ class FloatingService : Service() {
         //setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
         loadInitialData()
         loadLikeDate()
+        startCloseFloatingView()
     }
 
     private fun loadInitialData() {
@@ -133,6 +141,25 @@ class FloatingService : Service() {
             }
         }
     }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun startCloseFloatingView() {
+        // WindowManager를 사용하여 floatingView 설정
+        closeLayoutParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,  // 화면 너비에 맞춤
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        closeLayoutParams.gravity = Gravity.CENTER
+        closeFloatingView = LayoutInflater.from(this).inflate(R.layout.exit_layout, null)
+        // 두 번째 플로팅 뷰 설정
+        // 터치 리스너 설정
+    }
+
+
+
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -395,7 +422,6 @@ class FloatingService : Service() {
 
 
         val imageButton = floatingView.findViewById<ShapeableImageView>(R.id.imageButton1)
-        val backgroundB = floatingView.findViewById<ShapeableImageView>(R.id.imageButton2)
         imageButton.shapeAppearanceModel = imageButton.shapeAppearanceModel.toBuilder()
             .setAllCorners(CornerFamily.ROUNDED, 75f) // 원하는 크기의 반지름 설정
             .build()
@@ -410,6 +436,8 @@ class FloatingService : Service() {
         floatingView.findViewById<ShapeableImageView>(R.id.imageButton1).setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    isCloseViewVisible = true
+                    windowManager.addView(closeFloatingView, closeLayoutParams)
                     initialTouchX = event.rawX.toInt()
                     initialTouchY = event.rawY.toInt()
                     initialX = layoutParams.x
@@ -423,10 +451,52 @@ class FloatingService : Service() {
                     true
                 }
                 MotionEvent.ACTION_UP -> {
+                    val closeImg = closeFloatingView.findViewById<ImageView>(R.id.closeButton)
+
                     // 터치 움직임이 작으면 클릭으로 간주
                     if (Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
                         toggleSecondFloatingView()
                     }
+                    else{
+                        val imageButtonRect = Rect()
+                        val closeImgRect = Rect()
+
+                        imageButton.post {
+                            val locationImageButton = IntArray(2)
+                            val locationCloseImg = IntArray(2)
+
+                            imageButton.getLocationOnScreen(locationImageButton)
+                            closeImg.getLocationOnScreen(locationCloseImg)
+
+                            imageButtonRect.set(
+                                locationImageButton[0],
+                                locationImageButton[1],
+                                locationImageButton[0] + imageButton.width,
+                                locationImageButton[1] + imageButton.height
+                            )
+
+                            closeImgRect.set(
+                                locationCloseImg[0],
+                                locationCloseImg[1],
+                                locationCloseImg[0] + closeImg.width,
+                                locationCloseImg[1] + closeImg.height
+                            )
+
+                            // 충돌 여부 확인
+                            val isColliding = Rect.intersects(imageButtonRect, closeImgRect)
+
+                            if (isColliding) {
+                                stopSelf()
+                                Log.d("Collision", "imageButton이 closeImg와 겹칩니다.")
+                            } else {
+                                Log.d("Collision", "겹치지 않습니다.")
+                            }
+                        }
+
+                    }
+                    isCloseViewVisible = false
+                    windowManager.removeView(closeFloatingView)
+
                     true
                 }
                 else -> false
