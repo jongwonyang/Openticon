@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.ssafy.openticon.entity.MemberEntity;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.io.IOException;
 
@@ -107,8 +108,14 @@ public class MemberController {
     }
     @GetMapping("duplicate-check")
     public ResponseEntity<String> checkNickNameDupl(
+            @AuthenticationPrincipal UserDetails userDetails,
             @Parameter(description = "닉네임", required = true)
             @RequestParam("nickname") String nickname) {
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        if(Objects.equals(nickname, member.getNickname())){
+            return ResponseEntity.ok("사용 가능한 닉네임입니다.");
+        }
         boolean isDuplicate = memberRepository.existsMemberByNickname(nickname);
         if (isDuplicate) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("닉네임이 이미 존재합니다.");
