@@ -3,6 +3,7 @@ package io.ssafy.openticon.ui.screen
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -97,6 +98,11 @@ fun EmoticonPackDetailScreen(
         }
     }
 
+    BackHandler(enabled = isDownloading) {
+        // isDownloading이 true일 때 뒤로가기 버튼을 무시
+        Toast.makeText(context, "다운로드 중에는 뒤로가기를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -104,7 +110,10 @@ fun EmoticonPackDetailScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(
+                        onClick = { if (!isDownloading) navController.navigateUp() },
+                        enabled = !isDownloading // isDownloading이 true이면 비활성화
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = null
