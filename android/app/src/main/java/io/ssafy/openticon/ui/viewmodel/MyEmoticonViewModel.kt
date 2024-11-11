@@ -12,16 +12,25 @@ import io.ssafy.openticon.data.model.EmoticonPackEntity
 import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.data.repository.EmoticonPackRepository
+import io.ssafy.openticon.domain.usecase.DeleteAllOrderUseCase
+import io.ssafy.openticon.domain.usecase.DeleteOrderUseCase
 import io.ssafy.openticon.domain.usecase.DeletePackUseCase
 import io.ssafy.openticon.domain.usecase.GetEmoticonPacksUseCase
 import io.ssafy.openticon.domain.usecase.GetEmoticonPacksWithEmotionsUseCase
+import io.ssafy.openticon.domain.usecase.InsertOrderUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.security.PrivateKey
 import javax.inject.Inject
 
 @HiltViewModel
 class MyEmoticonViewModel @Inject constructor(
     private val getEmoticonPacksUseCase: GetEmoticonPacksUseCase,
-    private val deletePackUseCase: DeletePackUseCase
+    private val deletePackUseCase: DeletePackUseCase,
+    private val deleteOrderUseCase: DeleteOrderUseCase,
+    private val deleteAllOrderUseCase: DeleteAllOrderUseCase,
+    private val insertOrderUseCase: InsertOrderUseCase
 ): ViewModel() {
 
     private val _Sample_emoticonPacks = MutableLiveData<List<EmoticonPackEntity>>()
@@ -68,6 +77,7 @@ class MyEmoticonViewModel @Inject constructor(
                     viewModelScope.launch {
                         deletePackUseCase.invoke(updatedPack.id)
                         getEmoticonPacksUseCase.deleteEmoticons(updatedPack.id)
+                        deleteOrderUseCase.invoke(updatedPack.id)
                     }
                 }
             }
@@ -77,5 +87,15 @@ class MyEmoticonViewModel @Inject constructor(
     // 리스트 전체를 업데이트하는 함수 추가
     fun updateEmoticonPacks(newList: List<EmoticonPackEntity>) {
         _Sample_emoticonPacks.value = newList
+        viewModelScope.launch {
+            deleteAllOrderUseCase.invoke()
+            for (emoticonPack in _Sample_emoticonPacks.value!!) {
+                withContext(Dispatchers.IO) {
+                    // 1번 작업 완료 후 2번 작업 시작
+                    insertOrderUseCase.invoke(emoticonPack.id)
+                }
+            }
+        }
+
     }
 }

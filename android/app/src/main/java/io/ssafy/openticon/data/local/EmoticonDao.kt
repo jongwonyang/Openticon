@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPackEntity
+import io.ssafy.openticon.data.model.EmoticonPackOrder
 import io.ssafy.openticon.data.model.LikeEmoticon
 import kotlinx.coroutines.flow.Flow
 
@@ -21,6 +22,9 @@ interface EmoticonDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEmoticon(emoticon: Emoticon)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPackOrder(emoticon: EmoticonPackOrder)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLikeEmoticon(likeEmoticon: LikeEmoticon)
 
@@ -30,10 +34,20 @@ interface EmoticonDao {
     @Query("SELECT * FROM emoticons WHERE packId = :packId")
     fun getEmoticonsByPack(packId: Int): Flow<List<Emoticon>>
 
-    @Query("SELECT * FROM emoticon_packs")
+    @Query("""
+        SELECT e.* FROM emoticon_packs AS e
+        LEFT JOIN emoticon_pack_orders AS o ON e.id = o.packId
+        ORDER BY o.`order` IS NULL, o.`order`
+    """)
     fun getAllEmoticonPacks(): Flow<List<EmoticonPackEntity>>
 
-    @Query("SELECT * FROM emoticon_packs WHERE downloaded = 1")
+
+    @Query("""
+        SELECT e.* FROM emoticon_packs AS e
+        LEFT JOIN emoticon_pack_orders AS o ON e.id = o.packId
+        WHERE e.downloaded = 1
+        ORDER BY o.`order` IS NULL, o.`order`
+    """)
     fun getAllDownloadedEmoticonPacks(): Flow<List<EmoticonPackEntity>>
 
     @Query("UPDATE emoticon_packs SET downloaded = :b WHERE id = :packId")
@@ -45,8 +59,15 @@ interface EmoticonDao {
     @Query("Delete From emoticons where packId = :packId")
     fun deleteEmoticonsByPackId(packId: Int)
 
+    @Query("Delete From emoticon_pack_orders where packId = :packId")
+    fun deleteFromOrder(packId: Int)
+
     @Query("Delete From like_emoticons where packId = :packId")
     fun deleteLikeEmoticonsByPackId(packId: Int)
+
+    @Query("DELETE FROM emoticon_pack_orders")
+    suspend fun deleteAllEmoticonPacksOrder()
+
 
     @Update
     suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity)

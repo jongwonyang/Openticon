@@ -5,6 +5,7 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
+import io.ssafy.openticon.data.model.EmoticonPackOrder
 import io.ssafy.openticon.data.model.toEmoticonPack
 import io.ssafy.openticon.data.model.toEmoticonPackEntity
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
@@ -68,6 +69,11 @@ class EmoticonPackRepositoryImpl @Inject constructor(
         )
 
         emoticonDao.insertEmoticonPack(entity)
+        if(entity.downloaded){
+            emoticonDao.insertPackOrder(EmoticonPackOrder(
+                packId = entity.id
+            ))
+        }
     }
 
     override suspend fun downloadAndSavePublicEmoticonPack(packId: Int, emoticonUrls: List<String>) {
@@ -91,6 +97,11 @@ class EmoticonPackRepositoryImpl @Inject constructor(
     override suspend fun updateDownloadedStatus(packId: Int, isDownloaded: Boolean) {
         withContext(Dispatchers.IO) {
             emoticonDao.updateEmoticonPackDownloaded(packId, isDownloaded)
+            if(isDownloaded){
+                emoticonDao.insertPackOrder(
+                    EmoticonPackOrder(packId = packId)
+                )
+            }
         }
     }
 
