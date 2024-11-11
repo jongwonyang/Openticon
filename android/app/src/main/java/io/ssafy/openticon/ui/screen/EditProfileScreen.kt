@@ -1,7 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
 import android.Manifest
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -9,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import io.ssafy.openticon.ui.viewmodel.EditProfileViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -29,30 +29,54 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import io.ssafy.openticon.ui.viewmodel.SearchScreenViewModel
+import io.ssafy.openticon.R
+import io.ssafy.openticon.data.model.MemberEntity
+import kotlinx.coroutines.flow.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     navController: NavController,
+
                       ) {
     val context = LocalContext.current
     val contentResolver = context.contentResolver
     val viewModel: EditProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val memberEntity by viewModel.memberEntity.collectAsState()
+    val isDuplicated by viewModel.isDuplicate.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
-    var nickname by remember { mutableStateOf(TextFieldValue("")) }
+//    var nickname by remember { mutableStateOf(memberEntity?.nickname?.let { TextFieldValue(it) }) }
+//    var bio by remember { mutableStateOf(memberEntity?.bio?.let { TextFieldValue(it) }) }
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
+    var nickname by remember { mutableStateOf(TextFieldValue("")) }
+    var bio by remember { mutableStateOf(TextFieldValue("")) }
 
+    LaunchedEffect(memberEntity) {
+        if (memberEntity != null) {
+            nickname = TextFieldValue(memberEntity!!.nickname ?: "")
+            bio = TextFieldValue(memberEntity!!.bio ?: "")
+        }
+    }
+//    var isDuplicated by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(nickname) {
+        snapshotFlow { nickname.text }
+            .debounce(300)
+            .filter { it.isNotEmpty() }
+            .collect { newNickname ->
+                viewModel.checkDuplicateNickname(newNickname)
+            }
+    }
 
     // 이미지 선택 런처 (GetContent 사용)
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -89,7 +113,6 @@ fun EditProfileScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
                 )
             )
         },
@@ -108,8 +131,8 @@ fun EditProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(80.dp)
-                            .clip(CircleShape) // Box에도 CircleShape 적용
-                            .background(Color.Gray) // 기본 배경색 추가 (로딩 중 시각적 확인용)
+                            .clip(CircleShape)
+                            .background(Color.White)
                     ) {
                         if (selectedImageUri != null) {
                             Image(
@@ -121,24 +144,42 @@ fun EditProfileScreen(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            AsyncImage(
-                                model = if (memberEntity?.profile_image.isNullOrEmpty()) {
-                                    "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
-                                } else {
-                                    memberEntity?.profile_image
-                                },
-                                contentDescription = "Profile Image",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape), // AsyncImage에도 CircleShape 적용
-                                contentScale = ContentScale.Crop
-                            )
+//                            AsyncImage(
+//                                model = if (memberEntity?.profile_image.isNullOrEmpty()) {
+//                                    "https://lh3.googleusercontent.com/a/ACg8ocKR5byM6QoaU-8EG4pDglN1rnU3RIqI9Ght42cZJ8Ym0YdDDA=s96-c"
+//                                } else {
+//                                    memberEntity?.profile_image
+//                                },
+//                                contentDescription = "Profile Image",
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .clip(CircleShape), // AsyncImage에도 CircleShape 적용
+//                                contentScale = ContentScale.Crop
+//                            )
+                            if (memberEntity?.profile_image.isNullOrEmpty()) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = memberEntity?.profile_image,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(R.drawable.loading_img),
+                                    error = painterResource(R.drawable.ic_broken_image),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Edit Profile Button
                     Button(
                         onClick = {
                             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
@@ -148,20 +189,43 @@ fun EditProfileScreen(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF42A5F5) // Blue color
+                            containerColor = MaterialTheme.colorScheme.primary // Blue color
                         )
                     ) {
-                        Text(text = "프로필 수정", color = Color.White)
+                        Text(text = "이미지 수정", color = Color.White)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(50.dp))
 
-                // Nickname Input Field
                 TextField(
                     value = nickname,
                     onValueChange = { nickname = it },
+                    label = {Text("닉네임")},
+                    supportingText = {
+                        Text(
+                            text = when (isDuplicated) {
+                                true -> "사용 중인 닉네임."
+                                false -> "사용 가능한 닉네임."
+                            }
+                        )
+                    },
                     placeholder = { Text("수정할 닉네임을 입력해 주세요.") },
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f),
+                    shape = RoundedCornerShape(0.dp),
+                    interactionSource = interactionSource,
+                    isError = isDuplicated
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                TextField(
+                    value = bio,
+                    onValueChange = { bio = it },
+                    label = { Text("상태 메세지") },
+                    supportingText = {Text("상태 메세지")},
+                    placeholder = { Text("상태 메세지를 입력해 주세요.") },
                     modifier = Modifier
                         .fillMaxWidth(0.8f),
                     shape = RoundedCornerShape(0.dp),
@@ -170,17 +234,16 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                // Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
                         onClick = {
-                                viewModel.editProfile(contentResolver,nickname.text)
+                                viewModel.editProfile(contentResolver,nickname.text, bio.text)
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF42A5F5) // Confirm button color
+                            containerColor = MaterialTheme.colorScheme.primary // Confirm button color
                         ),
                         modifier = Modifier.width(100.dp)
                     ) {

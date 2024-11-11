@@ -79,7 +79,7 @@ fun EmoticonAllScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+
                 )
             )
         },
@@ -88,11 +88,15 @@ fun EmoticonAllScreen(
                 state = listState,
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(16.dp)
+//                    .padding(top = 16.dp)
             ) {
+                item{
+                    Spacer(Modifier.height(16.dp))
+                }
                 // 검색 결과가 없는 경우 메시지 표시
                 if (emoticonPack.isEmpty() && !isLoading) {
                     item {
+
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()

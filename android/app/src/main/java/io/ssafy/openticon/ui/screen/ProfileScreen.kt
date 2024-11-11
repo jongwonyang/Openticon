@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -167,6 +168,11 @@ fun ProfileScreen(
                             fontSize = 24.sp
                         )
                         Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = memberEntity?.bio ?: "",
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface // 테마 색상 사용
+                        )
 
                         // 결제 버튼
                         FilledTonalButton(
@@ -241,7 +247,7 @@ fun ProfileScreen(
                                     }
                                 },
                                 confirmButton = {
-                                    Button(
+                                    TextButton(
                                         onClick = {
                                             val amount = selectedAmount.text.toIntOrNull()
                                             if (amount != null) {
@@ -276,20 +282,16 @@ fun ProfileScreen(
                                                 Log.w("ProfileScreen", "올바른 금액을 입력하세요")
                                             }
                                         },
-                                        modifier = Modifier.padding(vertical = 4.dp)
                                     ) {
                                         Text("결제")
                                     }
                                 },
                                 dismissButton = {
-                                    OutlinedButton(onClick = { showPriceSelectionDialog = false }) {
+                                    TextButton(onClick = { showPriceSelectionDialog = false }) {
                                         Text("취소")
                                     }
                                 }
                             )
-
-
-
                         }
 
                         // 결제 결과 모달 창
@@ -359,7 +361,12 @@ fun ProfileScreen(
                             .clickable {
                                 coroutineScope.launch {
                                     viewModel.logout()
-                                    navController.navigate("login")
+
+                                    navController.navigate("login") {
+                                       popUpTo(0) { inclusive = true } // 스택의 모든 화면을 제거하고 이동
+                                       launchSingleTop = true // 중복된 화면이 스택에 쌓이지 않게 설정
+                                    }
+                                    
                                 }
                             }
                             .padding(vertical = 8.dp)
@@ -381,14 +388,15 @@ fun ProfileScreen(
                         },
                         modifier = Modifier
                             .clickable {
-                                coroutineScope.launch {
-                                    val result = viewModel.deleteMember()
-                                    if (result.isSuccess) {
-                                        showDeleteDialog = true
-                                    } else {
-                                        println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
-                                    }
-                                }
+                                showDeleteDialog = true
+//                                coroutineScope.launch {
+//                                    val result = viewModel.deleteMember()
+//                                    if (result.isSuccess) {
+//                                        showDeleteDialog = true
+//                                    } else {
+//                                        println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
+//                                    }
+//                                }
                             }
                             .padding(vertical = 8.dp)
                     )
@@ -397,5 +405,37 @@ fun ProfileScreen(
                 }
             }
         }
+    }
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false }, // 모달 외부를 터치하거나 뒤로가기 시 모달 닫기
+            title = { Text("회원 탈퇴") }, // 모달 제목
+            text = { Text("정말로 회원 탈퇴를 진행하시겠습니까?") }, // 탈퇴 확인 메시지
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // 탈퇴 확인 시 필요한 로직 (예: viewModel에서 회원 삭제 로직 호출)
+                        coroutineScope.launch {
+                            val result = viewModel.deleteMember()
+                            if (result.isSuccess) {
+                                showDeleteDialog = false // 모달 닫기
+                                navController.navigate("main") // 탈퇴 후 메인 페이지로 이동
+                            } else {
+                                Log.e("DeleteMember", "회원 탈퇴 실패: ${result.exceptionOrNull()?.message}")
+                            }
+                        }
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false } // 취소 시 모달 닫기
+                ) {
+                    Text("취소")
+                }
+            }
+        )
     }
 }
