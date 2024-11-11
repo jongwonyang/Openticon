@@ -2,6 +2,7 @@ package io.ssafy.openticon.data.remote
 
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
+import io.ssafy.openticon.data.model.TagListResponseDto
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.http.GET
@@ -41,6 +42,10 @@ interface EmoticonPacksApi {
     suspend fun getPackInfo(
         @Path("uuid") uuid: String
     ): PackInfoResponseDto
+
+    @GET("/api/v1/tag/list")
+    suspend fun getTagsInfo(
+    ): TagListResponseDto
 
     @Streaming
     @GET
