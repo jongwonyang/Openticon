@@ -86,7 +86,7 @@ public class PackService {
 
         AtomicBoolean detectPass = null;
 
-        if(isDuplicateTitle(emoticonPack.getPackTitle())){
+        if(isDuplicateTitle(emoticonPack.getPackTitle()) && emoticonPack.getIsPublic()){
             throw new OpenticonException(ErrorCode.DUPLICATE_PACK_TITLE);
         }
         MemberEntity member = memberService.getMemberByEmail(emoticonPack.getUsername()).orElseThrow();
