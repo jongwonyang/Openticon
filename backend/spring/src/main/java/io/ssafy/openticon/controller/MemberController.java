@@ -144,4 +144,11 @@ public class MemberController {
         memberRepository.save(member);
         return ResponseEntity.ok().body("디바이스 토큰 저장 성공!");
     }
+
+    @GetMapping("/writer")
+    public ResponseEntity<MemberEntity> getWriter(@RequestParam String nickname) {
+        return memberRepository.findByNickname(nickname)
+                .map(member -> ResponseEntity.ok(member))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
 }

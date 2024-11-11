@@ -4,6 +4,7 @@ package io.ssafy.openticon.service;
 import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
 import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
 import io.ssafy.openticon.controller.response.PackInfoResponseDto;
+import io.ssafy.openticon.controller.response.PackResponseDto;
 import io.ssafy.openticon.dto.*;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
@@ -36,6 +37,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.security.sasl.AuthenticationException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,9 +66,10 @@ public class PackService {
     private final SafeSearchService safeSearchService;
     private final ObjectionService objectionService;
     private final RedisViewService redisViewService;
+    private final MemberRepository memberRepository;
 
 
-    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService, PurchaseHistoryRepository purchaseHistoryRepository){
+    public PackService(WebClient webClient, PackRepository packRepository, MemberService memberService, EmoticonService emoticonService, PermissionService permissionService, TagRepository tagRepository, TagListRepository tagListRepository, PurchaseHistoryService purchaseHistoryService, SafeSearchService safeSearchService, ImageHashService imageHashService, ObjectionService objectionService, RedisViewService redisViewService, PurchaseHistoryRepository purchaseHistoryRepository, MemberRepository memberRepository){
         this.webClient=webClient;
         this.packRepository=packRepository;
         this.memberService = memberService;
@@ -79,6 +83,7 @@ public class PackService {
         this.objectionService = objectionService;
         this.redisViewService = redisViewService;
         this.purchaseHistoryRepository = purchaseHistoryRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Transactional
@@ -307,8 +312,26 @@ public class PackService {
     }
 
     public PackInfoResponseDto getPackInfo(String uuid, UserDetails userDetails, String requestIp) throws AuthenticationException {
-
         EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
+        if(userDetails != null){
+            Optional<MemberEntity> memberEntity = memberRepository.findMemberByEmail(userDetails.getUsername());
+
+            if(memberEntity.isPresent()){
+                Optional<PurchaseHistoryEntity> purchaseHistoryEntity = purchaseHistoryRepository.findByMemberAndEmoticonPack(memberEntity.get(), emoticonPackEntity);
+                if(purchaseHistoryEntity.isPresent()){
+                    List<String> emoticons=emoticonService.getEmoticons(emoticonPackEntity.getId());
+
+                    redisViewService.incrementView(emoticonPackEntity, userDetails, requestIp);
+                    emoticonPackEntity.setView(redisViewService.getRedisView(emoticonPackEntity));
+                    return new PackInfoResponseDto(emoticonPackEntity,emoticons);
+                }
+            }
+        }
+
+
+        if(emoticonPackEntity.getDeletedAt() != null){
+            throw new OpenticonException(ErrorCode.DELETED_PACK);
+        }
 
         if(emoticonPackEntity.getBlacklist()){
             throw new OpenticonException(ErrorCode.BLACKLIST_PACK);
@@ -346,6 +369,10 @@ public class PackService {
 
         EmoticonPackEntity emoticonPackEntity=packRepository.findById(packId).get();
 
+        if(emoticonPackEntity.getDeletedAt() != null){
+            throw new OpenticonException(ErrorCode.DELETED_PACK);
+        }
+
         if(!emoticonPackEntity.isPublic()){
             throw new OpenticonException(ErrorCode.PRIVATE_PACK);
         }
@@ -362,7 +389,7 @@ public class PackService {
 
     public Page<EmoticonPackResponseDto> search(String query, String type, Pageable pageable) {
         if (query == null || query.isEmpty()) {
-            return convertToDtoPage(packRepository.findAllByIsPublicTrueAndIsBlacklistFalse(pageable));
+            return convertToDtoPage(packRepository.findAllByIsPublicTrueAndIsBlacklistFalseAndDeletedAtIsNull(pageable));
         }
 
         Page<EmoticonPackEntity> entities;
@@ -377,7 +404,7 @@ public class PackService {
                 entities = packRepository.findByAuthorContaining(query, pageable);
                 break;
             default:
-                entities = packRepository.findAll(pageable);
+                entities = packRepository.findAllByIsPublicTrueAndIsBlacklistFalseAndDeletedAtIsNull(pageable);
                 break;
         }
         return convertToDtoPage(entities);
@@ -456,5 +483,19 @@ public class PackService {
         g2d.dispose();
 
         return newImage;
+    }
+
+    public PackResponseDto deleted(MemberEntity member, Long emoticonPackId){
+        EmoticonPackEntity emoticonPackEntity = packRepository.findById(emoticonPackId)
+                .orElseThrow(() -> new OpenticonException(ErrorCode.EMOTICON_PACK_EMPTY));
+        if(!member.getEmail().equals(emoticonPackEntity.getMember().getEmail())){
+            throw new OpenticonException(ErrorCode.ACCESS_DENIED);
+        }
+        emoticonPackEntity.setDeletedAt(LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime());
+        packRepository.save(emoticonPackEntity);
+        return PackResponseDto.builder()
+                .code("OK")
+                .message(emoticonPackEntity.getTitle()+"을 삭제했습니다.")
+                .build();
     }
 }
