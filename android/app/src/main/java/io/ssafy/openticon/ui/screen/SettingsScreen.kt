@@ -26,7 +26,7 @@ fun SettingsScreen(navController: NavController) {
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+
                 )
             )
         },

@@ -10,7 +10,6 @@ import io.ssafy.openticon.data.model.MemberEntity
 import io.ssafy.openticon.di.UserSession
 import io.ssafy.openticon.domain.usecase.EditProfileUseCase
 import io.ssafy.openticon.domain.usecase.GetMemberInfoUseCase
-import io.ssafy.openticon.ui.viewmodel.MemberViewModel.UiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -18,12 +17,14 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
+import io.ssafy.openticon.domain.usecase.DuplicateCheckUseCase
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userSession: UserSession,
     private val getMemberInfoUseCase: GetMemberInfoUseCase,
-    private val editProfileUseCase: EditProfileUseCase
+    private val editProfileUseCase: EditProfileUseCase,
+    private val duplicateCheckUseCase : DuplicateCheckUseCase
 ) : ViewModel() {
     val memberEntity: StateFlow<MemberEntity?> = userSession.memberEntity
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -34,11 +35,13 @@ class EditProfileViewModel @Inject constructor(
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri.asStateFlow()
 
-    fun editProfile(contentResolver: ContentResolver, nickname: String) {
+    private val _isDuplicate = MutableStateFlow<Boolean>(false)
+    val isDuplicate: StateFlow<Boolean> = _isDuplicate
+
+    fun editProfile(contentResolver: ContentResolver, nickname: String, bio: String) {
         viewModelScope.launch {
             val currentUri = _selectedImageUri.value
             Log.d("EditProfileViewModel", "Selected Image URI: $currentUri")
-
             val result: Result<*>
             val imagePart = if (currentUri != null) {
                 uriToMultipartBody(contentResolver, currentUri)
@@ -47,12 +50,13 @@ class EditProfileViewModel @Inject constructor(
             }
             _uiState.value = UiState.Loading // 로딩 상태 설정
 
-            result = editProfileUseCase.invoke(nickname, imagePart)
+            result = editProfileUseCase(nickname = nickname, bio = bio, profileImage = imagePart)
 
             result.onSuccess {
                 _uiState.value = UiState.Success // 성공 상태 설정
                 updateMemberEntity()
             }.onFailure { exception ->
+                Log.d("editProfile", exception.toString())
                 _uiState.value = UiState.Error(exception) // 오류 상태 설정
             }
         }
@@ -94,13 +98,26 @@ class EditProfileViewModel @Inject constructor(
                         if (result != null) {
                             userSession.login(result)
                         }
-
-                    } else if (status == 401 || status == 403) {Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
+                    } else if (status == 401 || status == 403) {
+                        Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
                     }
                 } catch (e: Exception) {
                 }
             }
         }
+
+    fun checkDuplicateNickname(newNickname: String) {
+        viewModelScope.launch {
+            try {
+                val response = duplicateCheckUseCase(newNickname)
+                _isDuplicate.value = response.getOrNull() == true
+            } catch (e: Exception) {
+                Log.e("DuplicateCheckViewModel", "Error checking nickname: ${e.message}")
+                _isDuplicate.value = false
+            }
+        }
+    }
+
 
     sealed class UiState {
         object Loading : UiState()
