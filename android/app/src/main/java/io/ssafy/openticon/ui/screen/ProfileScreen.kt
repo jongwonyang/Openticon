@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -167,6 +168,11 @@ fun ProfileScreen(
                             fontSize = 24.sp
                         )
                         Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = memberEntity?.bio ?: "",
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface // 테마 색상 사용
+                        )
 
                         // 결제 버튼
                         FilledTonalButton(
@@ -241,7 +247,7 @@ fun ProfileScreen(
                                     }
                                 },
                                 confirmButton = {
-                                    Button(
+                                    TextButton(
                                         onClick = {
                                             val amount = selectedAmount.text.toIntOrNull()
                                             if (amount != null) {
@@ -276,13 +282,12 @@ fun ProfileScreen(
                                                 Log.w("ProfileScreen", "올바른 금액을 입력하세요")
                                             }
                                         },
-                                        modifier = Modifier.padding(vertical = 4.dp)
                                     ) {
                                         Text("결제")
                                     }
                                 },
                                 dismissButton = {
-                                    OutlinedButton(onClick = { showPriceSelectionDialog = false }) {
+                                    TextButton(onClick = { showPriceSelectionDialog = false }) {
                                         Text("취소")
                                     }
                                 }
@@ -359,7 +364,12 @@ fun ProfileScreen(
                             .clickable {
                                 coroutineScope.launch {
                                     viewModel.logout()
-                                    navController.navigate("login")
+
+                                    navController.navigate("login") {
+                                       popUpTo(0) { inclusive = true } // 스택의 모든 화면을 제거하고 이동
+                                       launchSingleTop = true // 중복된 화면이 스택에 쌓이지 않게 설정
+                                    }
+                                    
                                 }
                             }
                             .padding(vertical = 8.dp)

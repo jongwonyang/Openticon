@@ -88,7 +88,6 @@ fun EditProfileScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
                 )
             )
         },

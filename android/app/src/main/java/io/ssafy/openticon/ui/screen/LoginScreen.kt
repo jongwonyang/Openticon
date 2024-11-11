@@ -70,7 +70,14 @@ fun LoginScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = { navController.popBackStack() }
+                        onClick = {
+                            if (!navController.popBackStack()) {
+                                navController.navigate("main") {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        }
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
