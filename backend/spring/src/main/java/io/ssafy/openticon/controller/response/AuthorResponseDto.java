@@ -12,4 +12,5 @@ public class AuthorResponseDto {
     private Long id;
     private String nickname;
     private String profile;
+    private String bio;
 }
