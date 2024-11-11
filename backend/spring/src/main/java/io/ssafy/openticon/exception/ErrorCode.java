@@ -24,6 +24,7 @@ public enum ErrorCode {
     SAFE_SEARCH_ERROR(HttpStatus.BAD_REQUEST, "세이프 서치 에러"),
     PRIVATE_PACK(HttpStatus.FORBIDDEN, "비공개 이모티콘 팩입니다."),
     BLACKLIST_PACK(HttpStatus.FORBIDDEN, "차단된 이모티콘 팩입니다."),
+    DELETED_PACK(HttpStatus.FORBIDDEN, "삭제된 이모티콘 팩입니다."),
     DUPLICATE_REPORT(HttpStatus.FORBIDDEN, "이미 신고한 이모티콘 팩입니다."),
     PACK_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "이모티콘 팩 데이터베이스 에러"),
     TAG_DATABASE_SAVE_ERROR(HttpStatus.BAD_REQUEST, "태그 데이터베이스 에러"),

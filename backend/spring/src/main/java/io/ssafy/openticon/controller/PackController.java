@@ -2,10 +2,7 @@ package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.EmoticonUploadRequestDto;
 import io.ssafy.openticon.controller.request.ReportPackRequestDto;
-import io.ssafy.openticon.controller.response.EmoticonPackResponseDto;
-import io.ssafy.openticon.controller.response.PackDownloadResponseDto;
-import io.ssafy.openticon.controller.response.PackInfoResponseDto;
-import io.ssafy.openticon.controller.response.UploadEmoticonResponseDto;
+import io.ssafy.openticon.controller.response.*;
 import io.ssafy.openticon.dto.EmoticonPack;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.repository.MemberRepository;
@@ -165,5 +162,14 @@ public class PackController {
     public ResponseEntity<?> emoticonPackDownloadInit(){
         packService.downloadInit();
         return ResponseEntity.ok().body("다했어요");
+    }
+
+    @DeleteMapping("delete")
+    @Operation(summary = "이모티콘 팩 삭제")
+    public ResponseEntity<PackResponseDto> emoticonPackDeleted(@AuthenticationPrincipal UserDetails userDetails,
+                                                               @RequestBody Long emoticonPackId){
+        MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
+        return ResponseEntity.ok().body(packService.deleted(member, emoticonPackId));
     }
 }
