@@ -23,10 +23,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Whatshot
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,9 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -135,13 +136,26 @@ fun StoreScreen(
             .padding(0.dp)
     ) {
         item {
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "신규",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 16.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = Color(0xFFF59E0B)
+                )
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = "신규",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
         item {
             Spacer(modifier = Modifier.height(50.dp))
@@ -217,19 +231,29 @@ fun StoreScreen(
 
         // 인기 섹션
         item {
+            Spacer(Modifier.height(16.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp)
+                    .height(64.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "인기",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
+                Row {
+                    Icon(
+                        imageVector = Icons.Outlined.Whatshot,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = Color(0xFFEF4444)
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Text(
+                        text = "인기",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 TextButton(onClick = {
                     navController.navigate("emoticonAll/popular")
@@ -303,14 +327,31 @@ fun StoreScreen(
 
         // 태그 섹션
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "태그",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(64.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row {
+                    Icon(
+                        imageVector = Icons.Outlined.LocalOffer,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = Color(0xFF6366F1)
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Text(
+                        text = "태그",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
         }
 
         val tags = listOf("#" + tagQuery1, "#" + tagQuery2, "#" + tagQuery3)
@@ -323,7 +364,8 @@ fun StoreScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(end = 16.dp)
+                            .padding(end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = tag,
@@ -342,7 +384,8 @@ fun StoreScreen(
                             tag?.let { validTag ->
                                 // '#' 문자를 제거하고 URL 인코딩
                                 val cleanedTag = validTag.replace("#", "")
-                                val encodedTag = URLEncoder.encode(cleanedTag, StandardCharsets.UTF_8.toString())
+                                val encodedTag =
+                                    URLEncoder.encode(cleanedTag, StandardCharsets.UTF_8.toString())
                                 Log.d("StoreScreen", "Navigating to emoticonAlltag/$encodedTag")
                                 navController.navigate("emoticonAlltag/$encodedTag")
                             } ?: Log.d("StoreScreen", "Tag is null or empty")
