@@ -23,7 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -130,7 +133,12 @@ fun MyEmoticonsScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "내 이모티콘 관리")
+            Text(
+                text = "내 이모티콘 관리",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -141,52 +149,81 @@ fun MyEmoticonsScreen(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TextButton(
-                onClick = { isVisible = true },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 4.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+            if(isVisible){
+                FilledIconButton(
+                    onClick = { isVisible = true },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 4.dp)
                 ) {
-                    Text(text = "순서 편집", color = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.height(4.dp))
-                    if (isVisible) {
-                        Divider(
-                            color = Color.Black,
-                            thickness = 1.dp,
-                            modifier = Modifier.fillMaxWidth()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "순서 편집",
+                            style = MaterialTheme.typography.labelMedium,
                         )
-                    } else {
-                        Spacer(modifier = Modifier.height(1.dp))
+                        Spacer(Modifier.height(4.dp))
+                    }
+                }
+            }
+            else{
+                TextButton(
+                    onClick = { isVisible = true },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 4.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "순서 편집",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                    }
+                }
+            }
+            if(isVisible){
+                TextButton(
+                    onClick = { isVisible = false },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 4.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "숨긴 이모티콘",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                    }
+                }
+            }
+            else{
+                FilledIconButton(
+                    onClick = { isVisible = false },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 4.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "숨긴 이모티콘",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Spacer(Modifier.height(4.dp))
                     }
                 }
             }
 
-            TextButton(
-                onClick = { isVisible = false },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 4.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "숨김 관리", color = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.height(4.dp))
-                    if (!isVisible) {
-                        Divider(
-                            color = Color.Black,
-                            thickness = 1.dp,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.height(1.dp))
-                    }
-                }
-            }
         }
+
 
         // 이모티콘 리스트
         LazyColumn(state = lazyListState) {
@@ -272,11 +309,13 @@ fun EmoticonItem(
         }
 
         // 가시성 토글 아이콘
-        IconButton(onClick = { viewModel.changeVisible(sampleEmoticonPack) }) {
-            Icon(
-                imageVector = Icons.Default.VisibilityOff,
-                contentDescription = "Toggle Visibility"
-            )
+        if (isVisible) {
+            IconButton(onClick = { viewModel.changeVisible(sampleEmoticonPack) }) {
+                Icon(
+                    imageVector = Icons.Default.VisibilityOff,
+                    contentDescription = "Toggle Visibility"
+                )
+            }
         }
         // DragHandle 아이콘에만 드래그 제스처 적용
         if (isVisible) {
