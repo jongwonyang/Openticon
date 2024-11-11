@@ -6,7 +6,6 @@ import io.ssafy.openticon.controller.request.PointRequestDto;
 import io.ssafy.openticon.controller.request.PointWithdrawRequestDto;
 import io.ssafy.openticon.controller.response.PointHistoryResponseDto;
 import io.ssafy.openticon.controller.response.PointResponseDto;
-import io.ssafy.openticon.controller.response.PurchasePointResponseDto;
 import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
@@ -14,8 +13,6 @@ import io.ssafy.openticon.repository.MemberRepository;
 import io.ssafy.openticon.service.PointService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.tomcat.util.http.parser.HttpParser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,15 +28,17 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/points")
 @Tag(name = "포인트")
 public class PointController {
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
+    private final PointService pointService;
 
-    @Autowired
-    private PointService pointService;
+    public PointController(MemberRepository memberRepository, PointService pointService){
+        this.memberRepository = memberRepository;
+        this.pointService = pointService;
+    }
 
     @PostMapping("/purchase-point")
     @Operation(summary = "사용자가 포인트를 구매합니다.")
-    public ResponseEntity<PurchasePointResponseDto> purchasePoint(@RequestBody PointRequestDto request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<PointResponseDto> purchasePoint(@RequestBody PointRequestDto request, @AuthenticationPrincipal UserDetails userDetails) {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
         return ResponseEntity.status(HttpStatus.OK).body(pointService.purchasePoints(request, member));
@@ -66,7 +65,7 @@ public class PointController {
         if (!pointHistoryPage.hasContent()) {
             throw new OpenticonException(ErrorCode.POINT_LIST_NO_CONTENT);
         }
-        return ResponseEntity.ok(pointHistoryPage);
+        return ResponseEntity.status(HttpStatus.OK).body(pointHistoryPage);
     }
 
     @PostMapping("/withdraw-point")
@@ -74,7 +73,6 @@ public class PointController {
     public ResponseEntity<PointResponseDto> withdrawPoint(@RequestBody PointWithdrawRequestDto request, @AuthenticationPrincipal UserDetails userDetails) {
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
-
         return ResponseEntity.status(HttpStatus.OK).body(pointService.withdrawPoints(member, request.getPoint()));
     }
 }
