@@ -17,12 +17,14 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
+import io.ssafy.openticon.domain.usecase.DuplicateCheckUseCase
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userSession: UserSession,
     private val getMemberInfoUseCase: GetMemberInfoUseCase,
-    private val editProfileUseCase: EditProfileUseCase
+    private val editProfileUseCase: EditProfileUseCase,
+    private val duplicateCheckUseCase : DuplicateCheckUseCase
 ) : ViewModel() {
     val memberEntity: StateFlow<MemberEntity?> = userSession.memberEntity
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -32,6 +34,9 @@ class EditProfileViewModel @Inject constructor(
 
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri.asStateFlow()
+
+    private val _isDuplicate = MutableStateFlow<Boolean>(false)
+    val isDuplicate: StateFlow<Boolean> = _isDuplicate
 
     fun editProfile(contentResolver: ContentResolver, nickname: String, bio: String) {
         viewModelScope.launch {
@@ -100,6 +105,19 @@ class EditProfileViewModel @Inject constructor(
                 }
             }
         }
+
+    fun checkDuplicateNickname(newNickname: String) {
+        viewModelScope.launch {
+            try {
+                val response = duplicateCheckUseCase(newNickname)
+                _isDuplicate.value = response.getOrNull() == true
+            } catch (e: Exception) {
+                Log.e("DuplicateCheckViewModel", "Error checking nickname: ${e.message}")
+                _isDuplicate.value = false
+            }
+        }
+    }
+
 
     sealed class UiState {
         object Loading : UiState()

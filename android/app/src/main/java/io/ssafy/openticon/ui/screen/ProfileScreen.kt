@@ -292,9 +292,6 @@ fun ProfileScreen(
                                     }
                                 }
                             )
-
-
-
                         }
 
                         // 결제 결과 모달 창
@@ -391,14 +388,15 @@ fun ProfileScreen(
                         },
                         modifier = Modifier
                             .clickable {
-                                coroutineScope.launch {
-                                    val result = viewModel.deleteMember()
-                                    if (result.isSuccess) {
-                                        showDeleteDialog = true
-                                    } else {
-                                        println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
-                                    }
-                                }
+                                showDeleteDialog = true
+//                                coroutineScope.launch {
+//                                    val result = viewModel.deleteMember()
+//                                    if (result.isSuccess) {
+//                                        showDeleteDialog = true
+//                                    } else {
+//                                        println("회원 삭제 실패: ${result.exceptionOrNull()?.message}")
+//                                    }
+//                                }
                             }
                             .padding(vertical = 8.dp)
                     )
@@ -407,5 +405,37 @@ fun ProfileScreen(
                 }
             }
         }
+    }
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false }, // 모달 외부를 터치하거나 뒤로가기 시 모달 닫기
+            title = { Text("회원 탈퇴") }, // 모달 제목
+            text = { Text("정말로 회원 탈퇴를 진행하시겠습니까?") }, // 탈퇴 확인 메시지
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // 탈퇴 확인 시 필요한 로직 (예: viewModel에서 회원 삭제 로직 호출)
+                        coroutineScope.launch {
+                            val result = viewModel.deleteMember()
+                            if (result.isSuccess) {
+                                showDeleteDialog = false // 모달 닫기
+                                navController.navigate("main") // 탈퇴 후 메인 페이지로 이동
+                            } else {
+                                Log.e("DeleteMember", "회원 탈퇴 실패: ${result.exceptionOrNull()?.message}")
+                            }
+                        }
+                    }
+                ) {
+                    Text("확인")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false } // 취소 시 모달 닫기
+                ) {
+                    Text("취소")
+                }
+            }
+        )
     }
 }

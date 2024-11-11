@@ -36,4 +36,9 @@ interface MemberApi {
 
     @DELETE("/api/v1/member")
     suspend fun deleteMember(): Response<Unit>
+
+    @GET("/api/v1/member/duplicate-check")
+    suspend fun duplicateCheck(
+        @Query("nickname") nickname: String
+    ) : Response<Boolean>
 }

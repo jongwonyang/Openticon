@@ -17,9 +17,11 @@
             suspend fun editProfile(nickname: String, bio : String, profileImage: MultipartBody.Part?): Response<String> {
                 return api.editProfile(nickname.toRequestBody(), bio.toRequestBody(), profileImage)
             }
-
             suspend fun deleteMember() : Response<Unit> {
                 return api.deleteMember()
+            }
+            suspend fun duplicateCheck(nickname: String) : Response<Boolean> {
+                return api.duplicateCheck(nickname)
             }
 
 
