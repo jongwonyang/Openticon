@@ -177,12 +177,12 @@ fun LoginScreen(
                         contentDescription = "Naver Image",
                         modifier = Modifier
                             .size(23.dp)
-                            .clickable {
-                                coroutineScope.launch {
-                                    val token = tokenDataSource.token.firstOrNull()
-                                    Log.d("Token", token ?: "No token found")
-                                }
-                            }
+//                            .clickable {
+//                                coroutineScope.launch {
+//                                    val token = tokenDataSource.token.firstOrNull()
+//                                    Log.d("Token", token ?: "No token found")
+//                                }
+//                            }
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
