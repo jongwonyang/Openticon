@@ -100,6 +100,14 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
+    public GroupedOpenApi tagApi() {
+        return GroupedOpenApi.builder()
+                .group("태그 관련 기능")
+                .pathsToMatch("/tag/**")
+                .build();
+    }
+
 
 
 }
