@@ -10,5 +10,6 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 public class PointResponseDto {
+    private String code;
     private String message;
 }

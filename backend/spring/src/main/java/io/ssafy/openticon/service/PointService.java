@@ -5,7 +5,6 @@ import com.siot.IamportRestClient.response.Payment;
 import io.ssafy.openticon.controller.request.PointRequestDto;
 import io.ssafy.openticon.controller.response.PointHistoryResponseDto;
 import io.ssafy.openticon.controller.response.PointResponseDto;
-import io.ssafy.openticon.controller.response.PurchasePointResponseDto;
 import io.ssafy.openticon.dto.PointType;
 import io.ssafy.openticon.entity.EmoticonPackEntity;
 import io.ssafy.openticon.entity.MemberEntity;
@@ -71,7 +70,7 @@ public class PointService {
     }
 
     @Transactional
-    public PurchasePointResponseDto purchasePoints(PointRequestDto pointRequestDto, MemberEntity member) {
+    public PointResponseDto purchasePoints(PointRequestDto pointRequestDto, MemberEntity member) {
         if(pointRequestDto.getPoint() <= 0){
             throw new OpenticonException(ErrorCode.NON_POSITIVE_INTEGER);
         }
@@ -91,7 +90,7 @@ public class PointService {
 
             DecimalFormat formatter = new DecimalFormat("#,###");  // 숫자에 쉼표를 추가하는 형식
             String formattedPoint = formatter.format(pointRequestDto.getPoint());
-            return new PurchasePointResponseDto("success", formattedPoint+"원을 구매하였습니다.");
+            return new PointResponseDto("OK", formattedPoint+"원을 구매하였습니다.");
         }
         throw new OpenticonException(ErrorCode.IAM_PORT_PAYMENT_ERROR);
     }
@@ -139,7 +138,7 @@ public class PointService {
         emoticonPack.setDownload(emoticonPack.getDownload() + 1);
         memberRepository.save(member);
 
-        return new PointResponseDto(emoticonPack.getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
+        return new PointResponseDto("OK", emoticonPack.getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
     }
 
     public Page<PointHistoryResponseDto> getPointHistory(MemberEntity member, Pageable pageable) {
@@ -179,7 +178,7 @@ public class PointService {
 
         DecimalFormat formatter = new DecimalFormat("#,###");  // 숫자에 쉼표를 추가하는 형식
         String formattedPoint = formatter.format(withdrawPoint);
-        return new PointResponseDto(formattedPoint + "원을 출금하였습니다.");
+        return new PointResponseDto("OK", formattedPoint + "원을 출금하였습니다.");
     }
 }
 
