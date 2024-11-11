@@ -84,7 +84,6 @@ fun ProfileScreen(
     val purchaseSuccess by viewModel.purchaseSuccess.collectAsState()
     var showPriceSelectionDialog by remember { mutableStateOf(false) }
     var selectedAmount by remember { mutableStateOf(TextFieldValue("")) }
-
     LaunchedEffect(Unit) {
         viewModel.fetchMemberInfo()
     }
@@ -119,15 +118,15 @@ fun ProfileScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                        colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 24.dp),
+                            .padding(start = 16.dp, end = 16.dp,top = 16.dp, bottom = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
@@ -161,19 +160,19 @@ fun ProfileScreen(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = memberEntity?.nickname ?: "",
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp
                         )
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(4.dp))
                         Text(
                             text = memberEntity?.bio ?: "",
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onSurface // 테마 색상 사용
                         )
-
+                        Spacer(Modifier.height((20.dp)))
                         // 결제 버튼
                         FilledTonalButton(
                             onClick = {
@@ -213,7 +212,9 @@ fun ProfileScreen(
                                                 }
                                             },
                                             label = { Text("금액 입력") },
-                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 8.dp),
                                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                                             singleLine = true
                                         )
@@ -230,7 +231,10 @@ fun ProfileScreen(
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .clickable { selectedAmount = TextFieldValue(amount.toString()) } // Row 전체를 클릭 가능하게 설정
+                                                        .clickable {
+                                                            selectedAmount =
+                                                                TextFieldValue(amount.toString())
+                                                        } // Row 전체를 클릭 가능하게 설정
                                                         .padding(vertical = 0.dp) // Row의 수직 간격 최소화
                                                 ) {
                                                     RadioButton(
@@ -363,10 +367,10 @@ fun ProfileScreen(
                                     viewModel.logout()
 
                                     navController.navigate("login") {
-                                       popUpTo(0) { inclusive = true } // 스택의 모든 화면을 제거하고 이동
-                                       launchSingleTop = true // 중복된 화면이 스택에 쌓이지 않게 설정
+                                        popUpTo(0) { inclusive = true } // 스택의 모든 화면을 제거하고 이동
+                                        launchSingleTop = true // 중복된 화면이 스택에 쌓이지 않게 설정
                                     }
-                                    
+
                                 }
                             }
                             .padding(vertical = 8.dp)

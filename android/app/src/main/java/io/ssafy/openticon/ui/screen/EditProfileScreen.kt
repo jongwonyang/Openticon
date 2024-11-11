@@ -68,13 +68,16 @@ fun EditProfileScreen(
             bio = TextFieldValue(memberEntity!!.bio ?: "")
         }
     }
-//    var isDuplicated by remember { mutableStateOf<Boolean?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+
     LaunchedEffect(nickname) {
+        isLoading = true
         snapshotFlow { nickname.text }
             .debounce(300)
             .filter { it.isNotEmpty() }
             .collect { newNickname ->
                 viewModel.checkDuplicateNickname(newNickname)
+                isLoading = false
             }
     }
 
@@ -203,12 +206,12 @@ fun EditProfileScreen(
                     onValueChange = { nickname = it },
                     label = {Text("닉네임")},
                     supportingText = {
-                        Text(
-                            text = when (isDuplicated) {
-                                true -> "사용 중인 닉네임."
-                                false -> "사용 가능한 닉네임."
-                            }
-                        )
+                        when {
+                            isLoading -> Text("검사 중...", color = MaterialTheme.colorScheme.onSurface)
+                            isDuplicated -> Text("사용 중인 닉네임입니다.", color = MaterialTheme.colorScheme.error)
+                            isDuplicated == false -> Text("사용 가능한 닉네임입니다.", color = MaterialTheme.colorScheme.primary)
+                            else -> Text("닉네임을 입력해 주세요.")
+                        }
                     },
                     placeholder = { Text("수정할 닉네임을 입력해 주세요.") },
                     modifier = Modifier
@@ -217,7 +220,6 @@ fun EditProfileScreen(
                     interactionSource = interactionSource,
                     isError = isDuplicated
                 )
-
                 Spacer(modifier = Modifier.height(48.dp))
 
                 TextField(
@@ -239,6 +241,7 @@ fun EditProfileScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
+                        enabled = !isLoading && !isDuplicated,
                         onClick = {
                                 viewModel.editProfile(contentResolver,nickname.text, bio.text)
                         },
