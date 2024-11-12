@@ -299,7 +299,6 @@ fun EmoticonPackDetailScreen(
                         )
                         Spacer(Modifier.height(16.dp))
                     }
-
                     items(emoticonPack.items.chunked(3).withIndex().toList()) { (rowIndex, row) ->
                         Row(
                             modifier = Modifier
