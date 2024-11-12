@@ -18,9 +18,11 @@ import io.ssafy.openticon.ui.screen.MainScreen
 import io.ssafy.openticon.ui.screen.SettingsScreen
 import io.ssafy.openticon.ui.viewmodel.LikeEmoticonViewModel
 import io.ssafy.openticon.ui.screen.WriterScreen
+import io.ssafy.openticon.ui.viewmodel.EmoticonViewModel
 
 @Composable
 fun AppNavHost(
+    emoticonViewModel: EmoticonViewModel,
     likeEmoticonViewModel: LikeEmoticonViewModel
 ) {
     val navController = rememberNavController()
@@ -31,7 +33,8 @@ fun AppNavHost(
         startDestination = "main"
     ) {
         composable("main") {
-            MainScreen(navController, likeEmoticonViewModel=likeEmoticonViewModel)
+            MainScreen(navController, likeEmoticonViewModel=likeEmoticonViewModel,
+                myViewModel = emoticonViewModel)
         }
 
         composable("login") {
