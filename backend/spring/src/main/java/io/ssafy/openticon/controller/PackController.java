@@ -124,6 +124,9 @@ public class PackController {
         else if (sort.equalsIgnoreCase("most")) {
             return Sort.by("view").descending(); // 인기순 정렬 (내림차순)
         }
+        else if (sort.equalsIgnoreCase("download")) {
+            return Sort.by("download").descending(); // 다운로드순 정렬 (내림차순)
+        }
         return Sort.unsorted(); // 기본 정렬 없음
     }
 
