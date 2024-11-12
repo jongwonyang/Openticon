@@ -84,6 +84,7 @@ class FloatingService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d("FloatingService", "onCreate called")
+        changeIslaunched(true)
         startForegroundServiceWithNotification()
         setupFloatingView()
         //setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
@@ -244,7 +245,7 @@ class FloatingService : Service() {
     private fun popupSetting() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("navigate_to", "my_emoticons")
+            putExtra("isLaunched", true)
         }
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -486,6 +487,7 @@ class FloatingService : Service() {
                             val isColliding = Rect.intersects(imageButtonRect, closeImgRect)
 
                             if (isColliding) {
+                                changeIslaunched(false)
                                 stopSelf()
                                 Log.d("Collision", "imageButton이 closeImg와 겹칩니다.")
                             } else {
@@ -542,4 +544,12 @@ class FloatingService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    fun changeIslaunched(boolean: Boolean){
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("is_visible", boolean) // Boolean 값으로 직접 저장
+        editor.apply()
+    }
+
 }
