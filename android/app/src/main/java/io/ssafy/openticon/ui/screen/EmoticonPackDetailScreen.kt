@@ -3,6 +3,7 @@ package io.ssafy.openticon.ui.screen
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -86,6 +87,7 @@ fun EmoticonPackDetailScreen(
     val isDownloading by viewModel.isDownloading.collectAsState()
     var selectedEmoticonIndex by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    var showReportDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(emoticonPackUuid) {
         viewModel.fetchEmoticonPackDetail(emoticonPackUuid)
@@ -98,6 +100,11 @@ fun EmoticonPackDetailScreen(
         }
     }
 
+    BackHandler(enabled = isDownloading) {
+        // isDownloading이 true일 때 뒤로가기 버튼을 무시
+        Toast.makeText(context, "다운로드 중에는 뒤로가기를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -105,7 +112,10 @@ fun EmoticonPackDetailScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(
+                        onClick = { if (!isDownloading) navController.navigateUp() },
+                        enabled = !isDownloading // isDownloading이 true이면 비활성화
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = null
@@ -113,7 +123,9 @@ fun EmoticonPackDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {
+                        showReportDialog = true
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Report,
                             contentDescription = null
@@ -496,6 +508,16 @@ fun EmoticonPackDetailScreen(
         )
     }
 
+    if (showReportDialog) {
+        ReportDialog(
+            onDismissRequest = { showReportDialog = false },
+            onConfirmation = {
+                showReportDialog = false
+                Toast.makeText(context, "신고가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     LaunchedEffect(Unit) {
         viewModel.toastEvent.collectLatest {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -562,7 +584,7 @@ fun ReportDialog(
             Text(text = "이모티콘 팩 신고")
         },
         text = {
-            Text(text = "이 이모티콘 팩을 신고할까요?")
+            Text(text = "부적절한 이모티콘 팩으로 신고할까요?")
         },
         onDismissRequest = {
             onDismissRequest()
@@ -573,7 +595,7 @@ fun ReportDialog(
                     onConfirmation()
                 }
             ) {
-                Text("Confirm")
+                Text("신고")
             }
         },
         dismissButton = {
@@ -582,7 +604,7 @@ fun ReportDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text("취소")
             }
         }
     )
