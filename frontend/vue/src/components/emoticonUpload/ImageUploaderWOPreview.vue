@@ -29,31 +29,31 @@ function handleFileInput(event: Event) {
   input.value = "";
 }
 
+
 function resizeImage(file: File): Promise<File> {
   return new Promise((resolve, reject) => {
-    // 기존 이미지 처리 로직
     const img = new Image();
     img.src = URL.createObjectURL(file);
 
     img.onload = () => {
       URL.revokeObjectURL(img.src);
 
-      if (img.width !== img.height) {
-        reject(new Error("이미지는 정사각형이어야 합니다."));
+      if (file.type.startsWith("image/gif")) {
+        if (img.width !== REQUIRED_WIDTH || img.height !== REQUIRED_WIDTH) {
+          reject(
+            new Error(
+              "GIF 파일은 리사이징을 지원하지 않습니다. 정확히 200x200 크기여야 합니다."
+            )
+          );
+          return;
+        }
+        resolve(file);
         return;
       }
 
-      if (img.width === REQUIRED_WIDTH) {
-        resolve(file);
-        return;
-      } else if (file.type.startsWith("image/gif")) {
-        reject(
-          new Error(
-            "GIF 파일은 리사이징을 지원하지 않습니다. 정확히 200x200 크기여야 합니다."
-          )
-        );
-        return;
-      }
+      const size = Math.min(img.width, img.height);
+      const startX = (img.width - size) / 2;
+      const startY = (img.height - size) / 2;
 
       const canvas = document.createElement("canvas");
       canvas.width = REQUIRED_WIDTH;
@@ -65,7 +65,20 @@ function resizeImage(file: File): Promise<File> {
         return;
       }
 
-      ctx.drawImage(img, 0, 0, REQUIRED_WIDTH, REQUIRED_HEIGHT);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      ctx.drawImage(
+        img,
+        startX,
+        startY,
+        size,
+        size,
+        0,
+        0,
+        REQUIRED_WIDTH,
+        REQUIRED_HEIGHT
+      );
 
       canvas.toBlob(
         (blob) => {

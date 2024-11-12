@@ -24,17 +24,17 @@
   </div>
   <nav class="pt-4 border-b-2 border-gray-200">
     <div class="grid grid-cols-4 max-w-screen-md mx-auto">
-        <RouterLink :to="{ name: 'main' }" :class="['nav-link', { active: isActive('main') }]">
+        <RouterLink :to="{ name: 'main' }" :class="['nav-link', { active: isActive(['main']) }]">
           메인
         </RouterLink>
-        <RouterLink :to="{ name: 'newList' }" :class="['nav-link', { active: isActive('newList') }]">
+        <RouterLink :to="{ name: 'newList' }" :class="['nav-link', { active: isActive(['newList']) }]">
           신규
         </RouterLink>
-        <RouterLink :to="{ name: 'popularList' }" :class="['nav-link', { active: isActive('popularList') }]">
+        <RouterLink :to="{ name: 'popularList' }" :class="['nav-link', { active: isActive(['popularList']) }]">
           인기
         </RouterLink>
-        <RouterLink :to="{ name: 'uploadEmoticon' }" :class="['nav-link', { active: isActive('uploadEmoticon') }]">
-          업로드
+        <RouterLink :to="{ name: 'methodSelect' }" :class="['nav-link', { active: isActive(['methodSelect', 'uploadEmoticon', 'createEmoticon']) }]">
+          만들기
         </RouterLink>
     </div>
   </nav>
@@ -50,8 +50,8 @@ import UserMenu from './UserMenu.vue'; // UserMenu 컴포넌트 임포트
 
 const route = useRoute();
 
-function isActive(routeName: string) {
-  return route.name === routeName;
+function isActive(routeName: string[]) {
+  return routeName.includes(route.name as string);
 }
 
 const userStore = useUserStore();
