@@ -81,13 +81,13 @@ fun EmoticonPackDetailScreen(
     viewModel: EmoticonPackDetailScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
     val uiState by viewModel.uiState.collectAsState()
     val purchaseState by viewModel.purchaseState.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isDownloading by viewModel.isDownloading.collectAsState()
     var selectedEmoticonIndex by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    var showReportDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(emoticonPackUuid) {
         viewModel.fetchEmoticonPackDetail(emoticonPackUuid)
@@ -123,7 +123,9 @@ fun EmoticonPackDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {
+                        showReportDialog = true
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Report,
                             contentDescription = null
@@ -443,6 +445,7 @@ fun EmoticonPackDetailScreen(
                                         "EmoticonPackDetailScreen",
                                         "${emoticonPack.authorId} clicked!!"
                                     )
+                                    navController.navigate("writer/${emoticonPack.authorNickname}")
                                 }
                             )
                             Spacer(Modifier.height(16.dp))
@@ -501,6 +504,16 @@ fun EmoticonPackDetailScreen(
                 ) {
                     Text("취소")
                 }
+            }
+        )
+    }
+
+    if (showReportDialog) {
+        ReportDialog(
+            onDismissRequest = { showReportDialog = false },
+            onConfirmation = {
+                showReportDialog = false
+                Toast.makeText(context, "신고가 완료되었습니다.", Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -571,7 +584,7 @@ fun ReportDialog(
             Text(text = "이모티콘 팩 신고")
         },
         text = {
-            Text(text = "이 이모티콘 팩을 신고할까요?")
+            Text(text = "부적절한 이모티콘 팩으로 신고할까요?")
         },
         onDismissRequest = {
             onDismissRequest()
@@ -582,7 +595,7 @@ fun ReportDialog(
                     onConfirmation()
                 }
             ) {
-                Text("Confirm")
+                Text("신고")
             }
         },
         dismissButton = {
@@ -591,7 +604,7 @@ fun ReportDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text("취소")
             }
         }
     )

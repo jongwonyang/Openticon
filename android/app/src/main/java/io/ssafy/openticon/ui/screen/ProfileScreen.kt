@@ -174,11 +174,20 @@ fun ProfileScreen(
                             fontSize = 24.sp
                         )
                         Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = memberEntity?.bio ?: "",
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurface // 테마 색상 사용
-                        )
+                        if(memberEntity?.bio==null || memberEntity?.bio.equals("")){
+                            Text(
+                                text = "상태 메세지가 없습니다.",
+                                fontSize = 15.sp,
+                                color = MaterialTheme.colorScheme.background // 테마 색상 사용
+                            )
+                        }else{
+                            Text(
+                                text = memberEntity?.bio!!,
+                                fontSize = 15.sp,
+                                color = MaterialTheme.colorScheme.onSurface // 테마 색상 사용
+                            )
+                        }
+
                         Spacer(Modifier.height((20.dp)))
                         // 결제 버튼
                         FilledTonalButton(
@@ -331,7 +340,6 @@ fun ProfileScreen(
                         }
                     }
                 }
-
                 Spacer(Modifier.height(16.dp))
 
                 Column {
