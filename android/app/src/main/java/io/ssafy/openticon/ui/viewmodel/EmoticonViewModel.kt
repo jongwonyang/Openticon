@@ -1,5 +1,7 @@
 package io.ssafy.openticon.ui.viewmodel
 
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +11,9 @@ import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.data.repository.EmoticonPackRepository
 import io.ssafy.openticon.domain.usecase.GetEmoticonPacksWithEmotionsUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,6 +24,7 @@ class EmoticonViewModel @Inject constructor(
 
     private val _Sample_emoticonPacks = MutableLiveData<List<EmoticonPackWithEmotions>>()
     val sampleEmoticonPacks: LiveData<List<EmoticonPackWithEmotions>> get() = _Sample_emoticonPacks
+
 
     init {
         loadEmoticonPacks()

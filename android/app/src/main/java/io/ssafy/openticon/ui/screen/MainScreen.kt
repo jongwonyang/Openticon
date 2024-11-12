@@ -59,50 +59,54 @@ import kotlinx.serialization.json.Json
 fun MainScreen(
     navController: NavController,
     myViewModel: EmoticonViewModel = hiltViewModel(),
-    likeEmoticonViewModel: LikeEmoticonViewModel = hiltViewModel(),
+    likeEmoticonViewModel: LikeEmoticonViewModel,
     myEmoticonViewModel: MyEmoticonViewModel = hiltViewModel()
 ) {
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    Log.d("LikeEmoticonViewModelHash", "MainActivity ViewModel hash: ${System.identityHashCode(likeEmoticonViewModel)}")
     val mainViewModel: MainViewModel = hiltViewModel()
     val isLoggedIn by mainViewModel.isLoggedIn.collectAsState()
 
-    val activity = context as? Activity
+    val activity = context as? MainActivity
+
+    val isLaunched by likeEmoticonViewModel.isLaunched.collectAsState()
 
     val selectedKey by likeEmoticonViewModel.sampleEmoticonPacksLiveData.observeAsState()
 
     val mainActivityLifecycle = (context as? MainActivity)?.lifecycle
 
-    DisposableEffect(mainActivityLifecycle) {
-        // MainActivity의 lifecycle을 감시할 Observer 설정
-        val observer = LifecycleEventObserver { _, event ->
-            if (allPermissionsGranted(context)) {
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        stopFloatingService(
-                            context,
-                            myViewModel,
-                            likeEmoticonViewModel,
-                            lifecycleOwner
-                        )
-                        Log.d("MainScreen", "MainActivity가 포그라운드로 전환되었습니다.")
-                    }
-
-                    else -> {}
-                }
-            }
-        }
-
-        // MainActivity의 lifecycle에 observer 추가
-        mainActivityLifecycle?.addObserver(observer)
-
-        // DisposableEffect에서 LifecycleObserver 제거
-        onDispose {
-            mainActivityLifecycle?.removeObserver(observer)
-        }
-    }
+//    DisposableEffect(mainActivityLifecycle) {
+//        // MainActivity의 lifecycle을 감시할 Observer 설정
+//        val observer = LifecycleEventObserver { _, event ->
+//            if (allPermissionsGranted(context)) {
+//                when (event) {
+//                    Lifecycle.Event.ON_RESUME -> {
+//                        stopFloatingService(
+//                            context,
+//                        )
+//                        Log.d("MainScreen", "MainActivity가 포그라운드로 전환되었습니다.")
+//                    }
+//
+//                    Lifecycle.Event.ON_PAUSE->{
+//                        Log.d("MainScreen", "MainActivity가 백그라운드로 전환되었습니다.")
+//
+//                    }
+//                    else->{}
+//                }
+//            }
+//        }
+//
+//        // MainActivity의 lifecycle에 observer 추가
+//        mainActivityLifecycle?.addObserver(observer)
+//
+//        // DisposableEffect에서 LifecycleObserver 제거
+//        onDispose {
+//            mainActivityLifecycle?.removeObserver(observer)
+//        }
+//    }
 
     myViewModel.sampleEmoticonPacks.observe(lifecycleOwner) { packs ->
         saveDataToPreferences(packs, context)
@@ -137,14 +141,21 @@ fun MainScreen(
             ExtendedFloatingActionButton(
                 onClick = {
                     if (allPermissionsGranted(context)) {
-                        Log.d("mainScreen", "allPermission")
-                        startFloatingService(
-                            context,
-                            myViewModel,
-                            likeEmoticonViewModel,
-                            lifecycleOwner
-                        )
-                        activity?.moveTaskToBack(true)
+                        if(isLoggedIn){
+                            Log.d("mainScreen", "allPermission")
+                            likeEmoticonViewModel.updateIsLaunched(true)
+//                        Log.d("MainScreen", isLaunched.toString())
+                            likeEmoticonViewModel.debugPrint()
+                            startFloatingService(
+                                context,
+                                myViewModel,
+                                likeEmoticonViewModel
+                            )
+                            activity?.moveTaskToBack(true)
+                        }
+                        else{
+                            navController.navigate("login")
+                        }
                     } else {
                         Log.d("mainScreen", "notAllPermission")
                         requestPermissionsAndStartService(
@@ -212,7 +223,7 @@ fun requestPermissionsAndStartService(
 
     // 모든 권한이 부여되었는지 확인 후 서비스 시작
     if (allPermissionsGranted(context)) {
-        startFloatingService(context, myViewModel, likeEmoticonViewModel, lifecycleOwner)
+        startFloatingService(context, myViewModel, likeEmoticonViewModel)
     }
 }
 
@@ -236,22 +247,18 @@ fun allPermissionsGranted(context: Context): Boolean {
     //&& isAccessibilityServiceEnabled(context, KeyboardAccessibilityService::class.java)
 }
 
-private fun stopFloatingService(
+fun stopFloatingService(
     context: Context,
-    myViewModel: EmoticonViewModel,
-    likeEmoticonViewModel: LikeEmoticonViewModel,
-    lifecycleOwner: LifecycleOwner
 ) {
     val intent = Intent(context, FloatingService::class.java)
     context.stopService(intent)
 
 }
 
-private fun startFloatingService(
+fun startFloatingService(
     context: Context,
     myViewModel: EmoticonViewModel,
     likeEmoticonViewModel: LikeEmoticonViewModel,
-    lifecycleOwner: LifecycleOwner
 ) {
     val intent = Intent(context, FloatingService::class.java)
 
