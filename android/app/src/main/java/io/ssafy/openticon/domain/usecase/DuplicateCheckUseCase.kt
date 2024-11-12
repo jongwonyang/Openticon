@@ -20,5 +20,4 @@ class DuplicateCheckUseCase @Inject constructor(
             Result.failure(e)
         }
     }
-
 }

@@ -41,4 +41,7 @@ interface MemberApi {
     suspend fun duplicateCheck(
         @Query("nickname") nickname: String
     ) : Response<Boolean>
+
+    @GET("api/v1/member/writer")
+    suspend fun getWriterInfo(@Query("nickname") nickname: String): Response<MemberEntity?>
 }

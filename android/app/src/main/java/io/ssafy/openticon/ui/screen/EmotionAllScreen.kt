@@ -96,7 +96,6 @@ fun EmoticonAllScreen(
                 // 검색 결과가 없는 경우 메시지 표시
                 if (emoticonPack.isEmpty() && !isLoading) {
                     item {
-
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()

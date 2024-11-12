@@ -14,7 +14,8 @@ data class EmoticonPackDetail(
     val createdAt: String,
     val authorId: Int,
     val authorNickname: String,
-    val authorProfilePic: String
+    val authorProfilePic: String,
+    val authorBio : String,
 )
 
 fun PackInfoResponseDto.toEmoticonPackDetail(): EmoticonPackDetail {
@@ -35,5 +36,6 @@ fun PackInfoResponseDto.toEmoticonPackDetail(): EmoticonPackDetail {
         authorId = author.id,
         authorNickname = author.nickname,
         authorProfilePic = author.profile,
+        authorBio = author.bio,
     )
 }
