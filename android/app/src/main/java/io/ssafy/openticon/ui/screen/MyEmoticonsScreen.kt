@@ -157,7 +157,9 @@ fun MyEmoticonsScreen(
                     ) {
                         Text(
                             text = "순서 편집",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 16.sp
+                            ),
                         )
                     }
                 }
@@ -173,7 +175,9 @@ fun MyEmoticonsScreen(
                     ) {
                         Text(
                             text = "순서 편집",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 16.sp
+                            ),
                         )
                     }
                 }
@@ -190,7 +194,9 @@ fun MyEmoticonsScreen(
                     ) {
                         Text(
                             text = "숨긴 이모티콘",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 16.sp
+                            ),
                         )
                     }
                 }
@@ -206,7 +212,9 @@ fun MyEmoticonsScreen(
                     ) {
                         Text(
                             text = "숨긴 이모티콘",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 16.sp
+                            ),
                         )
                     }
                 }
