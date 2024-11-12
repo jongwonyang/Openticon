@@ -37,6 +37,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 requestURI.equals("/emoticonpacks/search/image") ||
                 requestURI.equals("/emoticonpacks/download-init") ||
                 requestURI.startsWith("/emoticonpacks/info") ||
+                requestURI.equals("/tag/list") ||
                 requestURI.startsWith("/health") ||
                 requestURI.startsWith("/swagger-ui") || // 모든 /swagger-ui 경로를 거름
                 requestURI.startsWith("/v3/api-docs")) {
