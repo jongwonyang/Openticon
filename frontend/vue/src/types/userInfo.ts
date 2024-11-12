@@ -2,12 +2,13 @@ export type UserInfo = {
   id: number;
   email: string;
   nickname: string;
-  profile_image: string;
-  createdAt: number;
-  updatedAt: number;
-  isResigned: boolean;
+  point: number;
+  createdAt: string;
+  updatedAt: string;
   manager: boolean;
   mobile_fcm: string;
   web_fcm: string;
-  point: number;
+  profile_image: string;
+  bio: string;
+  isResigned: boolean;
 };
