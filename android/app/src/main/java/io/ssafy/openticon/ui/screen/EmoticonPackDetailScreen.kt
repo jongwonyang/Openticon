@@ -81,7 +81,6 @@ fun EmoticonPackDetailScreen(
     viewModel: EmoticonPackDetailScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
     val uiState by viewModel.uiState.collectAsState()
     val purchaseState by viewModel.purchaseState.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
@@ -446,6 +445,7 @@ fun EmoticonPackDetailScreen(
                                         "EmoticonPackDetailScreen",
                                         "${emoticonPack.authorId} clicked!!"
                                     )
+                                    navController.navigate("writer/${emoticonPack.authorNickname}")
                                 }
                             )
                             Spacer(Modifier.height(16.dp))

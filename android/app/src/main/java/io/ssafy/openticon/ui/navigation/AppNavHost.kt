@@ -16,6 +16,7 @@ import io.ssafy.openticon.ui.screen.LoginScreen
 import io.ssafy.openticon.ui.screen.LoginSuccessScreen
 import io.ssafy.openticon.ui.screen.MainScreen
 import io.ssafy.openticon.ui.screen.SettingsScreen
+import io.ssafy.openticon.ui.screen.WriterScreen
 
 @Composable
 fun AppNavHost() {
@@ -39,6 +40,22 @@ fun AppNavHost() {
         composable("settings") {
             SettingsScreen(navController)
         }
+
+        composable(
+            route = "writer/{nickname}",
+            arguments = listOf(
+                navArgument("nickname") { type = NavType.StringType },
+            )
+        ) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+
+            WriterScreen(
+                navController = navController,
+                nickname = nickname
+            )
+        }
+
+
 
         composable(
             route = "emoticonPack/{uuid}",

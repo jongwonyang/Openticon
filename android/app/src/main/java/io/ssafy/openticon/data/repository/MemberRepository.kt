@@ -23,6 +23,7 @@
             suspend fun duplicateCheck(nickname: String) : Response<Boolean> {
                 return api.duplicateCheck(nickname)
             }
-
-
+            suspend fun getWriterInfo(nickname: String): Response<MemberEntity?> {
+                return api.getWriterInfo(nickname)
+            }
         }
