@@ -54,7 +54,7 @@ class MainActivity(
         handleIntent(intent)
         setContent {
             AppTheme {
-                AppNavHost(likeEmoticonViewModel)
+                AppNavHost(myViewModel, likeEmoticonViewModel)
             }
         }
     }
