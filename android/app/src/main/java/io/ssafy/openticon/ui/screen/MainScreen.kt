@@ -60,7 +60,7 @@ import kotlinx.serialization.json.Json
 @Composable
 fun MainScreen(
     navController: NavController,
-    myViewModel: EmoticonViewModel = hiltViewModel(),
+    myViewModel: EmoticonViewModel,
     likeEmoticonViewModel: LikeEmoticonViewModel,
     myEmoticonViewModel: MyEmoticonViewModel = hiltViewModel()
 ) {
@@ -126,14 +126,15 @@ fun MainScreen(
             BottomNavigationBar(
                 selectedItem = selectedItem,
                 onItemSelected = { index ->
-                    if (index == 3) {
+                    if (index == 3 || index == 2) {
                         mainViewModel.isLoggedIn
                         if (isLoggedIn) {
                             selectedItem = index
                         } else {
                             navController.navigate("login")
                         }
-                    } else {
+                    }
+                    else {
                         selectedItem = index
                     }
                 }
@@ -148,11 +149,11 @@ fun MainScreen(
                             likeEmoticonViewModel.updateIsLaunched(true)
 //                        Log.d("MainScreen", isLaunched.toString())
                             likeEmoticonViewModel.debugPrint()
-                            startFloatingService(
-                                context,
-                                myViewModel,
-                                likeEmoticonViewModel
-                            )
+//                            startFloatingService(
+//                                context,
+//                                myViewModel,
+//                                likeEmoticonViewModel
+//                            )
                             activity?.moveTaskToBack(true)
                         }
                         else{
@@ -258,7 +259,6 @@ fun stopFloatingService(
 ) {
     val intent = Intent(context, FloatingService::class.java)
     context.stopService(intent)
-
 }
 
 fun startFloatingService(

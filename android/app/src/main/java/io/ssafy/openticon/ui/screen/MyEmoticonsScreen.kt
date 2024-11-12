@@ -56,6 +56,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import io.ssafy.openticon.data.model.EmoticonPackEntity
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 val itemHeight = 66.dp.value // EmoticonItem의 높이 (50.dp + 패딩 등)
@@ -106,7 +107,9 @@ fun MyEmoticonsScreen(
 
     val onDrag: (PointerInputChange, Offset) -> Unit = { change, dragAmount ->
         change.consume()
-        offsetY += dragAmount.y
+
+        // 이동 값을 조정하여 민감도를 낮춥니다. 예를 들어, dragAmount.y / 2로 줄임
+        offsetY += dragAmount.y / 2 // 이동량을 줄여 민감도 조절
 
         val startIndex = draggedItemIndex
         val endIndex = (startIndex + (offsetY / (itemHeight + itemSpacing)).roundToInt())
@@ -118,6 +121,7 @@ fun MyEmoticonsScreen(
             offsetY -= (endIndex - startIndex) * (itemHeight + itemSpacing)
         }
     }
+
 
     Column(
         modifier = Modifier
