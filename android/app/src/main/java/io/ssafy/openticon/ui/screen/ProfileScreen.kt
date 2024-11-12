@@ -1,5 +1,6 @@
 package io.ssafy.openticon.ui.screen
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -54,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -69,11 +71,13 @@ import com.iamport.sdk.domain.core.Iamport
 import io.ssafy.openticon.BuildConfig
 import io.ssafy.openticon.R
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
+import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
     navController: NavController,
+    myEmoticonViewModel: MyEmoticonViewModel = hiltViewModel()
 ) {
     val viewModel: MemberViewModel = hiltViewModel()
     val memberEntity by viewModel.memberEntity.collectAsState()
@@ -84,6 +88,9 @@ fun ProfileScreen(
     val purchaseSuccess by viewModel.purchaseSuccess.collectAsState()
     var showPriceSelectionDialog by remember { mutableStateOf(false) }
     var selectedAmount by remember { mutableStateOf(TextFieldValue("")) }
+
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.fetchMemberInfo()
     }
@@ -364,6 +371,14 @@ fun ProfileScreen(
                         modifier = Modifier
                             .clickable {
                                 coroutineScope.launch {
+
+                                    val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+
+                                    val editor = sharedPreferences.edit()
+                                    editor.putBoolean("is_visible", false) // Boolean 값으로 직접 저장
+                                    editor.apply()
+
                                     viewModel.logout()
 
                                     navController.navigate("login") {
