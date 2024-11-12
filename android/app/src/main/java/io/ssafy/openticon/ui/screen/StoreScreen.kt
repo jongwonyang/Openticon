@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -49,6 +50,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -161,9 +163,11 @@ fun StoreScreen(
             Spacer(modifier = Modifier.height(50.dp))
             LazyRow(
                 state = listState,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .height(200.dp),
                 horizontalArrangement = Arrangement.spacedBy(30.dp),
                 verticalAlignment = Alignment.CenterVertically
+
             ) {
                 itemsIndexed(newEmoticonPack) { index, item -> // Use itemsIndexed to get the index and item
                     Card(
@@ -173,6 +177,7 @@ fun StoreScreen(
                         modifier = Modifier
                             .scale(if (index == centerIndex) 1.3f else 0.8f)
                             .alpha(if (index == centerIndex) 1f else 0.5f)
+                            .fillMaxSize()
                             .width(150.dp)
                             .padding(bottom = 1.dp)
                             .clickable(
@@ -215,12 +220,20 @@ fun StoreScreen(
                             Text(
                                 text = item.title,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.95f)
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
                             )
                             Text(
                                 text = item.author,
                                 color = Color.Gray,
-                                fontSize = 10.sp
+                                fontSize = 10.sp,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.8f)
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
                             )
                         }
                     }
@@ -307,14 +320,21 @@ fun StoreScreen(
 
                                 Column {
                                     Text(
-                                        text = item.title, // Use the item's title
+                                        text = item.title,
                                         fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.8f)
+
                                     )
                                     Text(
-                                        text = item.author, // Use the item's author
+                                        text = item.author,
                                         color = Color.Gray,
-                                        style = MaterialTheme.typography.bodySmall
+                                        style = MaterialTheme.typography.bodySmall,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.8f)
                                     )
                                 }
                             }

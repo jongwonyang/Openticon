@@ -198,9 +198,7 @@ fun EditProfileScreen(
                         Text(text = "이미지 수정", color = Color.White)
                     }
                 }
-
                 Spacer(modifier = Modifier.height(50.dp))
-
                 TextField(
                     value = nickname,
                     onValueChange = { nickname = it },
@@ -218,10 +216,10 @@ fun EditProfileScreen(
                         .fillMaxWidth(0.8f),
                     shape = RoundedCornerShape(0.dp),
                     interactionSource = interactionSource,
-                    isError = isDuplicated
+                    isError = isDuplicated,
+                    singleLine = true // 한 줄 입력 설정
                 )
                 Spacer(modifier = Modifier.height(48.dp))
-
                 TextField(
                     value = bio,
                     onValueChange = { bio = it },
