@@ -6,7 +6,10 @@
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">프로필 이미지 변경</h2>
-        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
+        <button
+          @click="$emit('close')"
+          class="text-gray-500 hover:text-gray-700"
+        >
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -26,7 +29,9 @@
             />
           </div>
           <div v-else class="py-8">
-            <span class="material-icons text-4xl text-gray-400">add_photo_alternate</span>
+            <span class="material-icons text-4xl text-gray-400"
+              >add_photo_alternate</span
+            >
             <p class="mt-2 text-gray-500">
               이미지를 드래그하거나 클릭하여 업로드하세요
             </p>
@@ -50,10 +55,17 @@
         </button>
         <button
           @click="handleUpload"
+          v-if="!errorOccured"
           :disabled="!selectedFile"
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           변경하기
+        </button>
+        <button
+          v-if="errorOccured"
+          class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+        >
+          변경 실패!
         </button>
       </div>
     </div>
@@ -61,21 +73,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from "vue";
+import { useUserStore } from "@/stores/user";
 
 const props = defineProps<{
   show: boolean;
 }>();
 
+const userStore = useUserStore();
+
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'update', file: File): void;
+  (e: "close"): void;
 }>();
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const selectedFile = ref<File | null>(null);
 const previewImage = ref<string | null>(null);
-
+const errorOccured = ref(false);
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
@@ -96,8 +110,8 @@ const handleDrop = (event: DragEvent) => {
 };
 
 const handleFile = (file: File) => {
-  if (!file.type.startsWith('image/')) {
-    alert('이미지 파일만 업로드 가능합니다.');
+  if (!file.type.startsWith("image/")) {
+    alert("이미지 파일만 업로드 가능합니다.");
     return;
   }
   selectedFile.value = file;
@@ -109,8 +123,15 @@ const handleFile = (file: File) => {
 };
 
 const handleUpload = () => {
-  if (selectedFile.value) {
-    emit('update', selectedFile.value);
-  }
+  // TODO: API 호출하여 프로필 이미지 업데이트
+  userStore
+    .updateProfileImage(selectedFile.value!)
+    .then(() => {
+      userStore.retrieveUserInfo();
+      emit("close");
+    })
+    .catch(() => {
+      errorOccured.value = true;
+    });
 };
-</script> 
+</script>

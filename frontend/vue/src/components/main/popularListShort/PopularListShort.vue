@@ -1,6 +1,6 @@
 <template>
-    <div class="container mt-4 p-4 mx-auto max-w-screen-lg">
-      <h2>
+    <div class="container mt-4 mx-auto max-w-screen-lg">
+      <h2 class="px-4 pt-4">
         <span class="text-2xl font-nnsqneo font-bold pr-2">인기 이모티콘</span>
         <RouterLink
           :to="{ name: 'popularList' }"
@@ -9,9 +9,9 @@
         </RouterLink>
       </h2>
       <!-- 이모티콘 리스트 -->
-      <div class="md:grid md:grid-cols-5 md:gap-4 pt-4">
+      <div class="md:grid md:grid-cols-5 md:gap-4 pt-4 md:px-4">
         <!-- md 크기 이하일 때는 가로 스크롤 -->
-        <div class="flex gap-4 overflow-x-auto md:hidden pb-4">
+        <div class="flex gap-4 overflow-x-auto md:hidden pb-4 px-4">
           <RouterLink
             :to="{ name: 'packDetail', params: { id: emoticon.id } }"
             class="border p-4 emoticon-item-no-hover w-40 flex-shrink-0"

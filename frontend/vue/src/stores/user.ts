@@ -19,6 +19,16 @@ export const useUserStore = defineStore("user", () => {
     isLogined.value = true;
   };
 
+  const retrieveUserInfo = () => {
+    if(isLogined.value) {
+    apiClient.get("/member").then((res) => {
+        userInfo.value = res.data;
+      });
+    }else{
+      console.error("로그인되어있지 않습니다.");
+    }
+  };
+
   if (accessToken.value) {
     login(accessToken.value);
   }
@@ -34,12 +44,27 @@ export const useUserStore = defineStore("user", () => {
     return accessToken.value;
   };
 
-  const updateProfileImage = (file: File) => {
-    alert("프로필 이미지 변경은 준비중입니다.");
-    // apiClient.put("/member/profile-image", { file }).then((res) => {
-    //   userInfo.value = res.data;
-    // });
+  const updateProfileImage = (file: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append("profile_img", file);
+    formData.append("nickname", userInfo.value?.nickname ?? "");
+    formData.append("bio", userInfo.value?.bio ?? "");
+    return apiClient.put("/member", formData);
   };
 
-  return { isLogined, userInfo, getAccessToken, login, logout, updateProfileImage };
+  const updateNickname = (nickname: string): Promise<void> => {
+    const formData = new FormData();
+    formData.append("nickname", nickname);
+    formData.append("bio", userInfo.value?.bio ?? "");
+    return apiClient.put("/member", formData);
+  };
+
+  const updateBio = (bio: string): Promise<void> => {
+    const formData = new FormData();
+    formData.append("nickname", userInfo.value?.nickname ?? "");
+    formData.append("bio", bio);
+    return apiClient.put("/member", formData);
+  };
+
+  return { isLogined, userInfo, getAccessToken, login, logout, updateProfileImage, updateNickname, updateBio, retrieveUserInfo };
 });
