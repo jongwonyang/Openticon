@@ -25,7 +25,7 @@
             android:layout_height="100dp"
             android:layout_gravity="center_vertical"
             android:contentDescription="TODO"
-            android:src="@android:drawable/ic_notification_clear_all" />
+            android:src="@drawable/vector" />
 
         <Space
             android:layout_width="0dp"
