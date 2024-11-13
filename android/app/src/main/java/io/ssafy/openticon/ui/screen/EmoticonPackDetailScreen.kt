@@ -36,6 +36,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -85,6 +86,8 @@ fun EmoticonPackDetailScreen(
     val purchaseState by viewModel.purchaseState.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isDownloading by viewModel.isDownloading.collectAsState()
+    val totalEmoticonCount by viewModel.totalEmoticonCount.collectAsState()
+    val downloadedEmoticonCount by viewModel.downloadedEmoticonCount.collectAsState()
     var selectedEmoticonIndex by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
@@ -152,66 +155,79 @@ fun EmoticonPackDetailScreen(
         },
         bottomBar = {
             BottomAppBar {
-                when (purchaseState) {
-                    is UiState.Loading -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (isDownloading) {
+                        LinearProgressIndicator(
+                            progress = {
+                                downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat()
+                            },
+                            modifier = Modifier.fillMaxWidth().
+                            padding(0.dp)
+                        )
                     }
-
-                    is UiState.Success -> {
-                        val purchaseInfo = (purchaseState as UiState.Success).data
-
-                        if (!purchaseInfo.purchased) {
-                            // 테이블에 없음 (구매 안됨)
-                            // 구매 버튼 표시
-                            PrimaryActionButton(
-                                onClick = {
-                                    if (!isLoggedIn) {
-                                        // 로그인 안됨
-                                        // 로그인 화면으로
-                                        navController.navigate("login")
-                                    } else {
-                                        // 로그인 됨
-                                        // 구매 처리
-                                        showDialog = true
-                                    }
-                                },
-                                text = "구매"
-                            )
-                        } else {
-                            // 테이블에 있음 (구매함)
-                            if (!purchaseInfo.downloaded) {
-                                // 다운로드 안됨
-                                // 다운로드 버튼 표시
-                                PrimaryActionButton(
-                                    onClick = {
-                                        if (!isDownloading)
-                                            viewModel.downloadEmoticonPack(
-                                                packId = purchaseInfo.packId,
-                                                uuid = purchaseInfo.uuid
-                                            )
-                                    },
-                                    text = if (isDownloading) "다운로드 중" else "다운로드",
-                                    enabled = !isDownloading
-                                )
-                            } else {
-                                // 다운로드 됨
-                                // 다운로드 완료 표시
-                                PrimaryActionButton(
-                                    onClick = {},
-                                    text = "다운로드 완료",
-                                    enabled = false
-                                )
+                    when (purchaseState) {
+                        is UiState.Loading -> {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
                         }
-                    }
 
-                    is UiState.Error -> {
-                        Text("구매 정보를 불러오는데 실패했습니다.")
+                        is UiState.Success -> {
+                            val purchaseInfo = (purchaseState as UiState.Success).data
+
+                            if (!purchaseInfo.purchased) {
+                                // 테이블에 없음 (구매 안됨)
+                                // 구매 버튼 표시
+                                PrimaryActionButton(
+                                    onClick = {
+                                        if (!isLoggedIn) {
+                                            // 로그인 안됨
+                                            // 로그인 화면으로
+                                            navController.navigate("login")
+                                        } else {
+                                            // 로그인 됨
+                                            // 구매 처리
+                                            showDialog = true
+                                        }
+                                    },
+                                    text = "구매"
+                                )
+                            } else {
+                                // 테이블에 있음 (구매함)
+                                if (!purchaseInfo.downloaded) {
+                                    // 다운로드 안됨
+                                    // 다운로드 버튼 표시
+                                    PrimaryActionButton(
+                                        onClick = {
+                                            if (!isDownloading)
+                                                viewModel.downloadEmoticonPack(
+                                                    packId = purchaseInfo.packId,
+                                                    uuid = purchaseInfo.uuid
+                                                )
+                                        },
+                                        text = if (isDownloading) "다운로드 중" else "다운로드",
+                                        enabled = !isDownloading
+                                    )
+                                } else {
+                                    // 다운로드 됨
+                                    // 다운로드 완료 표시
+                                    PrimaryActionButton(
+                                        onClick = {},
+                                        text = "다운로드 완료",
+                                        enabled = false
+                                    )
+                                }
+                            }
+                        }
+
+                        is UiState.Error -> {
+                            Text("구매 정보를 불러오는데 실패했습니다.")
+                        }
                     }
                 }
             }
