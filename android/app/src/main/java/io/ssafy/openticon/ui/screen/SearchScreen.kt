@@ -185,6 +185,9 @@ fun SearchScreen(
                         }
                     }
                 }
+                item {
+                    Spacer(modifier = Modifier.height(128.dp)) // 원하는 높이로 여백 설정
+                }
             }
         }
 

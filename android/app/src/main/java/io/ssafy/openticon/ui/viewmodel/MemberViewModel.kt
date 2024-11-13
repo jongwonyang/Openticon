@@ -44,8 +44,8 @@ class MemberViewModel @Inject constructor(
     private val _purchaseLoading = MutableStateFlow<Boolean>(false)
     val purchaseLoading: StateFlow<Boolean> = _purchaseLoading
 
-    private val _purchaseSuccess = MutableStateFlow<Boolean>(false)
-    val purchaseSuccess: StateFlow<Boolean> = _purchaseSuccess
+    private val _purchaseSuccess = MutableStateFlow<Boolean?>(null)
+    val purchaseSuccess: StateFlow<Boolean?> = _purchaseSuccess
 
 
 
@@ -101,7 +101,6 @@ class MemberViewModel @Inject constructor(
         viewModelScope.launch {
             _purchaseLoading.value = true
             val result = purchasePointUseCase(amount, impUid)
-
             if (result.isSuccess) {
                 _purchaseSuccess.value = true
                 Log.i("PointRecharge", "포인트 충전 성공")
@@ -110,7 +109,6 @@ class MemberViewModel @Inject constructor(
                 _purchaseSuccess.value = false
                 Log.w("PointRecharge", "포인트 충전 실패")
             }
-
             _purchaseLoading.value = false
         }
     }
