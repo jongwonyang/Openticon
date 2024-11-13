@@ -71,6 +71,8 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.foundation.layout.android)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
@@ -117,6 +119,9 @@ dependencies {
 
     // iamport
     implementation(libs.iamport.android)
+
+    implementation(libs.kotlinx.coroutines.android.v160)
+    implementation("androidx.compose.ui:ui-graphics:1.7.5")
 }
 
 kapt {
