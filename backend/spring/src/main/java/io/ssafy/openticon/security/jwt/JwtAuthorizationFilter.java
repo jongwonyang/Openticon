@@ -36,6 +36,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 requestURI.equals("/emoticonpacks/search") ||
                 requestURI.equals("/emoticonpacks/search/image") ||
                 requestURI.equals("/emoticonpacks/download-init") ||
+                requestURI.equals("/member/writer") ||
                 requestURI.startsWith("/emoticonpacks/info") ||
                 requestURI.equals("/tag/list") ||
                 requestURI.startsWith("/health") ||
