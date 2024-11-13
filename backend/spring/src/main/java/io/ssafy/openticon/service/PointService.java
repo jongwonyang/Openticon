@@ -132,12 +132,15 @@ public class PointService {
                 .build();
         pointHistoryRepository.save(salePointHistory);
 
-        // 소지 금액 수정
+        // 구매자 소지 금액 수정
         int point = member.getPoint() - emoticonPack.getPrice();
         member.setPoint(point);
         emoticonPack.setDownload(emoticonPack.getDownload() + 1);
         memberRepository.save(member);
 
+        // 판매자 소지 금액 수정
+        emoticonPack.getMember().setPoint(emoticonPack.getMember().getPoint() + emoticonPack.getPrice());
+        memberRepository.save(emoticonPack.getMember());
         return new PointResponseDto("OK", emoticonPack.getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
     }
 
