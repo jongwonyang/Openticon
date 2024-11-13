@@ -11,6 +11,10 @@ import java.util.List;
 @AllArgsConstructor
 public class PackDownloadResponseDto {
 
+    private Long id;
+    private String title;
+    private boolean isPublic;
+    private String uuid;
     private String thumbnailImg;
     private String listImg;
     private List<String> emoticons;
