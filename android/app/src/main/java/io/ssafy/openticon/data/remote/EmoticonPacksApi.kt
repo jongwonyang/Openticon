@@ -1,5 +1,6 @@
 package io.ssafy.openticon.data.remote
 
+import io.ssafy.openticon.data.model.PackDownloadResponseDto
 import io.ssafy.openticon.data.model.PackInfoResponseDto
 import io.ssafy.openticon.data.model.PageEmoticonPackResponseDto
 import io.ssafy.openticon.data.model.TagListResponseDto
@@ -50,4 +51,9 @@ interface EmoticonPacksApi {
     @Streaming
     @GET
     suspend fun downloadEmoticon(@Url url: String): ResponseBody
+
+    @GET("/api/v1/emoticonpacks/download")
+    suspend fun getDownloadPackInfo(
+        @Query("uuid") uuid: String
+    ): PackDownloadResponseDto
 }

@@ -9,4 +9,5 @@ interface EmoticonPackRepository {
     suspend fun downloadAndSavePublicEmoticonPack(packId: Int, emoticonUrls: List<String>)
     suspend fun updateDownloadedStatus(packId: Int, isDownloaded: Boolean)
     suspend fun deleteFilesFromId(packId: Int, emoticons: List<Emoticon>)
+    suspend fun getDownloadPackInfo(uuid: String): EmoticonPack
 }

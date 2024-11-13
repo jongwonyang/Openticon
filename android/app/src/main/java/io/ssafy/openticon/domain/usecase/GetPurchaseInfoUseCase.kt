@@ -12,9 +12,19 @@ class GetPurchaseInfoUseCase @Inject constructor(
         val purchaseInfo = repository.getPurchasedPackInfo(packId).first()
 
         return if (purchaseInfo != null) {
-            Result.success(PurchaseInfo(packId, true, purchaseInfo.downloaded))
+            Result.success(PurchaseInfo(
+                packId = packId,
+                purchased = true,
+                downloaded = purchaseInfo.downloaded,
+                uuid = purchaseInfo.uuid
+            ))
         } else {
-            Result.success(PurchaseInfo(packId, false, false))
+            Result.success(PurchaseInfo(
+                packId = packId,
+                purchased = false,
+                downloaded = false,
+                uuid = ""
+            ))
         }
     }
 }
