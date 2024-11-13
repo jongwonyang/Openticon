@@ -432,11 +432,13 @@ public class PackService {
             throw new OpenticonException(ErrorCode.ACCESS_DENIED);
         }
 
+        String title=emoticonPackEntity.getTitle();
+        boolean isPublic=emoticonPackEntity.isPublic();
         String thumbnailImg=emoticonPackEntity.getThumbnailImg();
         String listImg=emoticonPackEntity.getListImg();
         Long packId=emoticonPackEntity.getId();
         List<String> emoticons=emoticonService.getEmoticons(packId);
-        return new PackDownloadResponseDto(thumbnailImg,listImg,emoticons);
+        return new PackDownloadResponseDto(packId,title,isPublic,uuid,thumbnailImg,listImg,emoticons);
     }
 
     public Optional<EmoticonPackEntity> getPackById(Long packId){
