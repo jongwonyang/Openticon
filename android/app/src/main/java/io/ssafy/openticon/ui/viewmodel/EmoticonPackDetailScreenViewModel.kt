@@ -7,9 +7,11 @@ import io.ssafy.openticon.di.UserSession
 import io.ssafy.openticon.domain.model.EmoticonPackDetail
 import io.ssafy.openticon.domain.model.PurchaseInfo
 import io.ssafy.openticon.domain.usecase.DownloadEmoticonPackUseCase
+import io.ssafy.openticon.domain.usecase.GetDownloadPackInfoUseCase
 import io.ssafy.openticon.domain.usecase.GetPublicPackDetailUseCase
 import io.ssafy.openticon.domain.usecase.GetPurchaseInfoUseCase
 import io.ssafy.openticon.domain.usecase.PurchaseEmoticonPackUseCase
+import io.ssafy.openticon.domain.usecase.UpdateDownloadedStatusUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,6 +27,8 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
     private val getPurchaseInfoUseCase: GetPurchaseInfoUseCase,
     private val purchaseEmoticonPackUseCase: PurchaseEmoticonPackUseCase,
     private val downloadEmoticonPackUseCase: DownloadEmoticonPackUseCase,
+    private val getDownloadPackInfoUseCase: GetDownloadPackInfoUseCase,
+    private val updateDownloadedStatusUseCase: UpdateDownloadedStatusUseCase,
     userSession: UserSession
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<EmoticonPackDetail>>(UiState.Loading)
@@ -41,6 +45,12 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
 
     private val _isDownloading = MutableStateFlow(false)
     val isDownloading: StateFlow<Boolean> = _isDownloading
+
+    private val _totalEmoticonCount = MutableStateFlow(9999)
+    val totalEmoticonCount: StateFlow<Int> = _totalEmoticonCount
+
+    private val _downloadedEmoticonCount = MutableStateFlow(0)
+    val downloadedEmoticonCount: StateFlow<Int> = _downloadedEmoticonCount
 
     fun fetchEmoticonPackDetail(emoticonPackUuid: String) {
         viewModelScope.launch {
@@ -85,16 +95,24 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
     fun downloadEmoticonPack(packId: Int, uuid: String) {
         viewModelScope.launch {
             _isDownloading.value = true
-            val result = downloadEmoticonPackUseCase(packId, uuid)
-            result
-                .onSuccess {
-                    _isDownloading.value = false
-                    _toastEvent.emit("다운로드 완료")
-                }
-                .onFailure {
-                    _isDownloading.value = false
-                    _toastEvent.emit("다운로드 실패")
-                }
+            val packInfo = getDownloadPackInfoUseCase(uuid)
+            _totalEmoticonCount.value = packInfo.emoticonUrls.size
+            _downloadedEmoticonCount.value = 0
+            packInfo.emoticonUrls.forEachIndexed { index, url ->
+                val result = downloadEmoticonPackUseCase(index, packId, url)
+                result
+                    .onSuccess {
+                        _downloadedEmoticonCount.value++
+                    }
+                    .onFailure {
+                        _toastEvent.emit("다운로드 실패")
+                        _isDownloading.value = false
+                        return@forEachIndexed
+                    }
+            }
+            updateDownloadedStatusUseCase(packId, true)
+            _toastEvent.emit("다운로드 완료")
+            _isDownloading.value = false
             fetchPurchaseInfo(packId)
         }
     }
