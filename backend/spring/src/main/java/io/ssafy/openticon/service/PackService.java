@@ -425,15 +425,16 @@ public class PackService {
     }
 
 
-    public PackDownloadResponseDto downloadPack(String email, Long packId) {
+    public PackDownloadResponseDto downloadPack(String email, String uuid) {
         MemberEntity member=memberService.getMemberByEmail(email).orElseThrow();
-        EmoticonPackEntity emoticonPackEntity=packRepository.findById(packId).orElseThrow();
+        EmoticonPackEntity emoticonPackEntity=packRepository.findByShareLink(uuid);
         if(!purchaseHistoryService.isMemberPurchasePack(member,emoticonPackEntity)){
             throw new OpenticonException(ErrorCode.ACCESS_DENIED);
         }
 
         String thumbnailImg=emoticonPackEntity.getThumbnailImg();
         String listImg=emoticonPackEntity.getListImg();
+        Long packId=emoticonPackEntity.getId();
         List<String> emoticons=emoticonService.getEmoticons(packId);
         return new PackDownloadResponseDto(thumbnailImg,listImg,emoticons);
     }
