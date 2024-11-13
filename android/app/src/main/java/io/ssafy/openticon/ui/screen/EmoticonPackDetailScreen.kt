@@ -190,7 +190,10 @@ fun EmoticonPackDetailScreen(
                                 PrimaryActionButton(
                                     onClick = {
                                         if (!isDownloading)
-                                            viewModel.downloadEmoticonPack(packId = purchaseInfo.packId)
+                                            viewModel.downloadEmoticonPack(
+                                                packId = purchaseInfo.packId,
+                                                uuid = purchaseInfo.uuid
+                                            )
                                     },
                                     text = if (isDownloading) "다운로드 중" else "다운로드",
                                     enabled = !isDownloading

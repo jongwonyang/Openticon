@@ -86,6 +86,7 @@ fun ProfileScreen(
     var showPaymentResultDialog by remember { mutableStateOf(false) }
     val userCode = BuildConfig.IMP_USERCODE
     val purchaseSuccess by viewModel.purchaseSuccess.collectAsState()
+    val purchaseLoading by viewModel.purchaseLoading.collectAsState()
     var showPriceSelectionDialog by remember { mutableStateOf(false) }
     var selectedAmount by remember { mutableStateOf(TextFieldValue("")) }
 
@@ -178,13 +179,13 @@ fun ProfileScreen(
                             Text(
                                 text = "상태 메세지가 없습니다.",
                                 fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.background // 테마 색상 사용
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }else{
                             Text(
                                 text = memberEntity?.bio!!,
                                 fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface // 테마 색상 사용
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
@@ -315,17 +316,17 @@ fun ProfileScreen(
                         }
 
                         // 결제 결과 모달 창
-                        if (showPaymentResultDialog) {
+                        if (showPaymentResultDialog &&  purchaseSuccess!=null) {
                             AlertDialog(
                                 onDismissRequest = { showPaymentResultDialog = false },
                                 title = {
                                     Text(
-                                        if (purchaseSuccess) "결제 완료" else "결제 실패"
+                                        if (purchaseSuccess == true) "결제 완료" else "결제 실패"
                                     )
                                 },
                                 text = {
                                     Text(
-                                        if (purchaseSuccess) "결제가 성공적으로 완료되었습니다!"
+                                        if (purchaseSuccess == true) "결제가 성공적으로 완료되었습니다!"
                                         else "결제에 실패했습니다. 다시 시도해 주세요."
                                     )
                                 },

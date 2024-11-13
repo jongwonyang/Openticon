@@ -105,6 +105,11 @@ class EmoticonPackRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getDownloadPackInfo(uuid: String): EmoticonPack {
+        val packInfo = emoticonPacksApi.getDownloadPackInfo(uuid)
+        return packInfo.toEmoticonPack()
+    }
+
     private suspend fun downloadAndSaveEmoticonFile(emoticonUrl: String, packId: Int, fileName: String): String? {
         return withContext(Dispatchers.IO) {
             try {
