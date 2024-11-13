@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -110,6 +112,10 @@ fun MyEmoticonsScreen(
 
         // 이동 값을 조정하여 민감도를 낮춥니다. 예를 들어, dragAmount.y / 2로 줄임
         offsetY += dragAmount.y / 2 // 이동량을 줄여 민감도 조절
+        offsetY = offsetY.coerceIn(
+            -(draggedItemIndex * (itemHeight + itemSpacing)),  // 상단 경계
+            (emoticonPacksState.size - 1 - draggedItemIndex) * (itemHeight + itemSpacing)  // 하단 경계
+        )
 
         val startIndex = draggedItemIndex
         val endIndex = (startIndex + (offsetY / (itemHeight + itemSpacing)).roundToInt())
@@ -254,7 +260,18 @@ fun MyEmoticonsScreen(
                         )
                 )
             }
+            item {
+                Spacer(modifier = Modifier.height(128.dp))
+            }
         }
+//        LaunchedEffect(offsetY) {
+//            // 아이템이 화면을 넘어가는 경우 스크롤
+//            if (offsetY > lazyListState.layoutInfo.viewportEndOffset - itemHeight) {
+//                lazyListState.scrollBy(itemHeight)
+//            } else if (offsetY < lazyListState.layoutInfo.viewportStartOffset + itemHeight) {
+//                lazyListState.scrollBy(-itemHeight)
+//            }
+//        }
     }
 }
 
