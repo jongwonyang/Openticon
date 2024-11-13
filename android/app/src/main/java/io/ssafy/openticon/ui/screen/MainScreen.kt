@@ -74,8 +74,6 @@ fun MainScreen(
 
     val activity = context as? MainActivity
 
-    val isLaunched by likeEmoticonViewModel.isLaunched.collectAsState()
-
     val selectedKey by likeEmoticonViewModel.sampleEmoticonPacksLiveData.observeAsState()
 
     val mainActivityLifecycle = (context as? MainActivity)?.lifecycle
@@ -146,9 +144,12 @@ fun MainScreen(
                     if (allPermissionsGranted(context)) {
                         if(isLoggedIn){
                             Log.d("mainScreen", "allPermission")
-                            likeEmoticonViewModel.updateIsLaunched(true)
-//                        Log.d("MainScreen", isLaunched.toString())
-                            likeEmoticonViewModel.debugPrint()
+
+                            val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.putBoolean("is_visible", true) // Boolean 값으로 직접 저장
+                            editor.apply()
+
 //                            startFloatingService(
 //                                context,
 //                                myViewModel,

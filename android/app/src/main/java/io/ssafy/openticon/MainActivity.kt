@@ -1,6 +1,7 @@
 package io.ssafy.openticon
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -48,10 +49,6 @@ class MainActivity(
         likeEmoticonViewModel.sampleEmoticonPacksLiveData.observe(this) { emoticonPacks ->
             // emoticonPacks 데이터를 이용해 UI 업데이트 로직 수행
         }
-
-
-
-        handleIntent(intent)
         setContent {
             AppTheme {
                 AppNavHost(myViewModel, likeEmoticonViewModel)
@@ -61,18 +58,6 @@ class MainActivity(
     override fun onDestroy() {
         Iamport.close()
         super.onDestroy()
-    }
-
-    private fun handleIntent(intent: Intent) {
-        // 전달된 "navigate_to" 값 받기 (null 가능성 체크)
-        val isLaunched = intent.getBooleanExtra("isLaunched", false)
-
-        if (isLaunched) {
-            likeEmoticonViewModel.updateIsLaunched(true)
-        } else {
-            // "navigate_to" 값이 없을 때 (앱 초기 실행 시의 기본 동작)
-            likeEmoticonViewModel.updateIsLaunched(false)
-        }
     }
 
 
@@ -89,14 +74,15 @@ class MainActivity(
         super.onPause()
         if (allPermissionsGranted(this)) {
             Log.d("LikeEmoticonViewModelHash", "MainActivity ViewModel hash: ${System.identityHashCode(likeEmoticonViewModel)}")
+            val sharedPreferences = this.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-            likeEmoticonViewModel.debugPrint()
+            val isVisible = sharedPreferences.getBoolean("is_visible", false) // 기본값을 false로 설정
+            Log.d("LikeViewModelChangeLaunched", isVisible.toString())
+
             lifecycleScope.launch {
-                likeEmoticonViewModel.isLaunched.collect { launched ->
-                    if (launched) {
-                        Log.d("MainScreen", "서비스가 실행되었습니다.")
-                        startFloatingService(this@MainActivity, myViewModel, likeEmoticonViewModel)
-                    }
+                if (isVisible) {
+                    Log.d("MainScreen", "서비스가 실행되었습니다.")
+                    startFloatingService(this@MainActivity, myViewModel, likeEmoticonViewModel)
                 }
             }
         }

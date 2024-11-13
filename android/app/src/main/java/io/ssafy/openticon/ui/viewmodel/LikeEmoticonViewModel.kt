@@ -39,12 +39,6 @@ class LikeEmoticonViewModel @Inject constructor(
     private val _Sample_emoticonPacksLiveData = MutableLiveData<LikeEmoticonPack?>()
     val sampleEmoticonPacksLiveData: MutableLiveData<LikeEmoticonPack?> get() = _Sample_emoticonPacksLiveData
 
-    private val _isLaunched = MutableStateFlow(false)
-    val isLaunched: StateFlow<Boolean> get() = _isLaunched.asStateFlow()
-
-    val isLoggedIn: StateFlow<Boolean> = userSession.isLoggedIn
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
     init {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         initEmoticonDataFromPreferences()
@@ -96,13 +90,6 @@ class LikeEmoticonViewModel @Inject constructor(
         getLikeEmoticonPack.insertLike(data)
     }
 
-    private suspend fun changeLaunched(){
-        val isVisible = sharedPreferences.getBoolean("is_visible", false) // 기본값을 false로 설정
-        Log.d("LikeViewModelChangeLaunched", isVisible.toString())
-        _isLaunched.value = isVisible
-    }
-
-
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == "like_emoticon_data") {
             Log.d("LikeEmoticonViewModel", "Really Changed")
@@ -113,30 +100,10 @@ class LikeEmoticonViewModel @Inject constructor(
                 addEmoticonDataFromPreferences()
             }
         }
-        else if(key == "is_visible"){
-            viewModelScope.launch {
-                changeLaunched()
-            }
-        }
     }
 
     override fun onCleared() {
         super.onCleared()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    fun updateIsLaunched(value: Boolean) {
-        _isLaunched.value = value
-        Log.d("LikeEmoticonViewModel", "isLaunched set to $value")
-
-        // 타이머로 일정 시간 동안 값이 유지되는지 확인
-        viewModelScope.launch {
-            delay(5000)  // 5초 동안 기다린 후 상태 확인
-            Log.d("LikeEmoticonViewModel", "isLaunched 5초 후 상태: ${_isLaunched.value}")
-        }
-    }
-
-    fun debugPrint(){
-        Log.d("LikeViewModelDebugPrint", _isLaunched.value.toString())
     }
 }
