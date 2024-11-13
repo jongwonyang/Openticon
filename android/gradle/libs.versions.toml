@@ -1,11 +1,13 @@
 [versions]
 accompanistReorderable = "0.24.13-rc"
+accompanistReorderableVersion = "<latest-version>"
 agp = "8.7.1"
 coilGif = "2.0.0"
 converterGson = "2.9.0"
 datastorePreferences = "1.1.1"
 coilCompose = "2.4.0"
 glide = "4.12.0"
+googleAccompanistReorderable = "0.28.0"
 hiltNavigationCompose = "1.2.0"
 iamportAndroidVersion = "1.4.5"
 kotlin = "2.0.0"
@@ -14,6 +16,7 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinxCoroutinesAndroid = "1.7.3"
+kotlinxCoroutinesAndroidVersion = "1.6.0"
 kotlinxCoroutinesCore = "1.7.3"
 kotlinxSerializationJson = "1.6.3"
 lifecycleRuntimeKtx = "2.8.6"
@@ -32,9 +35,13 @@ runtimeLivedata = "1.7.4"
 material = "1.12.0"
 room = "2.6.1"
 uiTextGoogleFonts = "1.7.5"
+foundationAndroid = "1.7.4"
+foundationLayoutAndroid = "1.7.4"
 
 [libraries]
 accompanist-reorderable = { module = "com.google.accompanist:accompanist-reorderable", version.ref = "accompanistReorderable" }
+accompanist-reorderable-v0280 = { module = "com.google.accompanist:accompanist-reorderable", version.ref = "googleAccompanistReorderable" }
+accompanist-reorderable-vlatestversion = { module = "com.google.accompanist:accompanist-reorderable", version.ref = "accompanistReorderableVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -65,6 +72,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltA
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-android-v160 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroidVersion" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
@@ -78,6 +86,8 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
+androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

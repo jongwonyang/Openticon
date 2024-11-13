@@ -3,7 +3,7 @@ package io.ssafy.openticon.ui.screen
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,13 +39,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -58,11 +61,8 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import io.ssafy.openticon.data.model.EmoticonPackEntity
 import io.ssafy.openticon.ui.viewmodel.MyEmoticonViewModel
-import kotlin.math.absoluteValue
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
-val itemHeight = 66.dp.value // EmoticonItem의 높이 (50.dp + 패딩 등)
-val itemSpacing = 16.dp.value // 아이템 간의 간격
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -90,44 +90,63 @@ fun MyEmoticonsScreen(
     var offsetY by remember { mutableFloatStateOf(0f) }
 
     val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val itemHeightPx = with(density) { 66.dp.toPx() }
 
-    val onDragStart: (Int) -> Unit = { index ->
-        draggedItemIndex = index
-    }
-
-    val onDragEnd: () -> Unit = {
-        draggedItemIndex = -1
-        offsetY = 0f
-        // 변경된 리스트를 ViewModel에 업데이트
-        viewModel.updateEmoticonPacks(emoticonPacksState.toList())
-    }
-
-    val onDragCancel: () -> Unit = {
+    // 상태 초기화를 위한 함수
+    fun resetDragState() {
         draggedItemIndex = -1
         offsetY = 0f
     }
 
-    val onDrag: (PointerInputChange, Offset) -> Unit = { change, dragAmount ->
-        change.consume()
+    val onDragEndOrCancel: () -> Unit = {
+        // 드래그가 끝나거나 취소될 때 호출
+        if (draggedItemIndex != -1) {
+            // 변경된 리스트를 ViewModel에 업데이트
+            viewModel.updateEmoticonPacks(emoticonPacksState.toList())
+        }
+        resetDragState()
+    }
 
-        // 이동 값을 조정하여 민감도를 낮춥니다. 예를 들어, dragAmount.y / 2로 줄임
-        offsetY += dragAmount.y / 2 // 이동량을 줄여 민감도 조절
-        offsetY = offsetY.coerceIn(
-            -(draggedItemIndex * (itemHeight + itemSpacing)),  // 상단 경계
-            (emoticonPacksState.size - 1 - draggedItemIndex) * (itemHeight + itemSpacing)  // 하단 경계
-        )
+    // 람다를 익명 함수로 변경하여 'return' 사용
+    val onDrag: (PointerInputChange, Offset) -> Unit = fun(change, dragAmount) {
+        if (change.positionChange() != Offset.Zero) change.consume()
+
+        if (draggedItemIndex == -1) return
+
+        // 민감도 조절 (예: dragAmount.y / 2)
+        offsetY += dragAmount.y
+
+        // 리스트 경계를 넘지 않도록 제한
+        val maxOffsetY = (emoticonPacksState.size - 1 - draggedItemIndex) * itemHeightPx
+        val minOffsetY = -draggedItemIndex * itemHeightPx
+        offsetY = offsetY.coerceIn(minOffsetY, maxOffsetY)
 
         val startIndex = draggedItemIndex
-        val endIndex = (startIndex + (offsetY / (itemHeight + itemSpacing)).roundToInt())
-            .coerceIn(0, emoticonPacksState.size - 1)
+        val offsetItem = (offsetY / itemHeightPx).toInt()
+        val endIndex = (startIndex + offsetItem).coerceIn(0, emoticonPacksState.size - 1)
 
         if (startIndex != endIndex) {
             emoticonPacksState.swap(startIndex, endIndex)
             draggedItemIndex = endIndex
-            offsetY -= (endIndex - startIndex) * (itemHeight + itemSpacing)
+            offsetY -= (endIndex - startIndex) * itemHeightPx
+        }
+
+        // 자동 스크롤
+        val viewportHeight = lazyListState.layoutInfo.viewportEndOffset
+        val itemInfo = lazyListState.layoutInfo.visibleItemsInfo.find { it.index == draggedItemIndex }
+        val itemOffset = itemInfo?.offset ?: 0
+        val itemEnd = itemOffset + itemHeightPx
+
+        coroutineScope.launch {
+            if (itemEnd + offsetY > viewportHeight) {
+                lazyListState.scrollBy(itemHeightPx)
+            } else if (itemOffset + offsetY < 0f) {
+                lazyListState.scrollBy(-itemHeightPx)
+            }
         }
     }
-
 
     Column(
         modifier = Modifier
@@ -229,49 +248,38 @@ fun MyEmoticonsScreen(
                     }
                 }
             }
-
         }
-
 
         // 이모티콘 리스트
         LazyColumn(state = lazyListState) {
             itemsIndexed(emoticonPacksState) { index, emoticonPack ->
                 val isDragging = index == draggedItemIndex
 
+                val itemModifier = Modifier
+                    .zIndex(if (isDragging) 1f else 0f)
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = if (isDragging) offsetY.roundToInt() else 0
+                        )
+                    }
+
                 EmoticonItem(
                     sampleEmoticonPack = emoticonPack,
                     viewModel = viewModel,
                     isVisible = isVisible,
-                    onDragStart = { onDragStart(index) },
+                    modifier = itemModifier,
+                    navController = navController,
+                    index = index,
+                    onDragStart = { draggedItemIndex = index },
                     onDrag = onDrag,
-                    onDragEnd = onDragEnd,
-                    onDragCancel = onDragCancel,
-                    modifier = Modifier
-                        .zIndex(if (isDragging) 1f else 0f)
-                        .offset {
-                            IntOffset(
-                                x = 0,
-                                y = if (isDragging) offsetY.roundToInt() else 0
-                            )
-                        }
-                        .combinedClickable(
-                            onClick = { navController.navigate("emoticonPack/${emoticonPack.uuid}") },
-                            onLongClick = { onDragStart(index) }
-                        )
+                    onDragEndOrCancel = onDragEndOrCancel
                 )
             }
             item {
                 Spacer(modifier = Modifier.height(128.dp))
             }
         }
-//        LaunchedEffect(offsetY) {
-//            // 아이템이 화면을 넘어가는 경우 스크롤
-//            if (offsetY > lazyListState.layoutInfo.viewportEndOffset - itemHeight) {
-//                lazyListState.scrollBy(itemHeight)
-//            } else if (offsetY < lazyListState.layoutInfo.viewportStartOffset + itemHeight) {
-//                lazyListState.scrollBy(-itemHeight)
-//            }
-//        }
     }
 }
 
@@ -286,12 +294,13 @@ private fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
 fun EmoticonItem(
     sampleEmoticonPack: EmoticonPackEntity,
     viewModel: MyEmoticonViewModel,
+    modifier: Modifier = Modifier,
+    isVisible: Boolean,
+    navController: NavController,
+    index: Int,
     onDragStart: () -> Unit,
     onDrag: (PointerInputChange, Offset) -> Unit,
-    onDragEnd: () -> Unit,
-    onDragCancel: () -> Unit,
-    modifier: Modifier = Modifier,
-    isVisible: Boolean
+    onDragEndOrCancel: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -309,7 +318,13 @@ fun EmoticonItem(
         Spacer(modifier = Modifier.width(16.dp))
 
         // 이모티콘 이름 및 공개 여부
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable {
+                    navController.navigate("emoticonPack/${sampleEmoticonPack.uuid}")
+                }
+        ) {
             Text(text = sampleEmoticonPack.title)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -343,15 +358,17 @@ fun EmoticonItem(
                 )
             }
         }
-        // DragHandle 아이콘에만 드래그 제스처 적용
+        // DragHandle 아이콘에 드래그 제스처 적용
         if (isVisible) {
             IconButton(
                 onClick = { /* 필요하면 클릭 이벤트 처리 */ },
                 modifier = Modifier.pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { onDragStart() },
-                        onDragEnd = { onDragEnd() },
-                        onDragCancel = { onDragCancel() },
+                        onDragStart = {
+                            onDragStart()
+                        },
+                        onDragEnd = onDragEndOrCancel,
+                        onDragCancel = onDragEndOrCancel,
                         onDrag = onDrag
                     )
                 }
