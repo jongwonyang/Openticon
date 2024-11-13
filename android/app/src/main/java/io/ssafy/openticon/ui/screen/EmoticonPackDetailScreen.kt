@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -158,15 +159,15 @@ fun EmoticonPackDetailScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (isDownloading) {
-                        LinearProgressIndicator(
-                            progress = {
-                                downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat()
-                            },
-                            modifier = Modifier.fillMaxWidth().
-                            padding(0.dp)
-                        )
-                    }
+//                    if (isDownloading) {
+//                        LinearProgressIndicator(
+//                            progress = {
+//                                downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat()
+//                            },
+//                            modifier = Modifier.fillMaxWidth().
+//                            padding(0.dp)
+//                        )
+//                    }
                     when (purchaseState) {
                         is UiState.Loading -> {
                             Row(
@@ -200,28 +201,60 @@ fun EmoticonPackDetailScreen(
                             } else {
                                 // 테이블에 있음 (구매함)
                                 if (!purchaseInfo.downloaded) {
-                                    // 다운로드 안됨
-                                    // 다운로드 버튼 표시
-                                    PrimaryActionButton(
-                                        onClick = {
-                                            if (!isDownloading)
-                                                viewModel.downloadEmoticonPack(
-                                                    packId = purchaseInfo.packId,
-                                                    uuid = purchaseInfo.uuid
-                                                )
-                                        },
-                                        text = if (isDownloading) "다운로드 중" else "다운로드",
-                                        enabled = !isDownloading
-                                    )
+                                    // 다운로드 안 됨
+                                    if (isDownloading) {
+                                        // 다운로드 진행 중일 때 진행 표시기 표시
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight()
+                                                .padding(16.dp)
+                                                .height(30.dp)
+                                                .clip(RoundedCornerShape(30.dp))
+                                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                        ) {
+                                            LinearProgressIndicator(
+                                                drawStopIndicator = {},
+                                                trackColor = MaterialTheme.colorScheme.primaryContainer,
+                                                progress = { downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat() },
+                                                modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+                                                color = MaterialTheme.colorScheme.primary,
+                                            )
+                                            Text(
+                                                text = "${(downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat() * 100).toInt()}%",
+                                                color = if (downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat() < 0.5f)
+                                                    MaterialTheme.colorScheme.onSurface
+                                                else
+                                                    MaterialTheme.colorScheme.onPrimary,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                modifier = Modifier.align(Alignment.Center) // 텍스트를 중앙에 정렬
+                                            )
+                                        }
+                                    } else {
+                                        // 다운로드 버튼 표시
+                                        PrimaryActionButton(
+                                            onClick = {
+                                                if (!isDownloading) {
+                                                    viewModel.downloadEmoticonPack(
+                                                        packId = purchaseInfo.packId,
+                                                        uuid = purchaseInfo.uuid
+                                                    )
+                                                }
+                                            },
+                                            text = "다운로드",
+                                            enabled = true
+                                        )
+                                    }
                                 } else {
-                                    // 다운로드 됨
-                                    // 다운로드 완료 표시
+                                    // 다운로드 완료
                                     PrimaryActionButton(
                                         onClick = {},
                                         text = "다운로드 완료",
                                         enabled = false
                                     )
                                 }
+
                             }
                         }
 

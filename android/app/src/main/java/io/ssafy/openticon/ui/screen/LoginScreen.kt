@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedButton
@@ -29,8 +32,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.ssafy.openticon.R
@@ -57,6 +66,7 @@ fun LoginScreen(
     val memberViewModel: MemberViewModel = hiltViewModel()
     val tokenDataSource = TokenDataSource
     val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -220,6 +230,79 @@ fun LoginScreen(
                     Text("구글로 시작하기", fontSize = 17.sp, color = Color.Black)
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 서비스 이용약관 동의 문구
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "로그인 시 ",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = "서비스 이용약관",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
+                    modifier = Modifier.clickable { showDialog = true }
+                )
+                Text(text = "에 동의하게 됩니다.",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 12.sp
+                    )
+            }
         }
+    }
+
+    // 이용약관 모달 창
+    if (showDialog) {
+        AlertDialog(
+            modifier = Modifier.fillMaxWidth(0.8f),
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("닫기")
+                }
+            },
+            title = {
+                Text(text = "서비스 이용약관")
+            },
+            text = {
+                // Scrollable Text area
+                Box(
+                    modifier = Modifier
+                        .height(300.dp) // Set maximum height for scrollable area
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = "오픈티콘은 이용자의 개인정보를 중요시하며, 「개인정보 보호법」에 따라 이용자의 개인정보를 보호하고 이와 관련한 고충을 원활하게 처리할 수 있도록 아래와 같이 개인정보 수집 및 이용에 대한 동의를 구합니다.\n" +
+                                "\n" +
+                                "1. 개인정보 수집 및 이용 목적\n" +
+                                "오픈티콘은 이용자의 개인정보를 다음의 목적으로 수집 및 이용합니다.\n" +
+                                "- 길 안내 서비스 제공 및 맞춤형 추천 장소 정보 제공\n" +
+                                "- 서비스 이용 기록 및 통계 분석을 통한 서비스 개선\n" +
+                                "- 회원 관리 및 인증 절차 수행\n" +
+                                "- 서비스 관련 공지 및 고객 문의 응대\n" +
+                                "\n" +
+                                "2. 수집하는 개인정보 항목\n" +
+                                "오픈티콘은 서비스 제공을 위해 아래와 같은 개인정보를 수집합니다.\n" +
+                                "\n" +
+                                "수집 항목: 이름, 이메일 주소, 생년월일, 프로필 사진\n" +
+                                "\n" +
+                                "3. 개인정보의 보유 및 이용 기간\n" +
+                                "오픈티콘 이용자의 개인정보를 수집 및 이용 목적이 달성될 때까지 보유하며, 회원 탈퇴 시 또는 수집된 개인정보의 이용 목적이 달성되었을 때 해당 정보를 지체 없이 파기합니다. \n" +
+                                "\n" +
+                                "4. 개인정보의 제공 및 공유\n" +
+                                "오픈티콘은 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않으며, 법령에 의해 요구되는 경우에 한해 제공될 수 있습니다.\n" +
+                                "\n" +
+                                "5. 동의 거부 권리\n" +
+                                "이용자는 개인정보 수집 및 이용에 대한 동의를 거부할 권리가 있습니다. 다만, 개인정보 활용 동의를 거부할 경우 오픈티콘의 서비스 이용이 제한될 수 있습니다."
+                    )
+                }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        )
     }
 }

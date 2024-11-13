@@ -61,7 +61,7 @@ class StoreViewModel @Inject constructor(
                         0,
                         "",
                         "",
-                        "https://www.htmlcsscolor.com/preview/128x128/FAF9FD.png",
+                        "https://apitest.openticon.store/static/upload/images/65481744-59e3-4253-a8f6-b4102bcde79b..png",
                         ""
                     )
                 )
@@ -71,7 +71,7 @@ class StoreViewModel @Inject constructor(
                         0,
                         "",
                         "",
-                        "https://www.htmlcsscolor.com/preview/128x128/FAF9FD.png",
+                        "https://apitest.openticon.store/static/upload/images/67cf9b92-57b6-4797-a747-ecc5100aa317..png",
                         ""
                     )
                 )

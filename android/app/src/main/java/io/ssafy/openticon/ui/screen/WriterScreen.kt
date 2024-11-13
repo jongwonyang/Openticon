@@ -181,8 +181,7 @@ fun WriterScreen(
                     item {
                         Column(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
+                                .fillMaxSize(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
