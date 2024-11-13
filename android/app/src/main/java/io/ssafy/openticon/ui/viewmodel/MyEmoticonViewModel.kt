@@ -95,7 +95,7 @@ class MyEmoticonViewModel @Inject constructor(
                     insertOrderUseCase.invoke(emoticonPack.id)
                 }
             }
+            loadEmoticonPacks()
         }
-
     }
 }
