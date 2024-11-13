@@ -94,6 +94,22 @@ class EmoticonPackRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun downloadAndSaveEmoticonPack(idx: Int, packId: Int, url: String) {
+        val fileName = "emoticon_$idx.${url.substringAfterLast(".")}"
+        val filePath = downloadAndSaveEmoticonFile(url, packId, fileName)
+
+        if (filePath != null) {
+            val emoticon = Emoticon(
+                id = "$packId-$idx",
+                packId = packId,
+                filePath = filePath
+            )
+            emoticonDao.insertEmoticon(emoticon)
+        } else {
+            throw Exception("Failed to download emoticon from $url")
+        }
+    }
+
     override suspend fun updateDownloadedStatus(packId: Int, isDownloaded: Boolean) {
         withContext(Dispatchers.IO) {
             emoticonDao.updateEmoticonPackDownloaded(packId, isDownloaded)
