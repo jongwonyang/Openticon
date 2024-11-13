@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -164,25 +165,23 @@ fun StoreScreen(
             LazyRow(
                 state = listState,
                 modifier = Modifier.fillMaxWidth()
-                    .height(200.dp),
+                    .height(235.dp),
                 horizontalArrangement = Arrangement.spacedBy(30.dp),
                 verticalAlignment = Alignment.CenterVertically
-
             ) {
-                itemsIndexed(newEmoticonPack) { index, item -> // Use itemsIndexed to get the index and item
+                itemsIndexed(newEmoticonPack) { index, item ->
                     Card(
-                        shape = RoundedCornerShape(16.dp), // 둥근 모서리 적용
-                        border = BorderStroke(1.dp, Color.LightGray), // 테두리 색상과 두께 설정
-                        colors = CardDefaults.cardColors(containerColor = Color.White), // 카드 배경색
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                         modifier = Modifier
                             .scale(if (index == centerIndex) 1.3f else 0.8f)
                             .alpha(if (index == centerIndex) 1f else 0.5f)
-                            .fillMaxSize()
                             .width(150.dp)
-                            .padding(bottom = 1.dp)
+                            .padding(vertical = 5.dp)
                             .clickable(
-                                indication = null, // 클릭 효과 제거
-                                interactionSource = remember { MutableInteractionSource() } // 상호작용 효과 제거
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
                             ) {
                                 if (index == 0 || index == newEmoticonPack.size - 1) {
                                     navController.navigate("emoticonAll/new")
@@ -192,11 +191,8 @@ fun StoreScreen(
                                 } else {
                                     centerIndex = index
                                     coroutineScope.launch {
-                                        val viewportCenter =
-                                            listState.layoutInfo.viewportSize.width / 2
-                                        val itemSize =
-                                            listState.layoutInfo.visibleItemsInfo.find { it.index == centerIndex }?.size
-                                                ?: 0
+                                        val viewportCenter = listState.layoutInfo.viewportSize.width / 2
+                                        val itemSize = listState.layoutInfo.visibleItemsInfo.find { it.index == centerIndex }?.size ?: 0
                                         listState.animateScrollToItem(
                                             centerIndex,
                                             scrollOffset = -viewportCenter + itemSize / 2
@@ -207,36 +203,56 @@ fun StoreScreen(
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(0.dp) // 카드 내부 여백 설정
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp)
+                                .weight(1f),
+                            verticalArrangement = Arrangement.Top // 상단에 딱 붙도록 설정
                         ) {
                             Image(
                                 painter = rememberImagePainter(data = item.thumbnail),
                                 contentDescription = "New Emoticon Pack Image",
                                 modifier = Modifier
                                     .size(150.dp)
-                                    .clip(RoundedCornerShape(16.dp)) // 이미지에 둥근 모서리 추가
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .align(Alignment.CenterHorizontally) // 수평으로 가운데 정렬
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = item.title,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier
-                                    .fillMaxWidth(0.95f)
-                                    .wrapContentWidth(Alignment.CenterHorizontally)
-                            )
-                            Text(
-                                text = item.author,
-                                color = Color.Gray,
-                                fontSize = 10.sp,
-                                overflow = TextOverflow.Ellipsis,
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .fillMaxWidth(0.8f)
-                                    .wrapContentWidth(Alignment.CenterHorizontally)
-                            )
+                                    .padding(0.dp)
+                            ) {
+                                Text(
+                                    text = item.title,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 2,
+                                    lineHeight = 20.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .padding(0.dp)
+                                        .fillMaxWidth()
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = item.author,
+                                    color = Color.Gray,
+                                    fontSize = 10.sp,
+                                    maxLines = 1,
+                                    lineHeight = 16.sp,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .padding(0.dp)
+                                        .fillMaxWidth()
+                                )
+                            }
                         }
                     }
+
                 }
             }
             Spacer(modifier = Modifier.height(40.dp))
@@ -393,7 +409,7 @@ fun StoreScreen(
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(30.dp))
-                                .background(Color.LightGray)
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
 
@@ -404,8 +420,8 @@ fun StoreScreen(
                             tag?.let { validTag ->
                                 // '#' 문자를 제거하고 URL 인코딩
                                 val cleanedTag = validTag.replace("#", "")
-                                val encodedTag =
-                                    URLEncoder.encode(cleanedTag, StandardCharsets.UTF_8.toString())
+                                val encodedTag = URLEncoder.encode(cleanedTag, StandardCharsets.UTF_8.toString())
+                                    .replace("+", "%20")
                                 Log.d("StoreScreen", "Navigating to emoticonAlltag/$encodedTag")
                                 navController.navigate("emoticonAlltag/$encodedTag")
                             } ?: Log.d("StoreScreen", "Tag is null or empty")
@@ -435,11 +451,12 @@ fun StoreScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                         }
-
                     }
                 }
             }
         }
-
+        item {
+            Spacer(modifier = Modifier.height(128.dp))
+        }
     }
 }

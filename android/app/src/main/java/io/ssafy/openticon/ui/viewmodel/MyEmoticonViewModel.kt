@@ -96,6 +96,5 @@ class MyEmoticonViewModel @Inject constructor(
                 }
             }
         }
-
     }
 }
