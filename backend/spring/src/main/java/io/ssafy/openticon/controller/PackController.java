@@ -132,10 +132,10 @@ public class PackController {
 
     @GetMapping("/download")
     @Operation(summary = "이모티콘 팩을 다운로드합니다.")
-    public ResponseEntity<PackDownloadResponseDto> downloadPack(@RequestParam("emoticonPackId")String packId,
+    public ResponseEntity<PackDownloadResponseDto> downloadPack(@RequestParam("uuid")String uuid,
                                                                 @AuthenticationPrincipal UserDetails userDetails){
         String email=userDetails.getUsername();
-        return ResponseEntity.status(HttpStatus.OK).body(packService.downloadPack(email,Long.parseLong(packId)));
+        return ResponseEntity.status(HttpStatus.OK).body(packService.downloadPack(email,uuid));
     }
 
     @PostMapping("reports")
