@@ -6,10 +6,10 @@ import javax.inject.Inject
 class DownloadEmoticonPackUseCase @Inject constructor(
     private val repository: EmoticonPackRepository
 ) {
-    suspend operator fun invoke(packId: Int): Result<Unit> {
+    suspend operator fun invoke(packId: Int, uuid: String): Result<Unit> {
         try {
             // 서버에서 팩 정보 가져오기
-            val pack = repository.getPublicPackInfo(packId)
+            val pack = repository.getDownloadPackInfo(uuid)
 
             // 팩 정보에 있는 url로 부터 다운로드
             repository.downloadAndSavePublicEmoticonPack(packId, pack.emoticonUrls)

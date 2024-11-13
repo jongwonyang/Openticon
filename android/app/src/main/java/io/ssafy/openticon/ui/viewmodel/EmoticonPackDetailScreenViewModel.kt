@@ -82,10 +82,10 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun downloadEmoticonPack(packId: Int) {
+    fun downloadEmoticonPack(packId: Int, uuid: String) {
         viewModelScope.launch {
             _isDownloading.value = true
-            val result = downloadEmoticonPackUseCase(packId)
+            val result = downloadEmoticonPackUseCase(packId, uuid)
             result
                 .onSuccess {
                     _isDownloading.value = false
