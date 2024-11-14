@@ -11,6 +11,7 @@ import io.ssafy.openticon.domain.usecase.GetDownloadPackInfoUseCase
 import io.ssafy.openticon.domain.usecase.GetPublicPackDetailUseCase
 import io.ssafy.openticon.domain.usecase.GetPurchaseInfoUseCase
 import io.ssafy.openticon.domain.usecase.PurchaseEmoticonPackUseCase
+import io.ssafy.openticon.domain.usecase.ReportPackUseCase
 import io.ssafy.openticon.domain.usecase.UpdateDownloadedStatusUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,7 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
     private val downloadEmoticonPackUseCase: DownloadEmoticonPackUseCase,
     private val getDownloadPackInfoUseCase: GetDownloadPackInfoUseCase,
     private val updateDownloadedStatusUseCase: UpdateDownloadedStatusUseCase,
+    private val reportPackUseCase: ReportPackUseCase,
     userSession: UserSession
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<EmoticonPackDetail>>(UiState.Loading)
@@ -114,6 +116,17 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
             _toastEvent.emit("다운로드 완료")
             _isDownloading.value = false
             fetchPurchaseInfo(packId)
+        }
+    }
+
+    fun reportPack(packUUid: String, reason: String) {
+        viewModelScope.launch {
+            val result = reportPackUseCase(packUUid, reason)
+            result.onSuccess {
+                _toastEvent.emit("신고가 접수되었습니다.")
+            }.onFailure {
+                _toastEvent.emit(it.message ?: "Unknown error")
+            }
         }
     }
 
