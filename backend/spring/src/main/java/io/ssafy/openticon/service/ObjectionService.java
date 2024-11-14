@@ -6,46 +6,58 @@ import io.ssafy.openticon.controller.request.ObjectionTestRequestDto;
 import io.ssafy.openticon.controller.response.AnswerResponseDto;
 import io.ssafy.openticon.controller.response.ObjectionListResponseDto;
 import io.ssafy.openticon.controller.response.ObjectionMsgResponseDto;
+import io.ssafy.openticon.controller.response.PackInfoResponseDto;
 import io.ssafy.openticon.dto.ReportStateType;
 import io.ssafy.openticon.dto.ReportType;
 import io.ssafy.openticon.entity.*;
 import io.ssafy.openticon.exception.ErrorCode;
 import io.ssafy.openticon.exception.OpenticonException;
-import io.ssafy.openticon.repository.AnswerRepository;
-import io.ssafy.openticon.repository.ObjectionRepository;
-import io.ssafy.openticon.repository.ObjectionSumbitRepository;
-import io.ssafy.openticon.repository.PackRepository;
+import io.ssafy.openticon.repository.*;
 import org.apache.coyote.BadRequestException;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 
+import javax.security.sasl.AuthenticationException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 public class ObjectionService {
-    ObjectionRepository objectionRepository;
-    PackRepository packRepository;
-    ObjectionSumbitRepository objectionSumbitRepository;
-    AnswerRepository answerRepository;
+    private final ObjectionRepository objectionRepository;
+    private final PackRepository packRepository;
+    private final ObjectionSumbitRepository objectionSumbitRepository;
+    private final AnswerRepository answerRepository;
+    private final EmoticonService emoticonService;
 
-    public ObjectionService(ObjectionRepository objectionRepository, PackRepository packRepository, ObjectionSumbitRepository objectionSumbitRepository, AnswerRepository answerRepository){
+    public ObjectionService(ObjectionRepository objectionRepository, PackRepository packRepository, ObjectionSumbitRepository objectionSumbitRepository, AnswerRepository answerRepository, EmoticonService emoticonService){
         this.objectionRepository = objectionRepository;
         this.packRepository = packRepository;
         this.objectionSumbitRepository = objectionSumbitRepository;
         this.answerRepository = answerRepository;
+        this.emoticonService = emoticonService;
     }
 
 
     public Page<ObjectionListResponseDto> getObjectionList(MemberEntity member, Pageable pageable){
-        return objectionRepository.findByMember(member, pageable).map(ObjectionListResponseDto::new);
+        Page<ObjectionEntity> objectionEntities = objectionRepository.findByMember(member, pageable);
+        Page<ObjectionListResponseDto> objectionListResponseDtos = null;
+        if(!objectionEntities.isEmpty()){
+            objectionListResponseDtos = objectionEntities.map(objectionEntity -> {
+                List<String> emoticons = emoticonService.getEmoticons(objectionEntity.getEmoticonPack().getId());
+                return new ObjectionListResponseDto(objectionEntity, emoticons);
+            });
+        }
+        return objectionListResponseDtos;
     }
 
 
@@ -134,7 +146,16 @@ public class ObjectionService {
         if(!member.getManager()){
             throw new OpenticonException(ErrorCode.ACCESS_DENIED);
         }
-        return objectionRepository.findByState(ReportStateType.RECEIVED, pageable).map(ObjectionListResponseDto::new);
+
+        Page<ObjectionEntity> objectionEntities = objectionRepository.findByState(ReportStateType.RECEIVED, pageable);
+        Page<ObjectionListResponseDto> objectionListResponseDtos = null;
+        if(!objectionEntities.isEmpty()){
+            objectionListResponseDtos = objectionEntities.map(objectionEntity -> {
+                List<String> emoticons = emoticonService.getEmoticons(objectionEntity.getEmoticonPack().getId());
+                return new ObjectionListResponseDto(objectionEntity, emoticons);
+            });
+        }
+        return objectionListResponseDtos;
     }
 
     // 관리자 - 이의 제기에 대해 관리자가 심사

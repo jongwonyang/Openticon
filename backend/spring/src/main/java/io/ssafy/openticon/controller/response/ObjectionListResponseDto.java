@@ -7,12 +7,13 @@ import lombok.Getter;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Getter
 public class ObjectionListResponseDto {
     private Long id;
 
-    private EmoticonPackResponseDto emoticonPack;
+    private PackInfoResponseDto emoticonPack;
 
     private ReportType type;
 
@@ -22,9 +23,9 @@ public class ObjectionListResponseDto {
 
     private String completedAt;
 
-    public ObjectionListResponseDto(ObjectionEntity objectionEntity) {
+    public ObjectionListResponseDto(ObjectionEntity objectionEntity, List<String> emoticons) {
         this.id = objectionEntity.getId();
-        this.emoticonPack = new EmoticonPackResponseDto(objectionEntity.getEmoticonPack());
+        this.emoticonPack = new PackInfoResponseDto(objectionEntity.getEmoticonPack(), emoticons);
         this.type = objectionEntity.getType();
         this.state = objectionEntity.getState();
         this.createdAt = objectionEntity.getCreatedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul"))
