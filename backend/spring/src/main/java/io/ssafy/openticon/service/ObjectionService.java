@@ -26,6 +26,8 @@ import org.springframework.web.client.HttpClientErrorException;
 
 
 import javax.security.sasl.AuthenticationException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -184,6 +186,7 @@ public class ObjectionService {
         }else{
             throw new OpenticonException(ErrorCode.OBJECTION_REPORT_STATE_TYPE_ERROR);
         }
+        objectionEntity.setCompletedAt(LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime());
         objectionRepository.save(objectionEntity);
         answerRepository.save(answerEntity);
         return ObjectionMsgResponseDto.builder()
