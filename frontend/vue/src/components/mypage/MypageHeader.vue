@@ -7,7 +7,7 @@
           <img
             :src="userStore.userInfo?.profile_image"
             alt="프로필 이미지"
-            class="w-full object-cover rounded-full"
+            class="w-full object-cover aspect-square rounded-full"
           />
           <button
             @click="showProfileImageModal = true"

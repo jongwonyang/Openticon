@@ -3,7 +3,7 @@
   <div class="flex justify-between items-center px-2 sm:px-4 md:px-6 pt-3">
     <div class="w-12">
     </div>
-    <h1 class="text-2xl font-bold">
+    <h1 class="text-2xl">
       <RouterLink to="/">
         <span class="font-nnsqneo-heavy">OPEN</span><span class="font-nnsqneo">TICON</span>
       </RouterLink>
@@ -13,7 +13,7 @@
         v-if="userStore.isLogined" 
         :src="userStore.userInfo?.profile_image" 
         alt="프로필 사진" 
-        class="w-12 h-12 relative z-20 rounded-full border bg-white cursor-pointer hover:scale-110  hover:shadow-lg hover:shadow-gray-300 transition-all duration-300" 
+        class="w-12 h-12 relative z-20 aspect-square object-cover rounded-full border bg-white cursor-pointer hover:scale-110  hover:shadow-lg hover:shadow-gray-300 transition-all duration-300" 
         @click="toggleUserMenu"
         :class="{'scale-110 shadow-lg shadow-gray-300': isUserMenuOpen}"
         ref="profileImageElement"
