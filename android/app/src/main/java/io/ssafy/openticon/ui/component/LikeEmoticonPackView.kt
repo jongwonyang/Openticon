@@ -20,6 +20,9 @@ import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.LikeEmoticonPack
 import io.ssafy.openticon.data.model.SampleEmoticon
 import io.ssafy.openticon.data.model.SampleEmoticonPack
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LikeEmoticonPackView @JvmOverloads constructor(
     context: Context,
@@ -45,38 +48,30 @@ class LikeEmoticonPackView @JvmOverloads constructor(
         }
     }
 
-    fun setupEmoticonPack(pack: LikeEmoticonPack, onPackClick: (List<LikeEmoticon>) -> Unit) {
-// 네모 박스를 만들기 위한 FrameLayout 생성
+    suspend fun setupEmoticonPack(pack: LikeEmoticonPack, onPackClick: suspend (List<LikeEmoticon>) -> Unit) {
         val frameLayout = FrameLayout(context).apply {
-            layoutParams = LayoutParams(
-                dpToPx(50), // 네모 박스의 너비와 높이를 50으로 설정
-                dpToPx(50)
-            )
-            setBackgroundColor(Color.parseColor("#F8F5F5")) // 박스의 배경색 설정 (선택 사항)
+            layoutParams = LayoutParams(dpToPx(50), dpToPx(50))
+            setBackgroundColor(Color.parseColor("#F8F5F5"))
 
-            // 박스 전체에 onClick 이벤트 설정
-            setOnClickListener { onPackClick(pack.emoticons) }
+            setOnClickListener {
+                CoroutineScope(Dispatchers.Main).launch {
+                    onPackClick(pack.emoticons) // onPackClick을 suspend 함수로 호출
+                }
+            }
         }
 
-// ImageView를 FrameLayout 중앙에 작게 배치
         val imageView = ImageView(context).apply {
             load(pack.filePath) {
-                crossfade(true) // 크로스페이드 효과 (선택 사항)
-                placeholder(R.drawable.icon_1) // 로딩 중일 때 사용할 이미지 (선택 사항)
-                error(R.drawable.icon_2) // 에러 발생 시 사용할 이미지 (선택 사항)
+                crossfade(true)
+                placeholder(R.drawable.icon_1)
+                error(R.drawable.icon_2)
                 allowHardware(false)
             }
-
-            // 이미지 크기를 박스보다 작게 설정하여 중앙에 배치
-            layoutParams = FrameLayout.LayoutParams(
-                dpToPx(30), // 너비를 작게 설정 (30)
-                dpToPx(30)  // 높이를 작게 설정 (30)
-            ).apply {
-                gravity = Gravity.CENTER // 이미지가 중앙에 위치하도록 설정
+            layoutParams = FrameLayout.LayoutParams(dpToPx(30), dpToPx(30)).apply {
+                gravity = Gravity.CENTER
             }
         }
 
-// FrameLayout에 ImageView를 추가
         frameLayout.addView(imageView)
         addView(frameLayout)
     }

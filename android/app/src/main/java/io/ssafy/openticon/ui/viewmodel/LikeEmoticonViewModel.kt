@@ -72,12 +72,13 @@ class LikeEmoticonViewModel @Inject constructor(
         } ?: LikeEmoticonPack("default", R.drawable.icon_2, emptyList()) // null일 경우 기본값 설정
 
         _Sample_emoticonPacksLiveData.value = data
+
     }
 
 
     private suspend fun addEmoticonDataFromPreferences() {
-        val jsonString = sharedPreferences.getString("new_like_emoticon_data", null)
-        val data = jsonString?.let {
+        val jsonString = sharedPreferences.getString("new_like_emoticon_data", null) ?: return
+        val data = jsonString.let {
             try {
                 Json.decodeFromString<LikeEmoticon>(it)
             } catch (e: SerializationException) {
@@ -88,6 +89,45 @@ class LikeEmoticonViewModel @Inject constructor(
         } ?: LikeEmoticon(filePath = "", title = "default", packId = Int.MAX_VALUE) // null일 경우 기본값 설정
 
         getLikeEmoticonPack.insertLike(data)
+
+        getLikeEmoticonPack.execute().collect { emoticonPacks ->
+            _Sample_emoticonPacksLiveData.value = emoticonPacks
+        }
+
+        val editor = sharedPreferences.edit()
+        val newJsonString = Json.encodeToString(_Sample_emoticonPacksLiveData.value)
+        editor.putString("like_emoticon_data", newJsonString)
+        editor.apply()
+        editor.putString("new_like_emoticon_data", null)
+        editor.apply()
+        Log.d("like", "changeEnd")
+    }
+
+    private suspend fun deleteEmoticonDataFromPreferences() {
+        val jsonString = sharedPreferences.getString("delete_like_data", null) ?: return
+        val data = jsonString.let {
+            try {
+                Json.decodeFromString<LikeEmoticon>(it)
+            } catch (e: SerializationException) {
+                // JSON 파싱 오류 시 로그를 남기고 기본값 사용
+                Log.e("LikeEmoticonViewModel", "JSON 디코딩 실패: ${e.message}")
+                null
+            }
+        } ?: LikeEmoticon(filePath = "", title = "default", packId = Int.MAX_VALUE) // null일 경우 기본값 설정
+//
+        getLikeEmoticonPack.deleteLike(data)
+
+        getLikeEmoticonPack.execute().collect { emoticonPacks ->
+            _Sample_emoticonPacksLiveData.value = emoticonPacks
+        }
+
+        val editor = sharedPreferences.edit()
+        val newJsonString = Json.encodeToString(_Sample_emoticonPacksLiveData.value)
+        editor.putString("like_emoticon_data", newJsonString)
+        editor.apply()
+        editor.putString("delete_like_data", null)
+        editor.apply()
+        Log.d("delete", "changeEnd")
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -98,6 +138,11 @@ class LikeEmoticonViewModel @Inject constructor(
         else if(key == "new_like_emoticon_data"){
             viewModelScope.launch {
                 addEmoticonDataFromPreferences()
+            }
+        }
+        else if(key == "delete_like_data"){
+            viewModelScope.launch {
+                deleteEmoticonDataFromPreferences()
             }
         }
     }

@@ -51,6 +51,7 @@ import io.ssafy.openticon.ui.component.EmoticonPackView
 import io.ssafy.openticon.ui.component.LikeEmoticonPackView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -68,6 +69,7 @@ class FloatingService : Service() {
     private var isSecondViewVisible = false  // 두 번째 뷰의 표시 상태
     private lateinit var secondLayoutParams: WindowManager.LayoutParams
 
+    private lateinit var likeView: LikeEmoticonPackView
 
     private var isCloseViewVisible = false  // 두 번째 뷰의 표시 상태
     private lateinit var closeFloatingView: View
@@ -89,8 +91,11 @@ class FloatingService : Service() {
         setupFloatingView()
         //setupSecondFloatingView()  // 두 번째 플로팅 뷰 초기화
         loadInitialData()
-        loadLikeDate()
-        startCloseFloatingView()
+        CoroutineScope(Dispatchers.Main).launch {
+            loadLikeDate(autoClick = false)
+            startCloseFloatingView()
+        }
+//        startCloseFloatingView()
     }
 
     private fun loadInitialData() {
@@ -105,40 +110,59 @@ class FloatingService : Service() {
         updateFloatingView(data)
     }
 
-    private fun loadLikeDate() {
-        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        val jsonString = sharedPreferences.getString("like_emoticon_data", null)
+    private fun loadLikeDate(autoClick: Boolean=false) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val jsonString = sharedPreferences.getString("like_emoticon_data", null)
 
-        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
-        val data = jsonString?.let {
-            Json.decodeFromString<LikeEmoticonPack>(it)
-        }
+            val data = jsonString?.let {
+                Json.decodeFromString<LikeEmoticonPack>(it)
+            }
 
-        val likeView = secondFloatingView.findViewById<LikeEmoticonPackView>(R.id.imageLike)
-        val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
-        val titleText = secondFloatingView.findViewById<TextView>(R.id.floatingTextView)
+            likeView = secondFloatingView.findViewById(R.id.imageLike)
+            val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
+            val titleText = secondFloatingView.findViewById<TextView>(R.id.floatingTextView)
 
-        data?.let {
-            likeView.removeAllViews() // 이미 존재하는 이미지 삭제
-            likeView.setupEmoticonPack(it) { images ->
-                likeView.displayImagesInTable(tableLayout, images,
-                    onImageClick = { emoticon: LikeEmoticon ->
-                        CoroutineScope(Dispatchers.Main).launch {
-                            insertEmoticonIntoFocusedEditText(emoticon.filePath)
+            data?.let {
+                likeView.removeAllViews()
+                likeView.setupEmoticonPack(it) { images ->
+                    likeView.displayImagesInTable(tableLayout, images,
+                        onImageClick = { emoticon: LikeEmoticon ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                insertEmoticonIntoFocusedEditText(emoticon.filePath)
+                            }
+                        },
+                        onImageLongClick = { emoticon: LikeEmoticon ->
+                            deleteEmoticon(emoticon)
                         }
+                    )
+
+                    titleText.text = it.name
+
+                    if (selectedEmoticonPackView != null) {
+                        selectedEmoticonPackView!!.resetColor()
+                        selectedEmoticonPackView = null
+                        likeView.makeGray()
+                    } else {
+                        likeView.makeGray()
                     }
-                )
-
-                titleText.text = it.name
-
-                if (selectedEmoticonPackView != null) {
-                    selectedEmoticonPackView!!.resetColor()
-                    selectedEmoticonPackView = null
-                    likeView.makeGray()
-                } else {
-                    likeView.makeGray()
                 }
-
+            }
+            // 모든 작업이 완료된 후 콜백 호출
+            if(autoClick){
+                if (data != null) {
+                    likeView.displayImagesInTable(tableLayout, data.emoticons,
+                        onImageClick = { emoticon: LikeEmoticon ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                                insertEmoticonIntoFocusedEditText(emoticon.filePath)
+                            }
+                        },
+                        onImageLongClick = { emoticon: LikeEmoticon ->
+                            deleteEmoticon(emoticon)
+                        }
+                    )
+                }
+                likeView.makeGray()
             }
         }
     }
@@ -257,47 +281,64 @@ class FloatingService : Service() {
         pendingIntent.send()
     }
     private fun lkeEmoticon(emoticon: Emoticon){
-//        val alertView = LayoutInflater.from(this).inflate(R.layout.alert_layout, null)
-//        val params = WindowManager.LayoutParams(
-//            WindowManager.LayoutParams.WRAP_CONTENT,
-//            WindowManager.LayoutParams.WRAP_CONTENT,
-//            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-//            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-//            PixelFormat.TRANSLUCENT
-//        )
-//        windowManager.addView(alertView, params)
+        CoroutineScope(Dispatchers.Main).launch {
 
 
+            val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+            val new_jsonString = Json.encodeToString(
+                LikeEmoticon(
+                    filePath = emoticon.filePath,
+                    title = emoticon.filePath,
+                    packId = emoticon.packId
+                )
+            )
+            val first_editor = sharedPreferences.edit()
+            first_editor.putString("new_like_emoticon_data", new_jsonString)
+            first_editor.apply()
+
+//        val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
+//
+//        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
+//        val likeEmoticonPack = past_jsonString?.let {
+//            Json.decodeFromString<LikeEmoticonPack>(it)
+//        }
 
 
+//        likeEmoticonPack?.let {
+//            val mutableImages = it.emoticons.toMutableList()  // MutableList로 변환
+//            mutableImages.add(LikeEmoticon(filePath = emoticon.filePath, title = emoticon.filePath, packId = emoticon.packId))
+//            it.emoticons = mutableImages.toList()  // 다시 List로 변환하여 할당
+//        }
 
-        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-
-        val new_jsonString = Json.encodeToString(LikeEmoticon(filePath = emoticon.filePath, title = emoticon.filePath, packId = emoticon.packId))
-        val first_editor = sharedPreferences.edit()
-        first_editor.putString("new_like_emoticon_data", new_jsonString)
-        first_editor.apply()
-
-        val past_jsonString = sharedPreferences.getString("like_emoticon_data", null)
-
-        // jsonString이 null이 아니면 역직렬화하여 List<ImoticonPack>으로 변환
-        val likeEmoticonPack = past_jsonString?.let {
-            Json.decodeFromString<LikeEmoticonPack>(it)
+//        val editor = sharedPreferences.edit()
+//        val jsonString = Json.encodeToString(likeEmoticonPack)
+//        editor.putString("like_emoticon_data", jsonString)
+//        editor.apply()
+            Log.d("floating", "Maybe.... success,..?")
+            delay(100L)
+            loadLikeDate()
         }
+    }
 
 
-        likeEmoticonPack?.let {
-            val mutableImages = it.emoticons.toMutableList()  // MutableList로 변환
-            mutableImages.add(LikeEmoticon(filePath = emoticon.filePath, title = emoticon.filePath, packId = emoticon.packId))
-            it.emoticons = mutableImages.toList()  // 다시 List로 변환하여 할당
+    private fun deleteEmoticon(emoticon: LikeEmoticon){
+        CoroutineScope(Dispatchers.Main).launch {
+            val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+            val new_jsonString = Json.encodeToString(
+                emoticon
+            )
+            val first_editor = sharedPreferences.edit()
+            first_editor.putString("delete_like_data", new_jsonString)
+            first_editor.apply()
+
+
+            delay(100L)
+            Log.d("floating", "Maybe.... success,..?")
+            loadLikeDate(true)
+
         }
-
-        val editor = sharedPreferences.edit()
-        val jsonString = Json.encodeToString(likeEmoticonPack)
-        editor.putString("like_emoticon_data", jsonString)
-        editor.apply()
-        loadLikeDate()
-        Log.d("floating", "Maybe.... success,..?")
     }
 
     suspend fun insertEmoticonIntoFocusedEditText(resourceUri: String) {

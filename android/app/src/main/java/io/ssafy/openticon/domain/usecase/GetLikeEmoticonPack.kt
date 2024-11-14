@@ -26,4 +26,8 @@ class GetLikeEmoticonPack @Inject constructor(
     suspend fun insertLike(likeEmoticon: LikeEmoticon){
         emoticonRepository.insertLikeEmoticons(likeEmoticon)
     }
+
+    suspend fun deleteLike(likeEmoticon: LikeEmoticon){
+        emoticonRepository.deleteLikeEmoticonsById(likeEmoticon.id);
+    }
 }
