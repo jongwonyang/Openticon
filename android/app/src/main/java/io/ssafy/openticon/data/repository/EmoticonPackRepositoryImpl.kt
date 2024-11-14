@@ -2,10 +2,13 @@ package io.ssafy.openticon.data.repository
 
 import android.content.Context
 import android.util.Log
+import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ssafy.openticon.data.local.EmoticonDao
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPackOrder
+import io.ssafy.openticon.data.model.ErrorResponse
+import io.ssafy.openticon.data.model.ReportPackRequestDto
 import io.ssafy.openticon.data.model.toEmoticonPack
 import io.ssafy.openticon.data.model.toEmoticonPackEntity
 import io.ssafy.openticon.data.remote.EmoticonPacksApi
@@ -107,6 +110,28 @@ class EmoticonPackRepositoryImpl @Inject constructor(
             emoticonDao.insertEmoticon(emoticon)
         } else {
             throw Exception("Failed to download emoticon from $url")
+        }
+    }
+
+    override suspend fun reportPack(packUuid: String, reason: String): Result<String> {
+        val response = emoticonPacksApi.reportPack(
+            ReportPackRequestDto(
+                uuid = packUuid,
+                description = reason
+            )
+        )
+        return if (response.isSuccessful) {
+            Result.success("신고가 접수되었습니다.")
+        } else {
+            val errorResponse: ErrorResponse? = response.errorBody()?.let { errorBody ->
+                try {
+                    val gson = Gson()
+                    gson.fromJson(errorBody.charStream(), ErrorResponse::class.java)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            Result.failure(Exception(errorResponse?.message ?: "Unknown error"))
         }
     }
 

@@ -40,6 +40,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -218,7 +219,9 @@ fun EmoticonPackDetailScreen(
                                                 drawStopIndicator = {},
                                                 trackColor = MaterialTheme.colorScheme.primaryContainer,
                                                 progress = { downloadedEmoticonCount.toFloat() / totalEmoticonCount.toFloat() },
-                                                modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .fillMaxWidth(),
                                                 color = MaterialTheme.colorScheme.primary,
                                             )
                                             Text(
@@ -358,8 +361,9 @@ fun EmoticonPackDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             if (row.size == 3) {
-                                for ((colIndex,item) in row.withIndex()) {
-                                    val isSelected = selectedEmoticonIndex == Pair(rowIndex, colIndex)
+                                for ((colIndex, item) in row.withIndex()) {
+                                    val isSelected =
+                                        selectedEmoticonIndex == Pair(rowIndex, colIndex)
                                     val scale by animateFloatAsState(
                                         targetValue = when {
                                             isSelected -> 1.25f
@@ -388,17 +392,25 @@ fun EmoticonPackDetailScreen(
                                                 indication = null, // 클릭 효과 제거
                                                 interactionSource = remember { MutableInteractionSource() } // 상호작용 효과 제거
                                             ) {
-                                                Log.d("EmoticonPackDetailScreen", "Clicked: $rowIndex, $colIndex")
+                                                Log.d(
+                                                    "EmoticonPackDetailScreen",
+                                                    "Clicked: $rowIndex, $colIndex"
+                                                )
                                                 // 다른 곳을 클릭하면 선택 해제
-                                                selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
+                                                selectedEmoticonIndex =
+                                                    if (isSelected) null else Pair(
+                                                        rowIndex,
+                                                        colIndex
+                                                    )
                                             },
                                         placeholder = painterResource(R.drawable.loading_img),
                                         error = painterResource(R.drawable.ic_broken_image),
                                     )
                                 }
                             } else {
-                                for ((colIndex,item) in row.withIndex()) {
-                                    val isSelected = selectedEmoticonIndex == Pair(rowIndex, colIndex)
+                                for ((colIndex, item) in row.withIndex()) {
+                                    val isSelected =
+                                        selectedEmoticonIndex == Pair(rowIndex, colIndex)
                                     val scale by animateFloatAsState(
                                         targetValue = when {
                                             isSelected -> 1.25f
@@ -428,7 +440,11 @@ fun EmoticonPackDetailScreen(
                                                 interactionSource = remember { MutableInteractionSource() } // 상호작용 효과 제거
                                             ) {
                                                 // 다른 곳을 클릭하면 선택 해제
-                                                selectedEmoticonIndex = if (isSelected) null else Pair(rowIndex, colIndex)
+                                                selectedEmoticonIndex =
+                                                    if (isSelected) null else Pair(
+                                                        rowIndex,
+                                                        colIndex
+                                                    )
                                             },
                                         placeholder = painterResource(R.drawable.loading_img),
                                         error = painterResource(R.drawable.ic_broken_image),
@@ -562,9 +578,9 @@ fun EmoticonPackDetailScreen(
     if (showReportDialog) {
         ReportDialog(
             onDismissRequest = { showReportDialog = false },
-            onConfirmation = {
+            onConfirmation = { reason ->
                 showReportDialog = false
-                Toast.makeText(context, "신고가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                viewModel.reportPack(emoticonPackUuid, reason)
             }
         )
     }
@@ -625,8 +641,13 @@ fun ScaffoldPreview() {
 @Composable
 fun ReportDialog(
     onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit
+    onConfirmation: (reason: String) -> Unit
 ) {
+    var reportReason by remember { mutableStateOf("") }
+    val maxCharCount = 200
+    val charCount = reportReason.length
+    var isError by remember { mutableStateOf(false) }
+
     AlertDialog(
         icon = {
             Icon(Icons.Filled.Report, contentDescription = null)
@@ -635,7 +656,40 @@ fun ReportDialog(
             Text(text = "이모티콘 팩 신고")
         },
         text = {
-            Text(text = "부적절한 이모티콘 팩으로 신고할까요?")
+            Column {
+                Text(text = "부적절한 이모티콘 팩으로 신고할까요?")
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = reportReason,
+                    onValueChange = {
+                        if (it.length <= maxCharCount) {
+                            reportReason = it
+                            isError = it.isBlank() // 입력 값이 비어 있으면 오류 상태로 표시
+                        }
+                    },
+                    label = { Text("신고 사유 (필수)") },
+                    placeholder = { Text("신고 사유를 입력하세요") },
+                    isError = isError,
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = {
+                        Text(
+                            text = "$charCount/$maxCharCount",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.End
+                        )
+                    }
+                )
+                if (isError) {
+                    Text(
+                        text = "신고 사유는 필수 입력 항목입니다.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp)
+                    )
+                }
+            }
         },
         onDismissRequest = {
             onDismissRequest()
@@ -643,8 +697,13 @@ fun ReportDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onConfirmation()
-                }
+                    if (reportReason.isNotBlank()) {
+                        onConfirmation(reportReason)
+                    } else {
+                        isError = true // 입력 값이 비어 있으면 오류 메시지 표시
+                    }
+                },
+                enabled = reportReason.isNotBlank()
             ) {
                 Text("신고")
             }
