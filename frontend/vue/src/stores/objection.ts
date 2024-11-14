@@ -8,12 +8,13 @@ import type {
 } from "@/types/emoticonPackUpload";
 import { ref } from "vue";
 import type { UploadResult } from "@/types/uploadResult";
+import type { BlacklistResult } from "@/types/blacklistResult";
 
 export const useObjectionStore = defineStore("objection", () => {
   const getBlockedEmoticonPackList = async (
     page: number,
     size: number
-  ): Promise<EmoticonPackSearchList> => {
+  ): Promise<BlacklistResult> => {
     const response = await apiClient.get(`/objection/list`, {
       params: {
         page: page,

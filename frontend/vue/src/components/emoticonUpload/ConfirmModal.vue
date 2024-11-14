@@ -41,7 +41,7 @@
           v-if="!isFailed"
         >
           <span v-if="!isUploading">업로드</span>
-          <span v-else>업로드중...</span>
+          <span v-else>업로드중... {{ uploadProgress }}%</span>
         </button>
         <button
           class="border border-orange-500 bg-orange-500 text-white rounded-md px-4 py-2 hover:bg-orange-600 transition-all duration-200 ease-in-out active:bg-orange-700"
@@ -69,6 +69,7 @@ import type { EmoticonPack } from "@/types/emoticonPack";
 import { useUserStore } from "@/stores/user";
 import EmoticonDetailContent from "./Confirm/EmoticonDetailContent.vue";
 import EmoticonDetailFooter from "./Confirm/EmoticonDetailFooter.vue";
+import axios, { type CancelTokenSource } from "axios";
 
 const props = defineProps<{
   emoticonPackUploadInfo: EmoticonPackUploadInfo;
@@ -118,21 +119,33 @@ const emoticonPackStore = useEmoticonPackStore();
 const isUploading = ref(false);
 const isUploaded = ref(false);
 const isFailed = ref(false);
+const uploadProgress = ref(0);
+const cancelToken = ref<CancelTokenSource | null>(null);
+
 function closeModal() {
+  if (cancelToken.value) {
+    cancelToken.value.cancel();
+  }
   emit("update:isOpen", false);
 }
 
 function handleConfirm() {
   if (isUploading.value) return;
   isUploading.value = true;
+  cancelToken.value = axios.CancelToken.source();
   emoticonPackStore
     .uploadEmoticonPack(
       props.emoticonPackUploadInfo,
-      props.emoticonPackUploadFiles
+      props.emoticonPackUploadFiles,
+      (progressEvent) => {
+        uploadProgress.value = Math.round(progressEvent.loaded / progressEvent.total! * 100);
+      },
+      cancelToken.value
     )
     .then((e) => {
       isUploading.value = false;
       isUploaded.value = true;
+      cancelToken.value = null;
     }).catch((e) => {
       isUploading.value = false;
       isFailed.value = true;
@@ -140,33 +153,5 @@ function handleConfirm() {
         isFailed.value = false;
       }, 3000);
     });
-
-//     {
-//     "id": 127,
-//     "title": "레니 테스트",
-//     "member": {
-//         "id": 5,
-//         "email": "pcs3373@naver.com",
-//         "nickname": "새로운 사용자5"
-//     },
-//     "price": 0,
-//     "view": 0,
-//     "category": "REAL",
-//     "thumbnailImg": "https://apitest.openticon.store/static/upload/images/2aed7d70-1d28-467e-bf4a-ddaa68996fd1..jpg",
-//     "listImg": "https://apitest.openticon.store/static/upload/images/18e8a5bf-438e-45c0-beb4-656c6a5d5b1b..jpg",
-//     "description": "",
-//     "shareLink": "4392cb9f-37b0-44b5-a33c-c7b0d38eed93",
-//     "createdAt": "2024-11-07 13:26:32:67",
-//     "updatedAt": "2024-11-07 13:26:32:67",
-//     "tags": [],
-//     "public": true,
-//     "aiGenerated": false,
-//     "blacklist": false
-// }
-
-    // setTimeout(() => {
-    //   isUploading.value = false;
-    //   isUploaded.value = true;
-    // }, 3000);
 }
 </script>

@@ -8,6 +8,7 @@ import type {
 } from "@/types/emoticonPackUpload";
 import { ref } from "vue";
 import type { UploadResult } from "@/types/uploadResult";
+import type { AxiosProgressEvent, CancelTokenSource } from "axios";
 
 export const useEmoticonPackStore = defineStore("emoticonPack", () => {
   const getEmoticonPackData = async (id: number): Promise<EmoticonPack> => {
@@ -75,7 +76,9 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
 
   const uploadEmoticonPack = async (
     packInfo: EmoticonPackUploadInfo,
-    files: EmoticonPackUploadFiles
+    files: EmoticonPackUploadFiles,
+    onUploadProgress: (progressEvent: AxiosProgressEvent) => void,
+    cancelToken: CancelTokenSource
   ): Promise<UploadResult> => {
     const formData = new FormData();
 
@@ -100,6 +103,8 @@ export const useEmoticonPackStore = defineStore("emoticonPack", () => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        onUploadProgress: onUploadProgress,
+        cancelToken: cancelToken.token,
       })
       .then((response) => {
         return response.data;

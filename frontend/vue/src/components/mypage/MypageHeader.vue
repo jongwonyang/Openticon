@@ -59,13 +59,26 @@
         </div>
       </div>
     </div>
-    <div class="flex justify-center items-center flex-1 min-w-72 mt-4 px-4">
+    <div
+      v-if="blockedEmoticonCount > 0"
+      class="flex justify-center items-center flex-1 mt-4 px-4"
+    >
       <div
-        class="w-full h-full flex justify-center items-center rounded-lg bg-gray-100 p-4 flex-col"
+        class="w-full h-full flex justify-center items-center rounded-lg bg-rose-200 p-4 flex-col"
       >
-        알림
+        <span class="text-lg font-nnsqneo-extra-bold text-center text-rose-700"
+          >표시중단된 이모티콘 :
+          <span class="text-2xl font-nnsqneo-heavy">{{
+            blockedEmoticonCount
+          }}
+          {{ moreBlockedEmoticon ? "+" : "" }}
+          </span>
+          개</span
+        >
         <RouterLink :to="{ name: 'blacklist' }">
-          <span class="material-icons text-xl hover:underline">
+          <span
+            class="material-icons text-xl hover:underline font-nnsqneo-heavy text-rose-700"
+          >
             표시중단 목록 바로가기
           </span>
         </RouterLink>
@@ -92,14 +105,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useUserStore } from "@/stores/user";
 import MypageBanner from "./MypageBanner.vue";
 import ProfileImageModal from "./ProfileImageModal.vue";
 import NicknameModal from "./NicknameModal.vue";
 import BioModal from "./BioModal.vue";
+import { useObjectionStore } from "@/stores/objection";
+import type { BlacklistResult } from "@/types/blacklistResult";
 
 const userStore = useUserStore();
+const objectionStore = useObjectionStore();
+
+const blacklistResult = ref<BlacklistResult | null>(null);
+const blockedEmoticonCount = ref(0);
+const moreBlockedEmoticon = ref(false);
+
+onMounted(async () => {
+  blacklistResult.value = await objectionStore.getBlockedEmoticonPackList(0, 100);
+  blockedEmoticonCount.value = blacklistResult.value?.content.length ?? 0;
+  moreBlockedEmoticon.value = !blacklistResult.value?.last;
+});
+
 const showProfileImageModal = ref(false);
 const showNicknameModal = ref(false);
 const showBioModal = ref(false);
