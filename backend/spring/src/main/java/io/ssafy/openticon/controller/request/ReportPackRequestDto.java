@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReportPackRequestDto {
 
-    private Long emoticonPackId;
+    private String uuid;
     private String description;
 
 }
