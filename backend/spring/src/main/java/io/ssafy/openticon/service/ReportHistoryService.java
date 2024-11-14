@@ -8,6 +8,8 @@ import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.ReportHistoryRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 public class ReportHistoryService {
@@ -21,29 +23,30 @@ public class ReportHistoryService {
     }
 
     public void report(ReportPackRequestDto reportPackRequestDto, Long memberId) {
-
-        if(packService.getPackById(reportPackRequestDto.getEmoticonPackId()).isEmpty()){
+        EmoticonPackEntity emoticonPackEntity = packService.getUuid(reportPackRequestDto.getUuid());
+        if(emoticonPackEntity == null){
             throw new IllegalArgumentException("해당하는 이모티콘 팩이 없음");
         }
 
-        if(reportHistoryRepository.findByMemberIdAndEmoticonPackIdAndDeletedAtIsNull(memberId,reportPackRequestDto.getEmoticonPackId()).isPresent()){
+        Long emoticonPackId = emoticonPackEntity.getId();
+
+        if(reportHistoryRepository.findByMemberIdAndEmoticonPackIdAndDeletedAtIsNull(memberId,emoticonPackId).isPresent()){
             throw new OpenticonException(ErrorCode.DUPLICATE_REPORT);
         }
 
 
         ReportHistoryEntity reportHistoryEntity = ReportHistoryEntity.builder()
-                .emoticonPackId(reportPackRequestDto.getEmoticonPackId())
+                .emoticonPackId(emoticonPackId)
                 .memberId(memberId)
                 .description(reportPackRequestDto.getDescription())
                 .build();
 
-        if(reportHistoryRepository.findByEmoticonPackIdAndDeletedAtIsNull(reportPackRequestDto.getEmoticonPackId()).size()>=9){
+        if(reportHistoryRepository.findByEmoticonPackIdAndDeletedAtIsNull(emoticonPackId).size()>=9){
             EmoticonPackEntity pack = packService.getPackById(reportHistoryEntity.getEmoticonPackId()).orElseThrow();
             pack.setBlacklist(true);
             packService.save(pack);
         }
 
         reportHistoryRepository.save(reportHistoryEntity);
-
     }
 }
