@@ -445,6 +445,10 @@ public class PackService {
         return packRepository.findById(packId);
     }
 
+    public EmoticonPackEntity getUuid(String uuid){
+        return packRepository.findByShareLink(uuid);
+    }
+
     @Transactional
     public void save(EmoticonPackEntity emoticonPackEntity){
         packRepository.save(emoticonPackEntity);

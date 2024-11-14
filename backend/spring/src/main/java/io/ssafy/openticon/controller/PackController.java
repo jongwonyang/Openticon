@@ -139,6 +139,7 @@ public class PackController {
     }
 
     @PostMapping("reports")
+    @Operation(summary = "이모티콘 팩을 신고합니다.")
     public ResponseEntity<Void> reportPack(@AuthenticationPrincipal UserDetails userDetails,
                                            @RequestBody ReportPackRequestDto reportPackRequestDto){
         MemberEntity member=memberService.getMemberByEmail(userDetails.getUsername()).orElseThrow();
