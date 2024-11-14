@@ -42,7 +42,7 @@ public class ObjectionController {
     }
 
     @GetMapping("list")
-    @Operation(summary = "심사를 통과하지 못하거나 누적 신고가 많은 이모티콘 팩 목록을 보여줍니다.")
+    @Operation(summary = "심사를 통과하지 못하거나 누적 신고가 많은 이모티콘 팩 목록을 보여줍니다. PENDING(접수전) | RECEIVED(접수완료) | APPROVED(통과) | REJECTED(반려)")
     public ResponseEntity<Page<ObjectionListResponseDto>> listObjection(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
