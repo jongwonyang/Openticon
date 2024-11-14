@@ -2,7 +2,6 @@ package io.ssafy.openticon.ui.screen
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,8 +53,6 @@ import androidx.navigation.NavController
 import io.ssafy.openticon.R
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.ui.viewmodel.MemberViewModel
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +80,9 @@ fun LoginScreen(
                         onClick = {
                             if (!navController.popBackStack()) {
                                 navController.navigate("main") {
-                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                    }
                                     launchSingleTop = true
                                 }
                             }
@@ -222,7 +221,7 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.google),
+                        painter = painterResource(R.drawable.google_icon),
                         contentDescription = "Google Image",
                         modifier = Modifier.size(23.dp)
                     )
@@ -248,10 +247,11 @@ fun LoginScreen(
                     fontSize = 12.sp,
                     modifier = Modifier.clickable { showDialog = true }
                 )
-                Text(text = "에 동의하게 됩니다.",
+                Text(
+                    text = "에 동의하게 됩니다.",
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 12.sp
-                    )
+                )
             }
         }
     }
