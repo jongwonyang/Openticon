@@ -13,7 +13,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="30dp"
         android:background="#D3D3D3">
 
         <!-- 왼쪽에 빈 공간을 추가하여 ImageView를 오른쪽 끝으로 보냄 -->
@@ -24,9 +24,9 @@
 
         <ImageView
             android:id="@+id/closeButton"
-            android:layout_width="wrap_content"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/btn_dialog" />
+            android:src="@drawable/close_24dp_5f6368" />
     </TableRow>
 
     <TableRow
@@ -73,7 +73,6 @@
                 android:layout_height="match_parent"
                 android:scaleType="fitCenter"
                 android:src="@drawable/baseline_storefront_24" />
-
         </FrameLayout>
     </TableRow>
 
