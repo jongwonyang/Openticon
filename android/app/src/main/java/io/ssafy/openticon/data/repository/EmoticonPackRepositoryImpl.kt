@@ -207,4 +207,11 @@ class EmoticonPackRepositoryImpl @Inject constructor(
             false
         }
     }
+
+    override suspend fun clearPurchaseList() {
+        emoticonDao.deleteAllEmoticons()
+        emoticonDao.deleteAllLikeEmoticons()
+        emoticonDao.deleteAllEmoticonPacksOrder()
+        emoticonDao.deleteAllEmoticonPacks()
+    }
 }
