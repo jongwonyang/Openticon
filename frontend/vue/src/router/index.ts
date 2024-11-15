@@ -13,6 +13,7 @@ import EmoticonDetailPrivateView from "@/views/QueryEmoticon/EmoticonDetailPriva
 import BlacklistView from "@/views/MyPage/BlacklistView.vue";
 import MethodSelectView from "@/views/MakeEmoticon/MethodSelectView.vue";
 import AICreateEmoticonView from "@/views/MakeEmoticon/AICreateEmoticonView.vue";
+import ObjectionListView from "@/views/Manager/ObjectionListView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -109,6 +110,11 @@ const router = createRouter({
       path: "/blacklist",
       name: "blacklist",
       component: BlacklistView,
+    },
+    {
+      path: "/objectionList",
+      name: "objectionList",
+      component: ObjectionListView,
     },
   ],
 });

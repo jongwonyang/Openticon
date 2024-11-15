@@ -68,10 +68,9 @@
       >
         <span class="text-lg font-nnsqneo-extra-bold text-center text-rose-700"
           >표시중단된 이모티콘 :
-          <span class="text-2xl font-nnsqneo-heavy">{{
-            blockedEmoticonCount
-          }}
-          {{ moreBlockedEmoticon ? "+" : "" }}
+          <span class="text-2xl font-nnsqneo-heavy"
+            >{{ blockedEmoticonCount }}
+            {{ moreBlockedEmoticon ? "+" : "" }}
           </span>
           개</span
         >
@@ -82,6 +81,35 @@
             표시중단 목록 바로가기
           </span>
         </RouterLink>
+      </div>
+    </div>
+    <div
+      v-if="userStore.userInfo?.manager && objectionCount > 0"
+      class="flex justify-center items-center flex-1 mt-4 px-4"
+    >
+      <div
+        class="flex justify-center items-center flex-1 mt-4 px-4"
+      >
+        <div
+          class="w-full h-full flex justify-center items-center rounded-lg bg-rose-200 p-4 flex-col"
+        >
+          <span
+            class="text-lg font-nnsqneo-extra-bold text-center text-rose-700"
+            >심사대기중인 이모티콘 :
+            <span class="text-2xl font-nnsqneo-heavy"
+              >{{ blockedEmoticonCount }}
+              {{ moreBlockedEmoticon ? "+" : "" }}
+            </span>
+            개</span
+          >
+          <RouterLink :to="{ name: 'objectionList' }">
+            <span
+              class="material-icons text-xl hover:underline font-nnsqneo-heavy text-rose-700"
+            >
+              심사대기 목록 바로가기
+            </span>
+          </RouterLink>
+        </div>
       </div>
     </div>
   </div>
@@ -113,6 +141,8 @@ import NicknameModal from "./NicknameModal.vue";
 import BioModal from "./BioModal.vue";
 import { useObjectionStore } from "@/stores/objection";
 import type { BlacklistResult } from "@/types/blacklistResult";
+import { useAdminStore } from "@/stores/admin";
+import type { ObjectionListResult } from "@/types/objectionlistResult";
 
 const userStore = useUserStore();
 const objectionStore = useObjectionStore();
@@ -121,10 +151,21 @@ const blacklistResult = ref<BlacklistResult | null>(null);
 const blockedEmoticonCount = ref(0);
 const moreBlockedEmoticon = ref(false);
 
+const objectionCount = ref(0);
+
 onMounted(async () => {
-  blacklistResult.value = await objectionStore.getBlockedEmoticonPackList(0, 100);
+  blacklistResult.value = await objectionStore.getBlockedEmoticonPackList(
+    0,
+    100
+  );
   blockedEmoticonCount.value = blacklistResult.value?.content.length ?? 0;
   moreBlockedEmoticon.value = !blacklistResult.value?.last;
+
+  if (userStore.userInfo?.manager) {
+    const adminStore = useAdminStore();
+    const objectionList = await adminStore.getObjectionList(0, 100);
+    objectionCount.value = objectionList.content.length;
+  }
 });
 
 const showProfileImageModal = ref(false);

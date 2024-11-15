@@ -1,17 +1,9 @@
 <template>
   <div class="container mx-auto max-w-screen-lg">
-    <div class="px-4 mt-4">
-      <div class="text-gray-600 px-4 py-4 bg-gray-200 rounded-lg">
-        업로드한 이모티콘 팩 중 AI 심사 통과실패 및 다수의 신고를 받은 이모티콘
-        팩 목록입니다.<br />
-        &nbsp;&nbsp;&nbsp;&nbsp;이모티콘 팩 중 표시중단 목록에 포함된 이모티콘
-        팩은 다른 사용자에게 표시되지 않습니다.
-      </div>
-    </div>
     <!-- 이모티콘 리스트 -->
     <div class="grid grid-cols-1 gap-4 pt-4 px-4">
       <BlacklistedEmoticonDiv
-        v-for="emoticon in blockedEmoticonList"
+        v-for="emoticon in displayedEmoticonList"
         :key="emoticon.id"
         :emoticon="emoticon"
       />
@@ -20,10 +12,10 @@
       <Loading />
     </div>
     <div
-      v-if="!hasMore"
+      v-if="displayedEmoticonList.length === 0"
       class="flex justify-center items-center h-24 bg-gray-200 rounded-lg mt-4"
     >
-      <p class="text-gray-500">더 이상 불러올 이모티콘이 없습니다.</p>
+      <p class="text-gray-500">표시할 내용이 없습니다.</p>
     </div>
     <div
       v-if="errorOccurred"
@@ -41,8 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import type { EmoticonPackInList } from "@/types/emoticonPackInList";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useInfiniteScroll } from "@vueuse/core";
 import Loading from "../common/loading/Loading.vue";
@@ -55,6 +46,16 @@ const currentPage = ref(0);
 const loading = ref(false);
 const hasMore = ref(true);
 const errorOccurred = ref(false);
+
+const props = defineProps<{
+  displayedState: "PENDING" | "RECEIVED" | "APPROVED" | "REJECTED";
+}>();
+
+const displayedEmoticonList = computed(() => {
+  return blockedEmoticonList.value.filter(
+    (emoticon) => emoticon.state === props.displayedState
+  );
+});
 
 const objectionStore = useObjectionStore();
 
@@ -96,17 +97,3 @@ onMounted(async () => {
   await loadMoreEmoticons();
 });
 </script>
-
-<style scoped>
-/* 호버 효과 추가 */
-.emoticon-item {
-  transition: transform 0.05s ease, box-shadow 0.05s ease,
-    border-color 0.05s ease, border-radius 0.05s ease;
-  @apply rounded-lg shadow-sm;
-}
-
-.emoticon-item-no-hover {
-  cursor: pointer;
-  @apply rounded-lg shadow-lg;
-}
-</style>
