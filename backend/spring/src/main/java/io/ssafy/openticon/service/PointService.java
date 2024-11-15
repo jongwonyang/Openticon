@@ -105,7 +105,7 @@ public class PointService {
             throw new OpenticonException(ErrorCode.DUPLICATE_EMOTICON_PACK_PURCHASE);
         }
 
-        if(member.getPoint() < emoticonPack.getPrice()){
+        if(member.getPoint() < emoticonPack.getPrice() && !emoticonPack.getMember().getEmail().equals(member.getEmail())){
             throw new OpenticonException(ErrorCode.INSUFFICIENT_BALANCE_ERROR);
         }
 
