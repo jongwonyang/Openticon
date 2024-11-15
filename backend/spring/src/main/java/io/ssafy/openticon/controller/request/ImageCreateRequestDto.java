@@ -7,9 +7,12 @@ public class ImageCreateRequestDto {
 
     private String prompt;
 
+    private int seed;
+
     public ImageCreateRequestDto(){}
 
-    public ImageCreateRequestDto(String prompt){
+    public ImageCreateRequestDto(String prompt, int seed){
         this.prompt=prompt;
+        this.seed=seed;
     }
 }

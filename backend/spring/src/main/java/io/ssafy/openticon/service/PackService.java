@@ -185,11 +185,11 @@ public class PackService {
                 });
 
         // 구매기록 추가
-        PurchaseHistoryEntity purchaseHistory = PurchaseHistoryEntity.builder()
-                .member(member)
-                .emoticonPack(emoticonPackEntity)
-                .build();
-        purchaseHistoryRepository.save(purchaseHistory);
+//        PurchaseHistoryEntity purchaseHistory = PurchaseHistoryEntity.builder()
+//                .member(member)
+//                .emoticonPack(emoticonPackEntity)
+//                .build();
+//        purchaseHistoryRepository.save(purchaseHistory);
 
         return new EmoticonPackResponseDto(emoticonPackEntity);
 

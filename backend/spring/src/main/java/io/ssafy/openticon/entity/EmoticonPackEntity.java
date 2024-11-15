@@ -82,7 +82,7 @@ public class EmoticonPackEntity {
 
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();;
+        this.updatedAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
     }
 
     @PrePersist
