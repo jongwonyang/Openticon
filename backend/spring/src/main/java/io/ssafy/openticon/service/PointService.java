@@ -116,31 +116,34 @@ public class PointService {
                 .build();
         purchaseHistoryRepository.save(purchaseHistory);
 
-        // 구매자
-        PointHistoryEntity purchasePointHistory = PointHistoryEntity.builder()
-                .member(member)  // 멤버 정보
-                .type(PointType.PURCHASE)      // 구입
-                .point(emoticonPack.getPrice())    // 포인트 금액
-                .build();
-        pointHistoryRepository.save(purchasePointHistory);
+        // 업로드를 한 사람과 구매자가 다른 경우
+        if(!emoticonPack.getMember().getEmail().equals(member.getEmail())){
+            // 구매자
+            PointHistoryEntity purchasePointHistory = PointHistoryEntity.builder()
+                    .member(member)  // 멤버 정보
+                    .type(PointType.PURCHASE)      // 구입
+                    .point(emoticonPack.getPrice())    // 포인트 금액
+                    .build();
+            pointHistoryRepository.save(purchasePointHistory);
 
-        // 판매자
-        PointHistoryEntity salePointHistory = PointHistoryEntity.builder()
-                .member(emoticonPack.getMember())  // 멤버 정보
-                .type(PointType.SALE)      // 판매
-                .point(emoticonPack.getPrice())    // 포인트 금액
-                .build();
-        pointHistoryRepository.save(salePointHistory);
+            // 판매자
+            PointHistoryEntity salePointHistory = PointHistoryEntity.builder()
+                    .member(emoticonPack.getMember())  // 멤버 정보
+                    .type(PointType.SALE)      // 판매
+                    .point(emoticonPack.getPrice())    // 포인트 금액
+                    .build();
+            pointHistoryRepository.save(salePointHistory);
 
-        // 구매자 소지 금액 수정
-        int point = member.getPoint() - emoticonPack.getPrice();
-        member.setPoint(point);
-        emoticonPack.setDownload(emoticonPack.getDownload() + 1);
-        memberRepository.save(member);
+            // 구매자 소지 금액 수정
+            int point = member.getPoint() - emoticonPack.getPrice();
+            member.setPoint(point);
+            emoticonPack.setDownload(emoticonPack.getDownload() + 1);
+            memberRepository.save(member);
 
-        // 판매자 소지 금액 수정
-        emoticonPack.getMember().setPoint(emoticonPack.getMember().getPoint() + emoticonPack.getPrice());
-        memberRepository.save(emoticonPack.getMember());
+            // 판매자 소지 금액 수정
+            emoticonPack.getMember().setPoint(emoticonPack.getMember().getPoint() + emoticonPack.getPrice());
+            memberRepository.save(emoticonPack.getMember());
+        }
         return new PointResponseDto("OK", emoticonPack.getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
     }
 
