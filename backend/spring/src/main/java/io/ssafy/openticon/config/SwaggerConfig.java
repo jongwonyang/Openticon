@@ -108,6 +108,11 @@ public class SwaggerConfig {
                 .build();
     }
 
-
-
+    @Bean
+    public GroupedOpenApi createToImageAiApi() {
+        return GroupedOpenApi.builder()
+                .group("AI 이미지 생성")
+                .pathsToMatch("/ai/**")
+                .build();
+    }
 }

@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class GpuRequest {
-
     private String prompt;
+    private int seed;
     private int num_inference_steps;
     private int guidance_scale;
 }

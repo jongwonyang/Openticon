@@ -14,6 +14,8 @@ spring:
 
   base-url: ${DEV_BASE_URL}
   image-server-url: ${DEV_IMAGE_SERVER_URL}
+  gpu-url: ${DEV_GPU_URL}
+
 server:
   port: 8080
   address: 0.0.0.0
