@@ -2,7 +2,9 @@ package io.ssafy.openticon.controller;
 
 import io.ssafy.openticon.controller.request.ImageCreateRequestDto;
 import io.ssafy.openticon.dto.GpuRequest;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -23,21 +25,23 @@ import java.io.InputStream;
 @RequestMapping("/ai")
 public class ImageCreateController {
 
-
+    @Value("${spring.gpu-url}")
+    private String GPU_URL;
 
     private final WebClient webClient;
 
     public ImageCreateController(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.
                 codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)).
-                baseUrl("http://222.107.238.124:7777").build();
+                baseUrl(GPU_URL).build();
     }
 
     @PostMapping("/create-image")
+    @Operation(summary = "GPU 서버에 이미지 생성 요청")
     public Mono<ResponseEntity<InputStreamResource>> createImage(@RequestBody ImageCreateRequestDto imageCreateRequestDto) {
-
         String prompt = imageCreateRequestDto.getPrompt();
-        GpuRequest gpuRequest = new GpuRequest(prompt, 20, 7);
+        int seed = imageCreateRequestDto.getSeed();
+        GpuRequest gpuRequest = new GpuRequest(prompt, seed, 20, 7);
 
         return webClient
                 .post()

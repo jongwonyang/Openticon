@@ -50,7 +50,7 @@ public class ObjectionController {
     ){
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponseEntity.ok().body(objectionService.getObjectionList(member, pageable));
     }
 
@@ -92,7 +92,7 @@ public class ObjectionController {
     ){
         MemberEntity member = memberRepository.findMemberByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 없습니다."));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponseEntity.ok().body(objectionService.managerObjection(member, pageable));
     }
 
