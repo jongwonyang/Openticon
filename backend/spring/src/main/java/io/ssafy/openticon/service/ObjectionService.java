@@ -55,8 +55,11 @@ public class ObjectionService {
         Page<ObjectionListResponseDto> objectionListResponseDtos = null;
         if(!objectionEntities.isEmpty()){
             objectionListResponseDtos = objectionEntities.map(objectionEntity -> {
+                String submitRequest = null;
                 List<String> emoticons = emoticonService.getEmoticons(objectionEntity.getEmoticonPack().getId());
-                return new ObjectionListResponseDto(objectionEntity, emoticons);
+                Optional<ObjectionSubmitEntity> objectionSubmitEntity = objectionSumbitRepository.findByObjectionEntity(objectionEntity);
+                if(objectionSubmitEntity.isPresent()) submitRequest = objectionSubmitEntity.get().getContent();
+                return new ObjectionListResponseDto(objectionEntity, submitRequest, emoticons);
             });
         }
         return objectionListResponseDtos;
@@ -153,8 +156,11 @@ public class ObjectionService {
         Page<ObjectionListResponseDto> objectionListResponseDtos = null;
         if(!objectionEntities.isEmpty()){
             objectionListResponseDtos = objectionEntities.map(objectionEntity -> {
+                String submitRequest = null;
                 List<String> emoticons = emoticonService.getEmoticons(objectionEntity.getEmoticonPack().getId());
-                return new ObjectionListResponseDto(objectionEntity, emoticons);
+                Optional<ObjectionSubmitEntity> objectionSubmitEntity = objectionSumbitRepository.findByObjectionEntity(objectionEntity);
+                if(objectionSubmitEntity.isPresent()) submitRequest = objectionSubmitEntity.get().getContent();
+                return new ObjectionListResponseDto(objectionEntity, submitRequest, emoticons);
             });
         }
         return objectionListResponseDtos;

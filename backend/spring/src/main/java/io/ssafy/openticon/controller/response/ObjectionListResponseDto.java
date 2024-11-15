@@ -15,6 +15,8 @@ public class ObjectionListResponseDto {
 
     private PackInfoResponseDto emoticonPack;
 
+    private String submitRequest;
+
     private ReportType type;
 
     private ReportStateType state;
@@ -23,7 +25,7 @@ public class ObjectionListResponseDto {
 
     private String completedAt;
 
-    public ObjectionListResponseDto(ObjectionEntity objectionEntity, List<String> emoticons) {
+    public ObjectionListResponseDto(ObjectionEntity objectionEntity, String submitRequest, List<String> emoticons) {
         this.id = objectionEntity.getId();
         this.emoticonPack = new PackInfoResponseDto(objectionEntity.getEmoticonPack(), emoticons);
         this.type = objectionEntity.getType();
@@ -32,5 +34,6 @@ public class ObjectionListResponseDto {
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         this.completedAt = objectionEntity.getCompletedAt() != null ? objectionEntity.getCompletedAt().atZoneSameInstant(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "null";
+        this.submitRequest = submitRequest;
     }
 }
