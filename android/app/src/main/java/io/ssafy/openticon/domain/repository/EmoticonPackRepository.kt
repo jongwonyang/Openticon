@@ -12,4 +12,5 @@ interface EmoticonPackRepository {
     suspend fun getDownloadPackInfo(uuid: String): EmoticonPack
     suspend fun downloadAndSaveEmoticonPack(idx: Int, packId: Int, url: String)
     suspend fun reportPack(packUuid: String, reason: String): Result<String>
+    suspend fun clearPurchaseList()
 }

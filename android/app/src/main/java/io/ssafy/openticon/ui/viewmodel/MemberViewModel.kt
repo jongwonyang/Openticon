@@ -3,12 +3,12 @@ package io.ssafy.openticon.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ssafy.openticon.data.local.TokenDataSource
 import io.ssafy.openticon.data.model.MemberEntity
-import io.ssafy.openticon.data.model.PurchasePointRequestDto
 import io.ssafy.openticon.di.UserSession
+import io.ssafy.openticon.domain.usecase.ClearDownloadedFilesUseCase
+import io.ssafy.openticon.domain.usecase.ClearPurchaseListUseCase
 import io.ssafy.openticon.domain.usecase.DeleteMemberUseCase
 import io.ssafy.openticon.domain.usecase.GetMemberInfoUseCase
 import io.ssafy.openticon.domain.usecase.PurchasePointUseCase
@@ -16,7 +16,6 @@ import io.ssafy.openticon.domain.usecase.SyncPurchasedPacksUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,8 +27,10 @@ class MemberViewModel @Inject constructor(
     private val userSession: UserSession,
     private val deleteMemberUseCase: DeleteMemberUseCase,
     private val syncPurchasedPacksUseCase: SyncPurchasedPacksUseCase,
-    private val purchasePointUseCase: PurchasePointUseCase
-): ViewModel() {
+    private val purchasePointUseCase: PurchasePointUseCase,
+    private val clearDownloadedFilesUseCase: ClearDownloadedFilesUseCase,
+    private val clearPurchaseListUseCase: ClearPurchaseListUseCase
+) : ViewModel() {
     // 로그인 상태
     val isLoggedIn: StateFlow<Boolean> = userSession.isLoggedIn
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
@@ -46,7 +47,6 @@ class MemberViewModel @Inject constructor(
 
     private val _purchaseSuccess = MutableStateFlow<Boolean?>(null)
     val purchaseSuccess: StateFlow<Boolean?> = _purchaseSuccess
-
 
 
     suspend fun deleteMember(): Result<Unit> {
@@ -66,11 +66,15 @@ class MemberViewModel @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun logout() {
+        clearDownloadedFilesUseCase()
+        clearPurchaseListUseCase()
         userSession.logout()
         val tokenDataSource = TokenDataSource
         tokenDataSource.clearToken()
     }
+
     // 회원 정보 수정하는 함수
     fun fetchMemberInfo() {
         _uiState.value = UiState.Loading
@@ -88,7 +92,8 @@ class MemberViewModel @Inject constructor(
                     syncPurchasedPacksUseCase()
 
                     _uiState.value = UiState.Success<MemberEntity>(result)
-                } else if (status == 401 || status == 403) {Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
+                } else if (status == 401 || status == 403) {
+                    Log.w("FetchMemberInfo", "Unauthorized or Forbidden response, status: $status")
                     _uiState.value = UiState.UnAuth
                 }
             } catch (e: Exception) {

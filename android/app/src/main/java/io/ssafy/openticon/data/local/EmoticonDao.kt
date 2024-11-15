@@ -71,7 +71,18 @@ interface EmoticonDao {
     @Query("DELETE FROM emoticon_pack_orders")
     suspend fun deleteAllEmoticonPacksOrder()
 
-
     @Update
     suspend fun updateEmoticonPack(emoticonPack: EmoticonPackEntity)
+
+    @Query("DELETE FROM emoticon_packs")
+    suspend fun deleteAllEmoticonPacks()
+
+    @Query("SELECT * FROM emoticons")
+    suspend fun getAllEmoticons(): List<Emoticon>
+
+    @Query("DELETE FROM emoticons")
+    suspend fun deleteAllEmoticons()
+
+    @Query("DELETE FROM like_emoticons")
+    suspend fun deleteAllLikeEmoticons()
 }
