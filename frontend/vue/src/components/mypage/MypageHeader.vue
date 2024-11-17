@@ -88,28 +88,23 @@
       class="flex justify-center items-center flex-1 mt-4 px-4"
     >
       <div
-        class="flex justify-center items-center flex-1 mt-4 px-4"
+        class="w-full h-full flex justify-center items-center rounded-lg bg-slate-200 p-4 flex-col"
       >
-        <div
-          class="w-full h-full flex justify-center items-center rounded-lg bg-rose-200 p-4 flex-col"
+        <span class="text-lg font-nnsqneo-extra-bold text-center text-slate-700"
+          >심사대기중인 이모티콘 :
+          <span class="text-2xl font-nnsqneo-heavy"
+            >{{ objectionCount }}
+            {{ moreObjection ? "+" : "" }}
+          </span>
+          개</span
         >
+        <RouterLink :to="{ name: 'objectionList' }">
           <span
-            class="text-lg font-nnsqneo-extra-bold text-center text-rose-700"
-            >심사대기중인 이모티콘 :
-            <span class="text-2xl font-nnsqneo-heavy"
-              >{{ blockedEmoticonCount }}
-              {{ moreBlockedEmoticon ? "+" : "" }}
-            </span>
-            개</span
+            class="material-icons text-xl hover:underline font-nnsqneo-heavy text-slate-700"
           >
-          <RouterLink :to="{ name: 'objectionList' }">
-            <span
-              class="material-icons text-xl hover:underline font-nnsqneo-heavy text-rose-700"
-            >
-              심사대기 목록 바로가기
-            </span>
-          </RouterLink>
-        </div>
+            심사대기 목록 바로가기
+          </span>
+        </RouterLink>
       </div>
     </div>
   </div>
@@ -152,6 +147,7 @@ const blockedEmoticonCount = ref(0);
 const moreBlockedEmoticon = ref(false);
 
 const objectionCount = ref(0);
+const moreObjection = ref(false);
 
 onMounted(async () => {
   blacklistResult.value = await objectionStore.getBlockedEmoticonPackList(
@@ -165,6 +161,7 @@ onMounted(async () => {
     const adminStore = useAdminStore();
     const objectionList = await adminStore.getObjectionList(0, 100);
     objectionCount.value = objectionList.content.length;
+    moreObjection.value = !objectionList.last;
   }
 });
 

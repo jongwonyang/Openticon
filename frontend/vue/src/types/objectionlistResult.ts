@@ -34,10 +34,11 @@ export type Objection = {
   emoticonPack: {
     id: number;
     title: string;
-    member: {
+    author: {
       id: number;
-      email: string;
       nickname: string;
+      profile: string;
+      bio: string;
     };
     price: number;
     view: number;
@@ -46,16 +47,15 @@ export type Objection = {
     listImg: string;
     emoticons: string[];
     description: string;
-    shareLink: string;
     createdAt: string;
-    updatedAt: string;
     tags: string[];
+    sharedLink: string;
     download: number;
-    deletedAt: string;
     public: boolean;
     blacklist: boolean;
-    aiGenerated: boolean;
+    aigenerated: boolean;
   };
+  submitRequest: string;
   type: "EXAMINE" | "REPORT";
   state: "PENDING" | "RECEIVED" | "APPROVED" | "REJECTED";
   createdAt: string;

@@ -1,10 +1,9 @@
 <template>
-  <div>
-    <h1>신고 목록</h1>
-  </div>
+  <Objectionlist/>
 </template>
 
 <script setup>
+import Objectionlist from "@/components/objectionManage/Objectionlist.vue";
 import { useAdminStore } from "@/stores/admin";
 
 const adminStore = useAdminStore();
