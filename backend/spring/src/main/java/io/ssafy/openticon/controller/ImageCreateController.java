@@ -3,6 +3,7 @@ package io.ssafy.openticon.controller;
 import io.ssafy.openticon.controller.request.ImageCreateRequestDto;
 import io.ssafy.openticon.dto.GpuRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,17 +25,19 @@ import java.io.InputStream;
 @RestController
 @RequestMapping("/ai")
 public class ImageCreateController {
-
-    @Value("${spring.gpu-url}")
-    private String GPU_URL;
-
     private final WebClient webClient;
 
-    public ImageCreateController(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.
-                codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)).
-                baseUrl(GPU_URL).build();
+    public ImageCreateController(WebClient.Builder webClientBuilder,
+                                 @Value("${spring.gpu-url}") String gpuUrl) {
+        if (gpuUrl == null || gpuUrl.isEmpty()) {
+            throw new IllegalArgumentException("GPU_URL is not set or invalid");
+        }
+        this.webClient = webClientBuilder
+                .baseUrl(gpuUrl)
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
+                .build();
     }
+
 
     @PostMapping("/create-image")
     @Operation(summary = "GPU 서버에 이미지 생성 요청")
