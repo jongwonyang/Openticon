@@ -93,7 +93,7 @@ watch(props, (newVal) => {
         nickname: userStore.userInfo?.nickname ?? "",
         profile: userStore.userInfo?.profile_image ?? "",
       },
-      aigenerated: false,
+      aigenerated: true,
       createdAt: new Date().toISOString(),
       id: 0,
       title: newVal.emoticonPackUploadInfo.packTitle,

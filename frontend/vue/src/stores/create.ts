@@ -11,6 +11,8 @@ export const useCreateStore = defineStore("create", () => {
   const expression = ref('');
   const composition = ref('');
   const outfit = ref('');
+  const textColor = ref('#FFFFFF');
+  const textOutlineColor = ref('#000000');
 
   const createImage = async (seed: string, prompt: string): Promise<File> => {
     const response = await apiClient.post(`/ai/create-image`, {
@@ -37,6 +39,8 @@ export const useCreateStore = defineStore("create", () => {
     expression,
     composition,
     outfit,
+    textColor,
+    textOutlineColor,
     createImage,
     shuffleSeed,
   };
