@@ -8,22 +8,22 @@
     <div class="flex flex-col gap-4">
       <div class="flex-grow">
         <p class="font-medium mb-2">스티커</p>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-4 gap-2 max-h-[170px] overflow-y-auto">
           <button
             v-for="sticker in stickers"
             :key="sticker"
             @click="addSticker(sticker)"
-            class="p-2 border rounded-lg hover:bg-gray-100"
+            class="p-2 rounded-full hover:bg-gray-100 text-3xl aspect-square"
           >
-            <img :src="sticker" class="w-full" />
+            {{ sticker }}
           </button>
         </div>
       </div>
       <div class="flex-shrink-0">
         <p class="font-medium mb-2">
           텍스트
-          <input type="color" v-model="textColor" />
-          <input type="color" v-model="textOutlineColor" />
+          <input type="color" v-model="createStore.textColor" />
+          <input type="color" v-model="createStore.textOutlineColor" />
         </p>
         <div class="flex items-center gap-2">
           <div class="flex-grow">
@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch, markRaw } from "vue";
 import * as fabric from "fabric";
+import { useCreateStore } from "@/stores/create";
 
 const props = defineProps<{
   image: File | null;
@@ -60,12 +61,43 @@ const canvas = ref<HTMLCanvasElement | null>(null);
 const fabricCanvas = ref<fabric.Canvas | null>(null);
 const textInput = ref("");
 
+const createStore = useCreateStore();
+
 // 스티커 목록 (예시)
 const stickers = [
-  "/stickers/sticker1.png",
-  "/stickers/sticker2.png",
-  "/stickers/sticker3.png",
-  "/stickers/sticker4.png",
+  "💖",
+  "💔",
+  "💗",
+  "💙",
+  "💢",
+  "💥",
+  "💕",
+  "💤",
+  "💦",
+  "💞",
+  "💨",
+  "💬",
+  "💭",
+  "💯",
+  "💫",
+  "🍀",
+  "🥑",
+  "🍉",
+  "🍎",
+  "🍒",
+  "🍓",
+  "🍋",
+  "🎉",
+  "✨",
+  "🧨",
+  "🎈",
+  "🏀",
+  "🎤",
+  "💊",
+  "🔪",
+  "⏳",
+  "⌛",
+  "📞",
 ];
 
 const imageUrl = computed(() => {
@@ -106,19 +138,19 @@ watch(imageUrl, (newUrl) => {
   }
 });
 
-// 텍스트 추가
+// addText 함수 수정
 const addText = () => {
   if (!textInput.value || !fabricCanvas.value) return;
 
   const text = new fabric.Textbox(textInput.value, {
     left: 100,
     top: 100,
-    fontSize: 20,
-    fontWeight: "bold",
-    fill: textColor.value,
-    stroke: textOutlineColor.value,      // 테두리 색상 (흰색)
-    strokeWidth: 1,         // 테두리 두께
-    strokeUniform: true,    // 테두리 두께를 균일하게 유지
+    fontSize: 60,
+    fill: createStore.textColor,
+    stroke: createStore.textOutlineColor,
+    strokeWidth: 3,
+    strokeUniform: true,
+    fontFamily: "MaplestoryOTFBold", // 폰트 패밀리 추가
   });
 
   fabricCanvas.value.add(markRaw(text));
@@ -127,51 +159,47 @@ const addText = () => {
 };
 
 // 스티커 추가
-const addSticker = (stickerUrl: string) => {
+const addSticker = (sticker: string) => {
   if (!fabricCanvas.value) return;
 
-  fabric.FabricImage.fromURL(stickerUrl).then((img) => {
-    img.scale(0.5);
-    img.set({
-      left: 100,
-      top: 100,
-    });
-
-    fabricCanvas.value?.add(markRaw(img));
-    fabricCanvas.value?.setActiveObject(img);
+  const text = new fabric.FabricText(sticker, {
+    left: 100,
+    top: 100,
+    fontSize: 60,
+    fill: createStore.textColor,
   });
+
+  fabricCanvas.value.add(markRaw(text));
+  fabricCanvas.value.setActiveObject(text);
 };
 
-const textColor = ref("#FFFFFF");
-const textOutlineColor = ref("#000000");
 const emit = defineEmits<{
-  (e: 'update:editedImage', image: File): void
+  (e: "update:editedImage", image: File): void;
 }>();
 
 // canvas를 이미지 파일로 변환하는 함수 추가
 const exportToImage = () => {
   if (!fabricCanvas.value) return;
-  
+
   // 캔버스를 DataURL로 변환
   const dataUrl = fabricCanvas.value.toDataURL({
     format: "png",
     quality: 1,
     multiplier: 2,
   });
-  
+
   // DataURL을 Blob으로 변환
   fetch(dataUrl)
-    .then(res => res.blob())
-    .then(blob => {
+    .then((res) => res.blob())
+    .then((blob) => {
       // Blob을 File 객체로 변환
-      const file = new File([blob], 'edited-image.png', { type: 'image/png' });
-      emit('update:editedImage', file);
+      const file = new File([blob], "edited-image.png", { type: "image/png" });
+      emit("update:editedImage", file);
     });
 };
 
 // exportToImage 함수를 외부에서 호출할 수 있도록 expose
 defineExpose({
-  exportToImage
+  exportToImage,
 });
-
 </script>

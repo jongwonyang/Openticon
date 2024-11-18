@@ -14,13 +14,6 @@ const REQUIRED_WIDTH = 200; // 정확히 200px
 const REQUIRED_HEIGHT = 200; // 정확히 200px
 
 const isImageCreatorOpen = ref(false);
-function handleDrop(event: DragEvent) {
-  event.preventDefault();
-  const files = event.dataTransfer?.files;
-  if (files && files.length > 0) {
-    Array.from(files).forEach((file) => handleImageFile(file));
-  }
-}
 
 function handleFileInput(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -147,7 +140,6 @@ function handleDragOver(event: DragEvent) {
   <div class="flex flex-col items-center justify-center aspect-square">
     <div
       @click="isImageCreatorOpen = true"
-      @drop="handleDrop"
       @dragover="handleDragOver"
       :class="[
         'w-full h-full bg-gray-100 rounded-md border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200',
@@ -155,9 +147,9 @@ function handleDragOver(event: DragEvent) {
       ]"
     >
       <span class="material-icons text-gray-400 text-6xl"
-        >add_circle_outline</span
+        >create</span
       >
-      <span class="text-gray-400 text-sm">이미지 불러오기</span>
+      <span class="text-gray-400 text-sm">이미  지 생성하기</span>
       <input
         ref="fileInput"
         type="file"

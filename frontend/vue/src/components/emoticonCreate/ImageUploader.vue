@@ -23,14 +23,6 @@ const REQUIRED_HEIGHT = 200; // 정확히 200px
 
 const isImageCreatorOpen = ref(false);
 
-function handleDrop(event: DragEvent) {
-  event.preventDefault();
-  const files = event.dataTransfer?.files;
-  if (files && files.length > 0) {
-    handleImageFile(files[0]);
-  }
-}
-
 function handleFileInput(event: Event) {
   const input = event.target as HTMLInputElement;
   const files = input.files;
@@ -155,7 +147,6 @@ function handleDragOver(event: DragEvent) {
   <div class="flex flex-col items-center justify-center md:items-start">
     <div
       @click="isImageCreatorOpen = true"
-      @drop="handleDrop"
       @dragover="handleDragOver"
       :class="[
         'w-32 h-32 bg-gray-100 rounded-md border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200',
@@ -166,9 +157,9 @@ function handleDragOver(event: DragEvent) {
     >
       <template v-if="!imageData.previewUrl">
         <span class="material-icons text-gray-400 text-6xl"
-          >add_circle_outline</span
+          >create</span
         >
-        <span class="text-gray-400 text-sm">이미지 불러오기</span>
+        <span class="text-gray-400 text-sm">이미지 생성하기</span>
       </template>
       <img
         v-else
