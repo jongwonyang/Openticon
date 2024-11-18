@@ -81,6 +81,7 @@ import { ref } from "vue";
 import ObjectionImageGrid from "./ObjectionImageGrid.vue";
 import ManagerAction from "./ManagerAction.vue";
 import type { Objection } from "@/types/objectionlistResult";
+
 const isOpen = ref(false);
 
 defineProps<{

@@ -186,7 +186,7 @@ const emit = defineEmits<{
 const createStore = useCreateStore();
 
 const handleCreateImage = async () => {
-  const prompt = `Chibi, solo, big head, ${createStore.characterType}, ${createStore.skinColor}, ${createStore.hairStyle}, ${createStore.hairColor}, ${createStore.expression}, ${createStore.composition}, ${createStore.outfit}`;
+  const prompt = `Chibi, solo, big head, ((white background)), ((simple background)), ${createStore.characterType}, ${createStore.skinColor}, ${createStore.hairStyle}, ${createStore.hairColor}, ${createStore.expression}, ${createStore.composition}, ${createStore.outfit}`;
   const image = await createStore.createImage(
     createStore.seed.toString(),
     prompt
