@@ -34,12 +34,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { RouterLink } from "vue-router";
 import { useInfiniteScroll } from "@vueuse/core";
 import Loading from "../common/loading/Loading.vue";
 import { useObjectionStore } from "@/stores/objection";
-import type { BlacklistedEmoticon } from "@/types/blacklistResult";
-import BlacklistedEmoticonDiv from "./BlacklistedEmoticonDiv.vue";
 import ObjectionDiv from "./ObjectionDiv.vue";
 import type { Objection } from "@/types/objectionlistResult";
 

@@ -77,10 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import type { BlacklistedEmoticon } from "@/types/blacklistResult";
 import { ref } from "vue";
-import EmoticonImageGrid from "./EmoticonImageGrid.vue";
-import UserAction from "./UserAction.vue";
 import ObjectionImageGrid from "./ObjectionImageGrid.vue";
 import ManagerAction from "./ManagerAction.vue";
 import type { Objection } from "@/types/objectionlistResult";
