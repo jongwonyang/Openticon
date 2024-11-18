@@ -20,10 +20,14 @@
         </div>
       </div>
       <div class="flex-shrink-0">
-        <p class="font-medium mb-2">
+        <p class="font-medium mb-2 flex flex-row justify-between gap-1">
           텍스트
-          <input type="color" v-model="createStore.textColor" />
-          <input type="color" v-model="createStore.textOutlineColor" />
+          <div>
+            <span class="text-xs text-gray-500">글자색</span>
+            <input type="color" v-model="createStore.textColor" />
+            <span class="text-xs text-gray-500">글자 테두리색</span>
+            <input type="color" v-model="createStore.textOutlineColor" />
+          </div>
         </p>
         <div class="flex items-center gap-2">
           <div class="flex-grow">

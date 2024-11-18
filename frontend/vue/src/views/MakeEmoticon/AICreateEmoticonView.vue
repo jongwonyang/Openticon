@@ -39,7 +39,7 @@ const emoticonPackStore = useEmoticonPackStore();
 
 const emoticonPackUploadInfo = ref<EmoticonPackUploadInfo>({
   packTitle: "",
-  isAiGenerated: false,
+  isAiGenerated: true,
   isPublic: true,
   category: "REAL",
   description: "",
