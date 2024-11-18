@@ -8,7 +8,7 @@ export type UploadResult = {
   };
   price: number;
   view: number;
-  category: "REAL" | "CHARACTER" | "ENTERTAINMENT" | "LETTER";
+  category: "REAL" | "CHARACTER" | "ENTERTAINMENT" | "TEXT";
   thumbnailImg: string;
   listImg: string;
   description: string;

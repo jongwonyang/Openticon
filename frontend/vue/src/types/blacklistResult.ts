@@ -41,7 +41,7 @@ export type BlacklistedEmoticon = {
     };
     price: number;
     view: number;
-    category: "REAL" | "CHARACTER" | "ENTERTAINMENT" | "LETTER";
+    category: "REAL" | "CHARACTER" | "ENTERTAINMENT" | "TEXT";
     thumbnailImg: string;
     listImg: string;
     emoticons: string[];

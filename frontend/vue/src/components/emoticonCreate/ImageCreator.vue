@@ -3,9 +3,9 @@
     v-if="isOpen"
     class="fixed inset-0 z-50 flex items-center justify-center"
   >
-    <div class="fixed inset-0 bg-black opacity-50"></div>
+    <div class="fixed inset-0 bg-black opacity-50" style=""></div>
     <div
-      class="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh]"
+      class="relative bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col overflow-hidden"
     >
       <div class="flex justify-between items-center p-6">
       <h2
@@ -18,9 +18,10 @@
         </button>
       </div>
 
-      <ImageEditor :image="image || null" @update:editedImage="handleImage($event)" ref="imageEditor" />
-      <ImageOptions @update:image="image = $event" @update:cancel="closeModal" @update:apply="handleApplyImage" />
-
+      <div class="flex flex-col flex-shrink overflow-y-auto">
+        <ImageEditor :image="image || null" @update:editedImage="handleImage($event)" ref="imageEditor" />
+        <ImageOptions @update:image="image = $event" @update:cancel="closeModal" @update:apply="handleApplyImage" />
+      </div>
       <!-- <div v-if="isUploaded" class="flex justify-end gap-2 p-6">
         <button
           @click="applyImage"

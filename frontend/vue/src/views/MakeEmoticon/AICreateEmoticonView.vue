@@ -75,7 +75,7 @@ function handleCategoryUpdate(category: string) {
     | "REAL"
     | "CHARACTER"
     | "ENTERTAINMENT"
-    | "LETTER";
+    | "TEXT";
 }
 
 function handleDescriptionUpdate(description: string) {
