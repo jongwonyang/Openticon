@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,13 +29,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.ssafy.openticon.ui.viewmodel.EmoticonAllViewModel
-import io.ssafy.openticon.ui.viewmodel.EmoticonPackDetailScreenViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +72,7 @@ fun EmoticonAllScreen(
                     IconButton(onClick = {
                         navController.popBackStack()
                     }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -90,7 +87,7 @@ fun EmoticonAllScreen(
                     .padding(paddingValues)
 //                    .padding(top = 16.dp)
             ) {
-                item{
+                item {
                     Spacer(Modifier.height(16.dp))
                 }
                 // 검색 결과가 없는 경우 메시지 표시
