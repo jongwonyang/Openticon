@@ -2,14 +2,21 @@ package io.ssafy.openticon.entity;
 
 import io.ssafy.openticon.dto.Category;
 import io.ssafy.openticon.dto.EmoticonPack;
-import io.ssafy.openticon.dto.ExamineType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hamcrest.core.Is;
+
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @Table(name = "emoticon_pack")
 public class EmoticonPackEntity {
@@ -19,7 +26,7 @@ public class EmoticonPackEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false, unique = true)
+    @Column(name = "title", nullable = false)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)  // 지연 로딩 설정
@@ -54,41 +61,56 @@ public class EmoticonPackEntity {
     @Column(name = "description")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "examine", nullable = false)
-    private ExamineType examine = ExamineType.IN_PROGRESS;
-
     @Column(name = "share_link", nullable = false)
     private String shareLink="public";
 
+    @OneToMany(mappedBy = "emoticonPack")
+    private List<TagListEntity> tagLists;
+
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private OffsetDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
+    @Column(name = "download", nullable = false)
+    private int download;
+
 
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
     }
 
     @PrePersist
     public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
+        this.createdAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
+        this.updatedAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
+        this.shareLink= UUID.randomUUID().toString();
+        this.download = 0;
     }
 
     public EmoticonPackEntity(EmoticonPack emoticonPack, MemberEntity member, String thumbnailImg, String listImg){
         this.title=emoticonPack.getPackTitle();
-        this.isAiGenerated=emoticonPack.isAiGenerated();
-        this.isPublic=emoticonPack.isPublic();
+        this.isAiGenerated=emoticonPack.getIsAiGenerated();
+        this.isPublic=emoticonPack.getIsPublic();
         this.category=emoticonPack.getCategory();
         this.description=emoticonPack.getDescription();
         this.price=emoticonPack.getPrice();
         this.member=member;
         this.thumbnailImg=thumbnailImg;
         this.listImg=listImg;
+    }
+
+    public boolean getBlacklist() {
+        return this.isBlacklist;
+    }
+
+    public void setBlacklist(boolean blacklist) {
+        isBlacklist = blacklist;
     }
 
 }

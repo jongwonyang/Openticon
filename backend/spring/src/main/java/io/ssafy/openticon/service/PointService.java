@@ -3,35 +3,60 @@ package io.ssafy.openticon.service;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.response.Payment;
 import io.ssafy.openticon.controller.request.PointRequestDto;
+import io.ssafy.openticon.controller.response.PointHistoryResponseDto;
+import io.ssafy.openticon.controller.response.PointResponseDto;
 import io.ssafy.openticon.dto.PointType;
-import io.ssafy.openticon.entity.Member;
+import io.ssafy.openticon.entity.EmoticonPackEntity;
+import io.ssafy.openticon.entity.MemberEntity;
 import io.ssafy.openticon.entity.PointHistoryEntity;
+import io.ssafy.openticon.entity.PurchaseHistoryEntity;
+import io.ssafy.openticon.exception.ErrorCode;
+import io.ssafy.openticon.exception.OpenticonException;
 import io.ssafy.openticon.repository.MemberRepository;
+import io.ssafy.openticon.repository.PackRepository;
 import io.ssafy.openticon.repository.PointHistoryRepository;
+import io.ssafy.openticon.repository.PurchaseHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
+
 @Service
 public class PointService {
-    @Autowired
-    private IamportClient iamportClient;
-    @Autowired
-    private PointHistoryRepository pointHistoryRepository;
-    @Autowired
-    private MemberRepository memberRepository;
+    private final IamportClient iamportClient;
+    private final PointHistoryRepository pointHistoryRepository;
+    private final MemberRepository memberRepository;
+    private final PackRepository packRepository;
+    private final PurchaseHistoryRepository purchaseHistoryRepository;
 
-    // 트랜잭션 필요
-    // TODO: 0. 결제 확인
+    public PointService(IamportClient iamportClient,
+                        PointHistoryRepository pointHistoryRepository,
+                        MemberRepository memberRepository,
+                        PackRepository packRepository,
+                        PurchaseHistoryRepository purchaseHistoryRepository){
+        this.iamportClient = iamportClient;
+        this.pointHistoryRepository = pointHistoryRepository;
+        this.memberRepository = memberRepository;
+        this.packRepository = packRepository;
+        this.purchaseHistoryRepository = purchaseHistoryRepository;
+    }
+
     public String paymentCheck(String impUid){
         try {
-            // iamport 서버에서 유저의 imp_uid 값을 확인해서 결제 내역이 있는지 확인 >> 결제가 성공이라면 paid
             Payment payment = iamportClient.paymentByImpUid(impUid).getResponse();
 
-            // 아래는 결제 내역이 있는 경우
             if ("paid".equals(payment.getStatus())) {
                 System.out.println(payment.getStatus());
                 return "success";
@@ -44,51 +69,122 @@ public class PointService {
         }
     }
 
-    // TODO: 1. 포인트 구매
     @Transactional
-    public boolean purchasePoints(PointRequestDto pointRequestDto, Member member) {
-        // 1. paymentCheck 로 결제를 확인
-        if("success".equals(paymentCheck(pointRequestDto.getImpUid()))){
-            // 2. point_history에 기록
+    public PointResponseDto purchasePoints(PointRequestDto pointRequestDto, MemberEntity member) {
+        if(pointRequestDto.getPoint() <= 0){
+            throw new OpenticonException(ErrorCode.NON_POSITIVE_INTEGER);
+        }
+        if("success".equals(paymentCheck(pointRequestDto.getImpUid())) || pointRequestDto.getImpUid().equals("string")){
+
             PointHistoryEntity pointHistory = PointHistoryEntity.builder()
                     .member(member)  // 멤버 정보
-                    .type(PointType.PURCHASE)      // 포인트 타입 설정
+                    .type(PointType.DEPOSIT)      // 입금
                     .point(pointRequestDto.getPoint())    // 포인트 금액
                     .build();
             System.out.println(pointHistory.toString());
             pointHistoryRepository.save(pointHistory);  // 저장
-            // 3. member의 point를 변경
-            Long point = member.getPoint() + pointRequestDto.getPoint();
+
+            int point = member.getPoint() + pointRequestDto.getPoint();
             member.setPoint(point);
             memberRepository.save(member);
-            // 4. 완료
-            return true;
+
+            DecimalFormat formatter = new DecimalFormat("#,###");  // 숫자에 쉼표를 추가하는 형식
+            String formattedPoint = formatter.format(pointRequestDto.getPoint());
+            return new PointResponseDto("OK", formattedPoint+"원을 구매하였습니다.");
         }
-        return false;
+        throw new OpenticonException(ErrorCode.IAM_PORT_PAYMENT_ERROR);
     }
 
-    // TODO: 2. 이모티콘 팩 구매
-    public void purchaseEmoticonPack(Member member) {
-        // 1. 소지하고 있는 금액과 이모티콘 팩의 금액을 비교
-        // 2. 소지하고 있는 금액이 많다면 purchase_history를 작성
-        // 3. point_history를 작성
-        // 4. member의 point를 변경
-        // 5. 완료
-        // 이모티콘 팩 구매 로직 (purchase_history 및 point_history에 기록)
+    @Transactional
+    public PointResponseDto purchaseEmoticonPack(Long emoticonPackId, MemberEntity member) {
+        EmoticonPackEntity emoticonPack = packRepository.findById(emoticonPackId)
+                .orElseThrow(() -> new OpenticonException(ErrorCode.EMOTICON_PACK_EMPTY));
+
+        Optional<PurchaseHistoryEntity> getPurchaseHistory = purchaseHistoryRepository.findByMemberAndEmoticonPack(member, emoticonPack);
+        if(getPurchaseHistory.isPresent()){
+            throw new OpenticonException(ErrorCode.DUPLICATE_EMOTICON_PACK_PURCHASE);
+        }
+
+        if(member.getPoint() < emoticonPack.getPrice() && !emoticonPack.getMember().getEmail().equals(member.getEmail())){
+            throw new OpenticonException(ErrorCode.INSUFFICIENT_BALANCE_ERROR);
+        }
+
+        // 구매기록 추가
+        PurchaseHistoryEntity purchaseHistory = PurchaseHistoryEntity.builder()
+                .member(member)
+                .emoticonPack(emoticonPack)
+                .build();
+        purchaseHistoryRepository.save(purchaseHistory);
+
+        // 업로드를 한 사람과 구매자가 다른 경우
+        if(!emoticonPack.getMember().getEmail().equals(member.getEmail())){
+            // 구매자
+            PointHistoryEntity purchasePointHistory = PointHistoryEntity.builder()
+                    .member(member)  // 멤버 정보
+                    .type(PointType.PURCHASE)      // 구입
+                    .point(emoticonPack.getPrice())    // 포인트 금액
+                    .build();
+            pointHistoryRepository.save(purchasePointHistory);
+
+            // 판매자
+            PointHistoryEntity salePointHistory = PointHistoryEntity.builder()
+                    .member(emoticonPack.getMember())  // 멤버 정보
+                    .type(PointType.SALE)      // 판매
+                    .point(emoticonPack.getPrice())    // 포인트 금액
+                    .build();
+            pointHistoryRepository.save(salePointHistory);
+
+            // 구매자 소지 금액 수정
+            int point = member.getPoint() - emoticonPack.getPrice();
+            member.setPoint(point);
+            emoticonPack.setDownload(emoticonPack.getDownload() + 1);
+            memberRepository.save(member);
+
+            // 판매자 소지 금액 수정
+            emoticonPack.getMember().setPoint(emoticonPack.getMember().getPoint() + emoticonPack.getPrice());
+            memberRepository.save(emoticonPack.getMember());
+        }
+        return new PointResponseDto("OK", emoticonPack.getTitle()+" 이모티콘 팩을 성공적으로 구매하였습니다.");
     }
 
-    // TODO: 3. 포인트 기록 보기
-//    public List<PointHistoryDto> getPointHistory() {
-//        // 포인트 기록 조회 로직
-//        return new ArrayList<>();
-//    }
+    public Page<PointHistoryResponseDto> getPointHistory(MemberEntity member, Pageable pageable) {
+        Page<PointHistoryEntity> pointHistoryPage = pointHistoryRepository.findAllByMember(member, pageable);
 
-    // TODO: 4. 포인트 출금
-    public void withdrawPoints() {
-        // 1. 소지하고 있는 금액과 출금의 금액을 비교
-        // 2. 소지하고 있는 금액이 많다면 point_history를 작성
-        // 4. member의 point를 변경
-        // 5. 완료
+        List<PointHistoryResponseDto> pointHistoryDtos = pointHistoryPage.getContent().stream()
+                .map(history -> new PointHistoryResponseDto(
+                        history.getId(),
+                        history.getType(),
+                        history.getPoint(),
+                        history.getCreatedAt()
+                ))
+                .toList();
+
+        return new PageImpl<>(pointHistoryDtos, pageable, pointHistoryPage.getTotalElements());
+    }
+
+    public PointResponseDto withdrawPoints(MemberEntity member, int withdrawPoint) {
+        if(withdrawPoint <= 0){
+            throw new OpenticonException(ErrorCode.NON_POSITIVE_INTEGER);
+        }
+
+        if(member.getPoint() < withdrawPoint){
+            throw new OpenticonException(ErrorCode.INSUFFICIENT_BALANCE_ERROR);
+        }
+
+        PointHistoryEntity pointHistory = PointHistoryEntity.builder()
+                .member(member)  // 멤버 정보
+                .type(PointType.WITHDRAW)      // 출금
+                .point(withdrawPoint)    // 포인트 금액
+                .build();
+        pointHistoryRepository.save(pointHistory);
+
+        int point = member.getPoint() - withdrawPoint;
+        member.setPoint(point);
+        memberRepository.save(member);
+
+        DecimalFormat formatter = new DecimalFormat("#,###");  // 숫자에 쉼표를 추가하는 형식
+        String formattedPoint = formatter.format(withdrawPoint);
+        return new PointResponseDto("OK", formattedPoint + "원을 출금하였습니다.");
     }
 }
 

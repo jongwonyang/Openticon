@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "member")
@@ -26,15 +28,15 @@ public class MemberEntity {
     private String nickname;  // 닉네임 (유니크)
 
     @Builder.Default
-    private Long point = 0L;  // 보유 포인트
+    private int point = 0;  // 보유 포인트
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();  // 생성 시간
+    private OffsetDateTime createdAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();  // 생성 시간
 
     @Column(nullable = false)
     @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();  // 수정 시간
+    private OffsetDateTime updatedAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();  // 수정 시간
 
     @Builder.Default
     private Boolean manager = false;  // 관리자 여부
@@ -50,4 +52,7 @@ public class MemberEntity {
 
     @Builder.Default
     private String profile_image = "";  // 프로필 이미지
+
+    @Builder.Default
+    private String bio = ""; // 상태 메세지
 }

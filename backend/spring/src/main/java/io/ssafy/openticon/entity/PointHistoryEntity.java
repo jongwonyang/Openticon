@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.flyway.FlywayProperties;
 
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "point_history")
@@ -26,16 +28,16 @@ public class PointHistoryEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberEntity member;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private PointType type;
 
     @Column(name = "point", nullable = false)
-    private Long point;
+    private int point;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private OffsetDateTime createdAt = LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toOffsetDateTime();
 }

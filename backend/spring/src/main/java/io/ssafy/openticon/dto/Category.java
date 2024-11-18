@@ -2,7 +2,7 @@ package io.ssafy.openticon.dto;
 
 public enum Category {
 
-    REAL("실사"), CHARACTER("캐릭터"), ENTERTAINMENT("방송&연예"), LETTER("글자");
+    REAL("실사"), CHARACTER("캐릭터"), ENTERTAINMENT("방송&연예"), TEXT("글자");
 
     final private String name;
 

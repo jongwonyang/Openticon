@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'org.flywaydb.flyway' version '8.5.0'
+	id 'org.openjfx.javafxplugin' version '0.0.14'
+
 }
 
 group = 'io.ssafy'
@@ -55,6 +57,23 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
+	implementation 'com.google.cloud:google-cloud-vision:3.46.0'
+
+	implementation group: 'dev.brachtendorf', name: 'JImageHash', version: '1.0.0'
+	implementation group: 'org.openjfx', name: 'javafx', version: '20.0.2', ext: 'pom'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	//gif encoder
+	implementation 'com.madgag:animated-gif-lib:1.4'
+}
+
+javafx {
+	version = "20"
+	modules = [ 'javafx.base', 'javafx.graphics' ]
 }
 
 tasks.named('test') {
