@@ -1,0 +1,81 @@
+name: ${ENV_PROJECT_NAME}
+services:
+  spring:
+    build:
+      context: ./spring
+      dockerfile: Dockerfile
+    ports:
+      - "${ENV_SPRING_EXPOSE_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${ENV_SPRING_PROFILES_ACTIVE}
+      DEV_NAME : ${ENV_DEV_NAME}
+      DEV_PASSWORD : ${ENV_DEV_PASSWORD}
+      KAKAO_OAUTH_CLIENT_ID : ${ENV_KAKAO_OAUTH_CLIENT_ID}
+      KAKAO_OAUTH_CLIENT_SECRET : ${ENV_KAKAO_OAUTH_CLIENT_SECRET}
+      NAVER_OAUTH_CLIENT_ID : ${ENV_NAVER_OAUTH_CLIENT_ID}
+      NAVER_OAUTH_CLIENT_SECRET : ${ENV_NAVER_OAUTH_CLIENT_SECRET}
+      GOOGLE_OAUTH_CLIENT_ID : ${ENV_GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET : ${ENV_GOOGLE_OAUTH_CLIENT_SECRET}
+      JWT_SECRET_KEY : ${ENV_JWT_SECRET_KEY}
+      IAMPORT_API_KEY : ${ENV_IAMPORT_API_KEY}
+      IAMPORT_API_SECRET : ${ENV_IAMPORT_API_SECRET}
+      DEV_BASE_URL : ${ENV_DEV_BASE_URL}
+      DEV_GPU_URL: ${ENV_DEV_GPU_URL}
+      DEV_IMAGE_SERVER_URL: "http://express:8070"
+      GOOGLE_APPLICATION_CREDENTIALS : ${ENV_GOOGLE_APPLICATION_CREDENTIALS}
+      TZ: Asia/Seoul
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - openticon_network
+
+  express:
+    build:
+      context: ./express
+      dockerfile: Dockerfile
+    ports:
+      - "${ENV_IMAGE_SERVER_EXPOSE_PORT}:8070"
+    environment:
+      IMAGE_SERVER_URL: ${ENV_DEV_IMAGE_SERVER_URL}
+      PORT: 8070
+    restart: unless-stopped
+    networks:
+      - openticon_network
+    volumes:
+      - image_server_data:/app/static
+    
+  redis:
+    image: redis
+    restart: unless-stopped
+    networks:
+      - openticon_network
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_DB=openticon
+      - POSTGRES_USER=${ENV_DEV_NAME}
+      - POSTGRES_PASSWORD=${ENV_DEV_PASSWORD}
+    ports:
+      - "${ENV_POSTGRES_EXPOSE_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ssafy -d openticon"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - openticon_network
+
+networks:
+  openticon_network:
+    external: true
+
+volumes:
+  postgres_data:
+  image_server_data:
