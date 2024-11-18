@@ -13,6 +13,7 @@ import EmoticonDetailPrivateView from "@/views/QueryEmoticon/EmoticonDetailPriva
 import BlacklistView from "@/views/MyPage/BlacklistView.vue";
 import MethodSelectView from "@/views/MakeEmoticon/MethodSelectView.vue";
 import AICreateEmoticonView from "@/views/MakeEmoticon/AICreateEmoticonView.vue";
+import ObjectionListView from "@/views/Manager/ObjectionListView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,9 +48,9 @@ const router = createRouter({
           next(); // 로그인 상태이면 접근 허용
         } else {
           makeWarningAlert(
-            "로그인이 필요한 서비스입니다. 메인페이지로 이동합니다."
+            "로그인이 필요한 서비스입니다."
           );
-          next({ name: "main" }); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
+          next(from); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
         }
       },
     },
@@ -63,9 +64,9 @@ const router = createRouter({
           next(); // 로그인 상태이면 접근 허용
         } else {
           makeWarningAlert(
-            "로그인이 필요한 서비스입니다. 메인페이지로 이동합니다."
+            "로그인이 필요한 서비스입니다."
           );
-          next({ name: "main" }); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
+          next(from); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
         }
       },
     },
@@ -94,9 +95,9 @@ const router = createRouter({
           next(); // 로그인 상태이면 접근 허용
         } else {
           makeWarningAlert(
-            "로그인이 필요한 서비스입니다. 메인페이지로 이동합니다."
+            "로그인이 필요한 서비스입니다."
           );
-          next({ name: "main" }); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
+          next(from); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
         }
       },
     },
@@ -109,6 +110,28 @@ const router = createRouter({
       path: "/blacklist",
       name: "blacklist",
       component: BlacklistView,
+    },
+    {
+      path: "/objectionList",
+      name: "objectionList",
+      component: ObjectionListView,
+      beforeEnter: (to, from, next) => {
+        const isLoggedIn = useUserStore().isLogined; // 로그인 상태 확인
+        if (isLoggedIn) {
+          if (!useUserStore().userInfo?.manager) {
+            makeWarningAlert(
+              "관리자 권한이 필요한 서비스입니다."
+            );
+            next(from);
+          }
+          next();
+        } else {
+          makeWarningAlert(
+            "로그인이 필요한 서비스입니다."
+          );
+          next(from); // 로그인 상태가 아니면 메인 페이지로 리다이렉트
+        }
+      },
     },
   ],
 });

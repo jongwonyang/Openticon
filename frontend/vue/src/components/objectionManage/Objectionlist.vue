@@ -2,17 +2,17 @@
   <div class="container mx-auto max-w-screen-lg">
     <!-- 이모티콘 리스트 -->
     <div class="grid grid-cols-1 gap-4 pt-4 px-4">
-      <BlacklistedEmoticonDiv
-        v-for="emoticon in displayedEmoticonList"
-        :key="emoticon.id"
-        :emoticon="emoticon"
+      <ObjectionDiv
+        v-for="objection in objectionList"
+        :key="objection.id"
+        :objection="objection"
       />
     </div>
     <div v-if="loading" class="flex justify-center items-center">
       <Loading />
     </div>
     <div
-      v-if="displayedEmoticonList.length === 0"
+      v-if="objectionList.length === 0"
       class="flex justify-center items-center h-24 bg-gray-200 rounded-lg mt-4"
     >
       <p class="text-gray-500">표시할 내용이 없습니다.</p>
@@ -34,28 +34,17 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { RouterLink } from "vue-router";
 import { useInfiniteScroll } from "@vueuse/core";
 import Loading from "../common/loading/Loading.vue";
 import { useObjectionStore } from "@/stores/objection";
-import type { BlacklistedEmoticon } from "@/types/blacklistResult";
-import BlacklistedEmoticonDiv from "./BlacklistedEmoticonDiv.vue";
+import ObjectionDiv from "./ObjectionDiv.vue";
+import type { Objection } from "@/types/objectionlistResult";
 
-const blockedEmoticonList = ref<BlacklistedEmoticon[]>([]);
+const objectionList = ref<Objection[]>([]);
 const currentPage = ref(0);
 const loading = ref(false);
 const hasMore = ref(true);
 const errorOccurred = ref(false);
-
-const props = defineProps<{
-  displayedState: "PENDING" | "RECEIVED" | "APPROVED" | "REJECTED";
-}>();
-
-const displayedEmoticonList = computed(() => {
-  return blockedEmoticonList.value.filter(
-    (emoticon) => emoticon.state === props.displayedState
-  );
-});
 
 const objectionStore = useObjectionStore();
 
@@ -64,15 +53,15 @@ const loadMoreEmoticons = async () => {
 
   loading.value = true;
   try {
-    const newEmoticonsResult = await objectionStore.getBlockedEmoticonPackList(
+    const newObjectionsResult = await objectionStore.getObjectionList(
       currentPage.value++,
       10
     );
-    if (newEmoticonsResult.last) {
+    if (newObjectionsResult.last) {
       hasMore.value = false;
     }
-    blockedEmoticonList.value.push(
-      ...newEmoticonsResult.content.map((item) => item)
+    objectionList.value.push(
+      ...newObjectionsResult.content.map((item) => item)
     );
     errorOccurred.value = false;
   } catch (error) {
