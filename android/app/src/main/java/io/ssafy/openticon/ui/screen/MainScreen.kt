@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,14 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import io.ssafy.openticon.FloatingService
+import io.ssafy.openticon.domain.FloatingService
 import io.ssafy.openticon.MainActivity
-import io.ssafy.openticon.R
 import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.LikeEmoticonPack
 import io.ssafy.openticon.ui.component.BottomNavigationBar
