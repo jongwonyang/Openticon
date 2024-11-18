@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Openticon으로 이동하기</title>
+    <script>
+      window.onload = function() {
+        // URL에서 UUID 추출
+        const path = window.location.pathname;
+        const uuid = path.split('/').pop();
+        
+        // openticon 스킴으로 리다이렉트
+        const redirectUrl = `openticon://emoticon-pack/${uuid}`;
+        window.location.href = redirectUrl;
+      }
+    </script>
+  </head>
+  <body>
+    <div style="text-align: center; padding: 20px;">
+      <h1>Openticon으로 이동중입니다...</h1>
+      <p>자동으로 이동하지 않는 경우, 앱이 설치되어 있는지 확인해주세요.</p>
+    </div>
+  </body>
+</html>
