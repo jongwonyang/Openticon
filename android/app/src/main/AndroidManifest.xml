@@ -77,7 +77,7 @@
 
         <!-- FloatingService -->
         <service
-            android:name=".FloatingService"
+            android:name=".domain.FloatingService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />

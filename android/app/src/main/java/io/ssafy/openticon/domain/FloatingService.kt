@@ -1,4 +1,4 @@
-package io.ssafy.openticon
+package io.ssafy.openticon.domain
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -13,10 +13,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
 import android.graphics.Rect
-import android.graphics.drawable.AnimatedImageDrawable
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -33,20 +30,18 @@ import android.widget.TableLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
-import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
+import io.ssafy.openticon.MainActivity
+import io.ssafy.openticon.R
 import io.ssafy.openticon.data.model.Emoticon
 import io.ssafy.openticon.data.model.EmoticonPackWithEmotions
 import io.ssafy.openticon.data.model.LikeEmoticon
 import io.ssafy.openticon.data.model.LikeEmoticonPack
-import io.ssafy.openticon.data.model.SampleEmoticon
-import io.ssafy.openticon.data.model.SampleEmoticonPack
 import io.ssafy.openticon.ui.component.EmoticonPackView
 import io.ssafy.openticon.ui.component.LikeEmoticonPackView
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +54,6 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.URL
 
 class FloatingService : Service() {
 
@@ -110,7 +104,7 @@ class FloatingService : Service() {
         updateFloatingView(data)
     }
 
-    private fun loadLikeDate(autoClick: Boolean=false) {
+    private fun loadLikeDate(autoClick: Boolean = false) {
         CoroutineScope(Dispatchers.Main).launch {
             val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
             val jsonString = sharedPreferences.getString("like_emoticon_data", null)
@@ -149,7 +143,7 @@ class FloatingService : Service() {
                 }
             }
             // 모든 작업이 완료된 후 콜백 호출
-            if(autoClick){
+            if (autoClick) {
                 if (data != null) {
                     likeView.displayImagesInTable(tableLayout, data.emoticons,
                         onImageClick = { emoticon: LikeEmoticon ->
@@ -184,9 +178,6 @@ class FloatingService : Service() {
     }
 
 
-
-
-
     @SuppressLint("ClickableViewAccessibility")
     private fun updateFloatingView(data: List<EmoticonPackWithEmotions>) {
         // WindowManager를 사용하여 floatingView 설정
@@ -198,7 +189,8 @@ class FloatingService : Service() {
             PixelFormat.TRANSLUCENT
         )
         secondLayoutParams.gravity = Gravity.CENTER
-        secondFloatingView = LayoutInflater.from(this).inflate(R.layout.new_compose_activity_layout, null)
+        secondFloatingView =
+            LayoutInflater.from(this).inflate(R.layout.new_compose_activity_layout, null)
         // 두 번째 플로팅 뷰 설정
         // 터치 리스너 설정
         secondFloatingView.setOnTouchListener { _, event ->
@@ -210,16 +202,19 @@ class FloatingService : Service() {
                     initialY = secondLayoutParams.y
                     true
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     secondLayoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
                     secondLayoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
                     windowManager.updateViewLayout(secondFloatingView, secondLayoutParams)
                     true
                 }
+
                 else -> false
             }
         }
-        val horizontalScrollView = secondFloatingView.findViewById<LinearLayout>(R.id.horizontal_linear)
+        val horizontalScrollView =
+            secondFloatingView.findViewById<LinearLayout>(R.id.horizontal_linear)
         val tableLayout = secondFloatingView.findViewById<TableLayout>(R.id.tableLayout)
         val closeButton = secondFloatingView.findViewById<ImageView>(R.id.closeButton)
         val settingButton = secondFloatingView.findViewById<FrameLayout>(R.id.homeBtn)
@@ -229,7 +224,7 @@ class FloatingService : Service() {
         closeButton.setOnClickListener {
             toggleSecondFloatingView()
         }
-        settingButton.setOnClickListener{
+        settingButton.setOnClickListener {
             popupSetting()
         }
 
@@ -242,9 +237,9 @@ class FloatingService : Service() {
                     onImageClick = { emoticon: Emoticon ->
                         CoroutineScope(Dispatchers.Main).launch {
                             insertEmoticonIntoFocusedEditText(emoticon.filePath)
-                        } },
-                    onImageLongClick = {
-                            emoticon: Emoticon ->
+                        }
+                    },
+                    onImageLongClick = { emoticon: Emoticon ->
                         lkeEmoticon(emoticon)
                     }
                 )
@@ -280,7 +275,8 @@ class FloatingService : Service() {
         stopSelf()
         pendingIntent.send()
     }
-    private fun lkeEmoticon(emoticon: Emoticon){
+
+    private fun lkeEmoticon(emoticon: Emoticon) {
         CoroutineScope(Dispatchers.Main).launch {
 
 
@@ -322,7 +318,7 @@ class FloatingService : Service() {
     }
 
 
-    private fun deleteEmoticon(emoticon: LikeEmoticon){
+    private fun deleteEmoticon(emoticon: LikeEmoticon) {
         CoroutineScope(Dispatchers.Main).launch {
             val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
@@ -347,7 +343,11 @@ class FloatingService : Service() {
         if (drawable != null) {
             if (!resourceUri.endsWith(".gif")) {
                 // 리소스가 정적 이미지일 경우
-                val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+                val bitmap = Bitmap.createBitmap(
+                    drawable.intrinsicWidth,
+                    drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888
+                )
                 val canvas = Canvas(bitmap)
                 drawable.setBounds(0, 0, canvas.width, canvas.height)
                 drawable.draw(canvas)
@@ -376,12 +376,14 @@ class FloatingService : Service() {
 
     suspend fun loadImageFromUrl(resourceUri: String): Drawable? {
         return withContext(Dispatchers.IO) {
-            val request = ImageRequest.Builder(this@FloatingService) // 서비스에서는 applicationContext를 사용
-                .data(resourceUri)
-                .allowHardware(false)
-                .build()
+            val request =
+                ImageRequest.Builder(this@FloatingService) // 서비스에서는 applicationContext를 사용
+                    .data(resourceUri)
+                    .allowHardware(false)
+                    .build()
 
-            val result = (applicationContext.imageLoader.execute(request) as? SuccessResult)?.drawable
+            val result =
+                (applicationContext.imageLoader.execute(request) as? SuccessResult)?.drawable
             result
         }
     }
@@ -400,7 +402,6 @@ class FloatingService : Service() {
             }
         }
     }
-
 
 
     suspend fun getImageUri(bitmap: Bitmap): Uri? {
@@ -426,7 +427,6 @@ class FloatingService : Service() {
     }
 
 
-
     private fun startForegroundServiceWithNotification() {
         val channelId = "floating_service_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -439,7 +439,7 @@ class FloatingService : Service() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Floating Service")
             .setContentText("Floating window is running in the background")
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_stat_emoji_emotions)
             .build()
         startForeground(1, notification)
     }
@@ -468,76 +468,79 @@ class FloatingService : Service() {
             .setAllCorners(CornerFamily.ROUNDED, 75f) // 원하는 크기의 반지름 설정
             .build()
 
-        floatingView.findViewById<ShapeableImageView>(R.id.imageButton1).setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    isCloseViewVisible = true
-                    windowManager.addView(closeFloatingView, closeLayoutParams)
-                    initialTouchX = event.rawX.toInt()
-                    initialTouchY = event.rawY.toInt()
-                    initialX = layoutParams.x
-                    initialY = layoutParams.y
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    layoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
-                    layoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
-                    windowManager.updateViewLayout(floatingView, layoutParams)
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    val closeImg = closeFloatingView.findViewById<ImageView>(R.id.closeButton)
-
-                    // 터치 움직임이 작으면 클릭으로 간주
-                    if (Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
-                        toggleSecondFloatingView()
+        floatingView.findViewById<ShapeableImageView>(R.id.imageButton1)
+            .setOnTouchListener { _, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        isCloseViewVisible = true
+                        windowManager.addView(closeFloatingView, closeLayoutParams)
+                        initialTouchX = event.rawX.toInt()
+                        initialTouchY = event.rawY.toInt()
+                        initialX = layoutParams.x
+                        initialY = layoutParams.y
+                        true
                     }
-                    else{
-                        val imageButtonRect = Rect()
-                        val closeImgRect = Rect()
 
-                        imageButton.post {
-                            val locationImageButton = IntArray(2)
-                            val locationCloseImg = IntArray(2)
+                    MotionEvent.ACTION_MOVE -> {
+                        layoutParams.x = initialX + (event.rawX - initialTouchX).toInt()
+                        layoutParams.y = initialY + (event.rawY - initialTouchY).toInt()
+                        windowManager.updateViewLayout(floatingView, layoutParams)
+                        true
+                    }
 
-                            imageButton.getLocationOnScreen(locationImageButton)
-                            closeImg.getLocationOnScreen(locationCloseImg)
+                    MotionEvent.ACTION_UP -> {
+                        val closeImg = closeFloatingView.findViewById<ImageView>(R.id.closeButton)
 
-                            imageButtonRect.set(
-                                locationImageButton[0],
-                                locationImageButton[1],
-                                locationImageButton[0] + imageButton.width,
-                                locationImageButton[1] + imageButton.height
-                            )
+                        // 터치 움직임이 작으면 클릭으로 간주
+                        if (Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
+                            toggleSecondFloatingView()
+                        } else {
+                            val imageButtonRect = Rect()
+                            val closeImgRect = Rect()
 
-                            closeImgRect.set(
-                                locationCloseImg[0],
-                                locationCloseImg[1],
-                                locationCloseImg[0] + closeImg.width,
-                                locationCloseImg[1] + closeImg.height
-                            )
+                            imageButton.post {
+                                val locationImageButton = IntArray(2)
+                                val locationCloseImg = IntArray(2)
 
-                            // 충돌 여부 확인
-                            val isColliding = Rect.intersects(imageButtonRect, closeImgRect)
+                                imageButton.getLocationOnScreen(locationImageButton)
+                                closeImg.getLocationOnScreen(locationCloseImg)
 
-                            if (isColliding) {
-                                changeIslaunched(false)
-                                stopSelf()
-                                Log.d("Collision", "imageButton이 closeImg와 겹칩니다.")
-                            } else {
-                                Log.d("Collision", "겹치지 않습니다.")
+                                imageButtonRect.set(
+                                    locationImageButton[0],
+                                    locationImageButton[1],
+                                    locationImageButton[0] + imageButton.width,
+                                    locationImageButton[1] + imageButton.height
+                                )
+
+                                closeImgRect.set(
+                                    locationCloseImg[0],
+                                    locationCloseImg[1],
+                                    locationCloseImg[0] + closeImg.width,
+                                    locationCloseImg[1] + closeImg.height
+                                )
+
+                                // 충돌 여부 확인
+                                val isColliding = Rect.intersects(imageButtonRect, closeImgRect)
+
+                                if (isColliding) {
+                                    changeIslaunched(false)
+                                    stopSelf()
+                                    Log.d("Collision", "imageButton이 closeImg와 겹칩니다.")
+                                } else {
+                                    Log.d("Collision", "겹치지 않습니다.")
+                                }
                             }
+
                         }
+                        isCloseViewVisible = false
+                        windowManager.removeView(closeFloatingView)
 
+                        true
                     }
-                    isCloseViewVisible = false
-                    windowManager.removeView(closeFloatingView)
 
-                    true
+                    else -> false
                 }
-                else -> false
             }
-        }
 
 
         windowManager.addView(floatingView, layoutParams)
@@ -579,7 +582,7 @@ class FloatingService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    fun changeIslaunched(boolean: Boolean){
+    fun changeIslaunched(boolean: Boolean) {
         val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putBoolean("is_visible", boolean) // Boolean 값으로 직접 저장
