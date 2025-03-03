@@ -323,7 +323,7 @@ class EmoticonPackDetailScreenViewModel @Inject constructor(
 
 처음에는 Domain Layer가 Data Layer에 직접 의존하도록 설계했습니다. 예를 들어, Data Layer에서 사용하는 DTO를 Domain Layer에서 사용하는 모델로 변환하는 메서드를 **Domain Layer 안에서 `fromXXX` 형태로 구현**했고, UI에서도 Data Layer의 Repository를 직접 호출하도록 작성했습니다. 이 방식은 코드가 일관성 있고 가독성이 높아 보였지만, 클린 아키텍처의 핵심 원칙인 **“안쪽 계층은 바깥 계층을 몰라야 한다”**는 규칙을 위반하고 있었습니다.  
 
-**잘못된 설계 예시 (초기 버전)**  
+### 잘못된 설계 (초기 버전)
 ```kotlin
 // Domain Layer 내부 (잘못된 예시)
 fun fromPackDownloadResponseDto(dto: PackDownloadResponseDto): EmoticonPack {
@@ -343,7 +343,7 @@ fun fromPackDownloadResponseDto(dto: PackDownloadResponseDto): EmoticonPack {
 하지만, 코드를 일관성 있게 작성하고 가독성을 유지하는 데 신경을 썼던 덕분에, 중간에 **올바른 클린 아키텍처 설계를 깨닫고도 수정을 어렵지 않게 진행할 수 있었습니다.**  
 결국 DTO 변환 로직을 **Data Layer 내부로 이동**하고, Domain Layer에서는 순수한 비즈니스 로직만 유지하는 방식으로 개선했습니다.
 
-**올바르게 개선된 설계**
+### 올바르게 개선된 설계
 ```kotlin
 package io.ssafy.openticon.data.model
 
@@ -373,9 +373,9 @@ data class PackDownloadResponseDto(
 ```
 이제 Domain Layer는 DTO를 알 필요가 없어졌고, Data Layer에서 변환한 Domain 객체만 사용하도록 변경되었습니다.
 
-**배운 점**  
+### 배운 점
 1. **의존성 방향을 항상 고려해야 한다** → 바깥 계층(Data, UI)은 안쪽 계층(Domain)에 의존해야 하지만, 반대로 Domain이 바깥 계층을 알면 안 된다.  
 2. **잘못된 구조라도 코드가 일관성 있고 깔끔하면 수정이 쉽다** → 아키텍처를 잘못 적용했더라도, 명확한 패턴을 유지하면 리팩토링이 용이하다.  
 3. **DTO 변환 로직은 Data Layer에서 담당해야 한다** → Domain Layer는 **순수한 비즈니스 로직만 포함**하도록 설계해야 한다.  
 
-이 경험을 통해 클린 아키텍처를 단순히 개념적으로 이해하는 것뿐만 아니라, 실제 코드에 적용하면서 **설계 원칙을 지키는 것이 왜 중요한지 깊이 배울 수 있었습니다.**  
+이 경험을 통해 클린 아키텍처를 단순히 개념적으로 이해하는 것뿐만 아니라, 실제 코드에 적용하면서 **설계 원칙을 지키는 것의 중요성을 배울 수 있었습니다.**  
