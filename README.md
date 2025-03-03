@@ -61,4 +61,129 @@
 
 
 # 🔥 나의 기여
-### 1️⃣
+## 1️⃣ MVVM 패턴 적용
+본 프로젝트에서는 안드로이드 코드 전반에 MVVM 패턴을 적용하였습니다.
+
+- MVVM 패턴은 다음 세 가지 주요 컴포넌트로 구성됩니다.
+  - Model (모델): 데이터 및 비즈니스 로직을 담당하는 계층
+  - View (뷰): UI를 담당하며 사용자의 입력을 처리하는 계층
+  - ViewModel (뷰모델): Model과 View 사이에서 데이터를 관리하고 UI 로직을 처리하는 계층
+- MVVM 패턴의 장점은 다음과 같습니다.
+  - **UI와 비즈니스 로직 분리** → ViewModel이 UI 로직을 담당하므로 UI 코드가 깔끔해짐
+  - **생명 주기 관리** → ViewModel은 Activity/Fragment의 생명 주기와 무관하게 데이터를 유지
+  - **비동기 처리 최적화** → Coroutine을 활용하여 백그라운드에서 데이터 로딩 가능
+
+이모티콘 검색 화면의 예를 통해 프로젝트에서 MVVM 패턴을 적용 방식을 설명하겠습니다.
+
+### 1. ViewModel을 이용한 UI 상태 관리
+
+`SearchScreenViewModel`은 검색 화면에서 UI 상태를 관리하며, `StateFlow`를 이용해 Compose UI와 데이터 바인딩을 수행합니다.
+
+#### ViewModel 코드:
+```kotlin
+@HiltViewModel
+class SearchScreenViewModel @Inject constructor(
+    private val searchEmoticonPacksUseCase: SearchEmoticonPacksUseCase,
+    private val searchEmoticonPacksByImageUseCase: SearchEmoticonPacksByImageUseCase
+) : ViewModel() {
+    private val _searchText = MutableStateFlow("")
+    private val _searchResult = MutableStateFlow(emptyList<SearchEmoticonPacksListItem>())
+    private val _isLoading = MutableStateFlow(false)
+    private val _selectedImageUri = MutableStateFlow<Uri?>(null)
+
+    val searchText: StateFlow<String> = _searchText
+    val searchResult: StateFlow<List<SearchEmoticonPacksListItem>> = _searchResult
+    val isLoading: StateFlow<Boolean> = _isLoading
+    val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
+
+    fun onSearchTextChange(value: String) {
+        _searchText.value = value
+    }
+
+    fun search() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = searchEmoticonPacksUseCase(_searchText.value)
+            _searchResult.value = result
+            _isLoading.value = false
+        }
+    }
+}
+```
+
+#### 주요 구현:
+- `MutableStateFlow`를 사용하여 UI 상태를 관리함
+- `onSearchTextChange()`를 통해 사용자의 입력을 반영
+- `search()` 메서드에서 비동기 작업을 수행하여 검색 결과를 가져오고 UI 상태를 업데이트
+- `viewModelScope.launch {}` 블록을 사용하여 코루틴 실행 (백그라운드 작업 수행)
+
+### 2. Compose UI에서 ViewModel과 데이터 연동
+
+`SearchBar` Composable 함수에서는 `ViewModel`을 `hiltViewModel()`로 주입받아 UI와 상태를 연결합니다.
+
+#### SearchBar 코드:
+```kotlin
+@Composable
+fun SearchBar(
+    viewModel: SearchScreenViewModel = hiltViewModel()
+) {
+    val searchText by viewModel.searchText.collectAsState()
+    val context = LocalContext.current
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        BasicTextField(
+            value = searchText,
+            onValueChange = { viewModel.onSearchTextChange(it) },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    viewModel.search()
+                }
+            )
+        )
+    }
+}
+```
+
+#### 주요 구현:
+- `viewModel.searchText.collectAsState()`를 사용하여 UI가 ViewModel의 상태를 관찰
+- 사용자가 텍스트를 입력하면 `viewModel.onSearchTextChange()`가 호출되어 상태를 업데이트
+- `imeAction = ImeAction.Search`를 설정하여 엔터 키 입력 시 `viewModel.search()`가 호출되도록 구성
+
+### 3. 비동기 네트워크 요청 처리
+
+ViewModel 내부에서 `suspend fun`을 사용하여 네트워크 요청을 비동기적으로 처리합니다. 이는 UI 스레드를 차단하지 않고 데이터를 가져올 수 있도록 합니다.
+
+#### 네트워크 요청 코드:
+```kotlin
+suspend fun loadMoreSearchResult() {
+    if (_isLoading.value) return
+    _isLoading.value = true
+
+    val (newItems, isLast) = searchEmoticonPacksUseCase(
+        searchKey = _searchKey.value.key,
+        searchText = _searchText.value,
+        page = page,
+        size = pageSize,
+        sort = _searchSort.value.key
+    )
+    _searchResult.value += newItems
+    lastPageReached = isLast
+    page++
+    _isLoading.value = false
+}
+```
+
+#### 주요 포인트:
+- `suspend` 함수로 작성하여 **비동기 실행을 최적화**
+- `_isLoading` 상태를 사용하여 중복 요청을 방지
+- `searchEmoticonPacksUseCase()`를 호출하여 검색 API 요청 수행 후 `_searchResult` 상태 업데이트
+
+### 결론
+Jetpack Compose 기반의 MVVM 구조를 적용함으로써 **코드의 가독성과 유지보수성 향상** 및 **비동기 데이터 처리 최적화**를 달성할 수 있었습니다.
+
+특히 StateFlow와 Hilt를 활용해 ViewModel을 구성하여 MVVM 패턴을 더욱 효과적으로 적용할 수 있었습니다.
+
+
